@@ -2,7 +2,7 @@
   <div class="bg-light min-vh-100 d-flex flex-row align-items-center">
     <CContainer>
       <CRow class="justify-content-center">
-        <CCol :md="8">
+        <CCol :md="5">
           <CCardGroup>
             <CCard class="p-4">
               <CCardBody>
@@ -49,7 +49,7 @@
                 </CForm>
               </CCardBody>
             </CCard>
-            <CCard class="text-white bg-primary py-5" style="width: 44%">
+            <!-- <CCard class="text-white bg-primary py-5" style="width: 44%">
               <CCardBody class="text-center">
                 <div>
                   <h2>Sign up</h2>
@@ -63,7 +63,7 @@
                   </CButton>
                 </div>
               </CCardBody>
-            </CCard>
+            </CCard> -->
           </CCardGroup>
         </CCol>
       </CRow>
@@ -95,7 +95,9 @@ export default {
           password: this.form.password,
         })
         .then(function (response) {
-          window.localStorage.setItem('accessToken', response.data.accessToken)
+          window.localStorage.setItem('accessToken', response.data.accessToken);
+          window.localStorage.setItem('username', response.data.user.username);
+          window.localStorage.setItem('role', response.data.user.role);
           router.push({ path: '/dashboard' })
         })
         .catch(function (error) {

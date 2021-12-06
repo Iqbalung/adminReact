@@ -55,7 +55,9 @@ export default {
   methods: {
     handleClick() {
       window.localStorage.removeItem('accessToken')
-      router.push({ path: '/' })
+      window.localStorage.removeItem('role')
+      window.localStorage.removeItem('username')
+      router.push({ name:'Login' })
     },
   },
   setup() {

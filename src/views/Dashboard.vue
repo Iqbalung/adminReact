@@ -100,12 +100,7 @@
                 <CRow>
                   <CCol :sm="6">
                     <div
-                      class="
-                        border-start border-start-4 border-start-info
-                        py-1
-                        px-3
-                        mb-3
-                      "
+                      class="border-start border-start-4 border-start-info py-1 px-3 mb-3"
                     >
                       <div class="text-medium-emphasis small">New Clients</div>
                       <div class="fs-5 fw-semibold">9,123</div>
@@ -113,12 +108,7 @@
                   </CCol>
                   <CCol :sm="6">
                     <div
-                      class="
-                        border-start border-start-4 border-start-danger
-                        py-1
-                        px-3
-                        mb-3
-                      "
+                      class="border-start border-start-4 border-start-danger py-1 px-3 mb-3"
                     >
                       <div class="text-medium-emphasis small">
                         Recurring Clients
@@ -148,12 +138,7 @@
                 <CRow>
                   <CCol :sm="6">
                     <div
-                      class="
-                        border-start border-start-4 border-start-warning
-                        py-1
-                        px-3
-                        mb-3
-                      "
+                      class="border-start border-start-4 border-start-warning py-1 px-3 mb-3"
                     >
                       <div class="text-medium-emphasis small">Pageviews</div>
                       <div class="fs-5 fw-semibold">78,623</div>
@@ -161,12 +146,7 @@
                   </CCol>
                   <CCol :sm="6">
                     <div
-                      class="
-                        border-start border-start-4 border-start-success
-                        py-1
-                        px-3
-                        mb-3
-                      "
+                      class="border-start border-start-4 border-start-success py-1 px-3 mb-3"
                     >
                       <div class="text-medium-emphasis small">Organic</div>
                       <div class="fs-5 fw-semibold">49,123</div>
@@ -213,141 +193,40 @@
               </CCol>
             </CRow>
             <br />
-            <CButton @click="shm" class="me-2" color="primary"
-              ><CIcon class="text-white" name="cil-plus"
-            /></CButton>
-            <Ramodal v-bind:isVisible="isModalVisible">
-              <template v-slot:body>
-                <CForm>
-                  <div class="mb-3">
-                    <CFormLabel for="name">Full Name</CFormLabel>
-                    <CFormInput
-                      v-model="this.form.name"
-                      type="text"
-                      id="name"
-                      placeholder="Full name"
-                    />
-                  </div>
-                  <div class="mb-3">
-                    <CFormLabel for="email">Email</CFormLabel>
-                    <CFormInput
-                      v-model="this.form.email"
-                      type="email"
-                      id="email"
-                      placeholder="Email"
-                    />
-                  </div>
-                  <div class="mb-3">
-                    <CFormLabel for="username">Username</CFormLabel>
-                    <CFormInput
-                      v-model="this.form.username"
-                      type="text"
-                      id="username"
-                      placeholder="Username"
-                    />
-                  </div>
-                  <div class="mb-3">
-                    <CFormLabel for="password">password</CFormLabel>
-                    <CFormInput
-                      v-model="this.form.password"
-                      type="password"
-                      id="password"
-                      placeholder="password"
-                    />
-                  </div>
-                  <div class="mb-3">
-                    <CFormLabel for="mistake">Mistake</CFormLabel>
-                    <CFormInput
-                      v-model="this.form.mistake"
-                      type="text"
-                      id="mistake"
-                      placeholder="mistake"
-                    />
-                  </div>
-                  <div class="col-auto">
-                    <CButton
-                      @click="saveData"
-                      type="submit"
-                      color="primary"
-                      class="mb-3"
-                      >Save data</CButton
-                    >
-                  </div>
-                </CForm>
-              </template>
-            </Ramodal>
-            <br class="mb-2" />
-            <CTable align="middle" class="mb-0 mt-2 border" hover responsive>
+            <CTable align="middle" class="mb-0 border" hover responsive>
               <CTableHead color="light">
                 <CTableRow>
                   <CTableHeaderCell class="text-center">
                     <CIcon name="cil-people" />
                   </CTableHeaderCell>
-                  <CTableHeaderCell>Name</CTableHeaderCell>
+                  <CTableHeaderCell>User</CTableHeaderCell>
                   <CTableHeaderCell class="text-center"
-                    >Username</CTableHeaderCell
+                    >Country</CTableHeaderCell
                   >
-                  <CTableHeaderCell>Email</CTableHeaderCell>
-                  <CTableHeaderCell class="text-center">Role</CTableHeaderCell>
-                  <CTableHeaderCell>Mistake</CTableHeaderCell>
-                  <CTableHeaderCell>Action</CTableHeaderCell>
+                  <CTableHeaderCell>Usage</CTableHeaderCell>
+                  <CTableHeaderCell class="text-center"
+                    >Payment Method</CTableHeaderCell
+                  >
+                  <CTableHeaderCell>Activity</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                <CTableRow v-for="item in info" :key="item.name">
+                <CTableRow v-for="item in tableExample" :key="item.name">
                   <CTableDataCell class="text-center">
-                    <CAvatar size="md" :src="item.avatar" />
+                    <CAvatar
+                      size="md"
+                      :src="item.avatar.src"
+                      :status="item.avatar.status"
+                    />
                   </CTableDataCell>
                   <CTableDataCell>
-                    <div>{{ item.name }}</div>
-                    <!-- <div class="small text-medium-emphasis">
+                    <div>{{ item.user.name }}</div>
+                    <div class="small text-medium-emphasis">
                       <span>{{ item.user.new ? 'New' : 'Recurring' }}</span> |
                       {{ item.user.registered }}
-                    </div> -->
-                  </CTableDataCell>
-                  <CTableDataCell>
-                    <div>{{ item.username }}</div>
-                    <!-- <div class="small text-medium-emphasis">
-                      <span>{{ item.user.new ? 'New' : 'Recurring' }}</span> |
-                      {{ item.user.registered }}
-                    </div> -->
-                  </CTableDataCell>
-                  <CTableDataCell>
-                    <div>{{ item.email }}</div>
-                    <!-- <div class="small text-medium-emphasis">
-                      <span>{{ item.user.new ? 'New' : 'Recurring' }}</span> |
-                      {{ item.user.registered }}
-                    </div> -->
-                  </CTableDataCell>
-                  <CTableDataCell>
-                    <div>{{ item.role }}</div>
-                    <!-- <div class="small text-medium-emphasis">
-                      <span>{{ item.user.new ? 'New' : 'Recurring' }}</span> |
-                      {{ item.user.registered }}
-                    </div> -->
-                  </CTableDataCell>
-                  <CTableDataCell>
-                    <div>{{ item.mistake }}</div>
-                    <!-- <div class="small text-medium-emphasis">
-                      <span>{{ item.user.new ? 'New' : 'Recurring' }}</span> |
-                      {{ item.user.registered }}
-                    </div> -->
-                  </CTableDataCell>
-                  <CTableDataCell>
-                    <div>
-                      <CButton class="me-2" color="warning"
-                        ><CIcon class="text-white" name="cil-pencil"
-                      /></CButton>
-                      <CButton @click="delete(item._id)" color="danger"
-                        ><CIcon class="text-white" name="cil-trash"
-                      /></CButton>
                     </div>
-                    <!-- <div class="small text-medium-emphasis">
-                      <span>{{ item.user.new ? 'New' : 'Recurring' }}</span> |
-                      {{ item.user.registered }}
-                    </div> -->
                   </CTableDataCell>
-                  <!-- <CTableDataCell class="text-center">
+                  <CTableDataCell class="text-center">
                     <CIcon
                       size="xl"
                       :name="item.country.flag"
@@ -377,7 +256,7 @@
                   <CTableDataCell>
                     <div class="small text-medium-emphasis">Last login</div>
                     <strong>{{ item.activity }}</strong>
-                  </CTableDataCell> -->
+                  </CTableDataCell>
                 </CTableRow>
                 <CTableRow> </CTableRow>
               </CTableBody>
@@ -386,16 +265,6 @@
         </CCard>
       </CCol>
     </CRow>
-    <!-- <CModal v-show="isModalVisible">
-      <CModalHeader>
-        <CModalTitle>Modal title</CModalTitle>
-      </CModalHeader>
-      <CModalBody>Woohoo, you're reading this text in a modal!</CModalBody>
-      <CModalFooter>
-        <CButton @click="close">Close</CButton>
-        <CButton color="primary">Save changes</CButton>
-      </CModalFooter>
-    </CModal> -->
   </div>
 </template>
 
@@ -409,94 +278,15 @@ import avatar6 from '@/assets/images/avatars/6.jpg'
 import MainChartExample from './charts/MainChartExample'
 import WidgetsStatsA from './widgets/WidgetsStatsTypeA.vue'
 import WidgetsStatsD from './widgets/WidgetsStatsTypeD.vue'
-import axios from 'axios'
-import Ramodal from './widgets/Ramodal.vue'
-import { ref } from 'vue'
-import { CForm } from '@coreui/vue'
+
 export default {
   name: 'Dashboard',
-  mounted() {
-    this.getUser()
-  },
   components: {
-    Ramodal,
     MainChartExample,
     WidgetsStatsA,
     WidgetsStatsD,
   },
-  data() {
-    return {
-      info: null,
-      form: {
-        name: '',
-        username: '',
-        email: '',
-        password: '',
-        mistake: '',
-      },
-    }
-  },
-  methods: {
-    getUser: async function () {
-      await axios
-        .get('http://localhost:3030/users', {
-          headers: {
-            Authorization: localStorage.getItem('accessToken'),
-          },
-        })
-        .then((res) => (this.info = res.data.data))
-    },
-    dataprint: function () {
-      console.log(this.info)
-    },
-    showModal: function () {
-      this.isModalVisible = true
-    },
-    closeModal: function () {
-      this.isModalVisible = false
-    },
-    saveData: async function () {
-      await axios
-        .post('http://localhost:3030/users', {
-          email: this.form.email,
-          name: this.form.name,
-          username: this.form.username,
-          password: this.form.password,
-          role: 'user',
-          mistake: this.form.mistake,
-        })
-        .then(function () {
-          this.form.email = ''
-          this.form.name = ''
-          this.form.username = ''
-          this.form.password = ''
-          this.form.mistake = ''
-          router.push({ path: '/dashboard', redirect: true })
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-    },
-    delete: async function (id) {
-      await axios
-        .delete(`http://localhost:3030/users/${id}`, {
-          headers: {
-            Authorization: localStorage.getItem('accessToken'),
-          },
-        })
-        .then(function () {
-          router.push({ path: '/dashboard', redirect: true })
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-    },
-  },
   setup() {
-    const isModalVisible = ref(false)
-    const shm = () => {
-      isModalVisible.value = !isModalVisible.value
-    }
     const progressGroupExample1 = [
       { title: 'Monday', value1: 34, value2: 78 },
       { title: 'Tuesday', value1: 56, value2: 94 },
@@ -613,8 +403,6 @@ export default {
     ]
 
     return {
-      isModalVisible,
-      shm,
       tableExample,
       progressGroupExample1,
       progressGroupExample2,
