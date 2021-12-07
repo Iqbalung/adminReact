@@ -1,7 +1,6 @@
 <template>
   <div>
     <CCard class="mb-4">
-      {{ sel }}
         <CCardHeader>Task List</CCardHeader>
       <CCardBody>
       <div class="flex-column">
