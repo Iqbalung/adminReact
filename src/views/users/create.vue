@@ -68,7 +68,7 @@ export default {
       username:'',
       name:'',
       password:'',
-      role:'user',
+      role:'worker',
       mistake:'',
     });
     const validation = ref([]);
