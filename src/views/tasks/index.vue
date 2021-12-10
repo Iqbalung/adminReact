@@ -199,11 +199,14 @@
 <script>
 import router from '../../router'
 import axios from 'axios'
-// import {useFind} from 'feathers-vuex'
 import {reactive,onMounted,ref} from 'vue'
-
 export default {
   name: 'TaskList',
+  sockets:{
+    connect: function() {
+      console.log('socket to notificatino channel connected')
+    }
+  },
   data() {
     return {
         visibleLiveDemo: false,
@@ -322,10 +325,26 @@ export default {
       })
     },
   },
+  watch() {
+    this.sockets.subscribe('created',function(data){
+      console.log('this oke',data)
+    })
+  },
+  mounted(){
+    console.log('oke')
+    this.sockets.subscribe("created", function(data) {
+        console.log("this event was fired by eg. sio.emit('created')",data)
+      })
+      // this.sockets.on('created', function(data) {
+      //     console.log('created',data)
+      // });
+  },
   setup() {
+
     // const {Tasks} = context.root.$FeathersVuex.api
     // const {$store} = context.root
     //reactive state
+    // const {items : userss } = useFind({model:Users})
     let tasks = ref([]);
     let selected = ref([]);
     let users = ref({});
@@ -367,6 +386,7 @@ export default {
       }).catch((err) =>{
         console.log(err.response);
       });
+
 
     });
     //delete

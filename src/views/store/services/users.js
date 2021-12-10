@@ -6,24 +6,18 @@ class User extends BaseModel {
     super(data, options)
   }
   // Required for $FeathersVuex plugin to work after production transpile.
-  static modelName = 'Task'
+  static modelName = 'User'
   // Define default properties here
   static instanceDefaults() {
     return {
-      taskTittle: '',
-      taskRefNumber: '',
-      taskAssigne: '',
-      taskStatus: '',
-      taskExpiredTime: '',
-      taskCreatedBy: '',
-      taskData: '',
-      taskHistory: '',
+      email: '',
+      password: ''
     }
   }
 }
-const servicePath = 'tasks'
+const servicePath = 'users'
 const servicePlugin = makeServicePlugin({
-  Model: Task,
+  Model: User,
   service: feathersClient.service(servicePath),
   servicePath
 })
