@@ -7,39 +7,39 @@
       <CDropdownHeader component="h6" class="bg-light fw-semibold py-2">
         Account
       </CDropdownHeader>
-      <CDropdownItem>
+      <!-- <CDropdownItem>
         <CIcon icon="cil-bell" /> Updates
         <CBadge color="info" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem>
-      <CDropdownItem>
+      </CDropdownItem> -->
+      <!-- <CDropdownItem>
         <CIcon icon="cil-envelope-open" /> Messages
         <CBadge color="success" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem>
+      </CDropdownItem> -->
       <CDropdownItem>
         <CIcon icon="cil-task" /> Tasks
         <CBadge color="danger" class="ms-auto">{{ itemsCount }}</CBadge>
       </CDropdownItem>
-      <CDropdownItem>
+      <!-- <CDropdownItem>
         <CIcon icon="cil-comment-square" /> Comments
         <CBadge color="warning" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem>
-      <CDropdownHeader component="h6" class="bg-light fw-semibold py-2">
+      </CDropdownItem> -->
+      <!-- <CDropdownHeader component="h6" class="bg-light fw-semibold py-2">
         Settings
-      </CDropdownHeader>
+      </CDropdownHeader> -->
       <CDropdownItem> <CIcon icon="cil-user" /> Profile </CDropdownItem>
-      <CDropdownItem> <CIcon icon="cil-settings" /> Settings </CDropdownItem>
-      <CDropdownItem>
+      <!-- <CDropdownItem> <CIcon icon="cil-settings" /> Settings </CDropdownItem> -->
+      <!-- <CDropdownItem>
         <CIcon icon="cil-dollar" /> Payments
         <CBadge color="secondary" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem>
-      <CDropdownItem>
+      </CDropdownItem> -->
+      <!-- <CDropdownItem>
         <CIcon icon="cil-file" /> Projects
         <CBadge color="primary" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem>
-      <CDropdownDivider />
-      <CDropdownItem>
+      </CDropdownItem> -->
+      <!-- <CDropdownDivider /> -->
+      <!-- <CDropdownItem>
         <CIcon icon="cil-shield-alt" /> Lock Account
-      </CDropdownItem>
+      </CDropdownItem> -->
       <CDropdownItem @click="handleClick">
         <CIcon icon="cil-lock-locked" /> Logout
       </CDropdownItem>
@@ -49,6 +49,7 @@
 
 <script>
 import avatar from '@/assets/images/avatars/8.jpg'
+import avat from '@/assets/images/avatars/pic.jpg'
 import router from '../router'
 export default {
   name: 'AppHeaderDropdownAccnt',
@@ -57,12 +58,13 @@ export default {
       window.localStorage.removeItem('accessToken')
       window.localStorage.removeItem('role')
       window.localStorage.removeItem('username')
+      window.localStorage.removeItem('_id')
       router.push({ name:'Login' })
     },
   },
   setup() {
     return {
-      avatar: avatar,
+      avatar: avat,
       itemsCount: 42,
     }
   },

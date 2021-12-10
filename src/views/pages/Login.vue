@@ -89,12 +89,13 @@ export default {
     handleClick() {
       console.log(this.form)
       axios
-        .post('http://localhost:3030/authentication', {
+        .post(`${process.env.VUE_APP_URL_API}/authentication`, {
           strategy: 'local',
           email: this.form.username,
           password: this.form.password,
         })
         .then(function (response) {
+          window.localStorage.setItem('_id', response.data.user._id);
           window.localStorage.setItem('accessToken', response.data.accessToken);
           window.localStorage.setItem('username', response.data.user.username);
           window.localStorage.setItem('role', response.data.user.role);

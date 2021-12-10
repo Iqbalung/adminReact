@@ -1,21 +1,13 @@
 <template>
   <div>
     <CCard class="mb-4">
-        <CCardHeader>Worker List</CCardHeader>
-      <CCardBody>
-      <div class="flex-column">
-      <CButton color="primary" class="d-inline-block me-2">
-          <CIcon class="text-white" name="cil-plus"/> Add Task
-      </CButton>
-      <CButton color="dark" class="d-inline-block me-2">
-          <CIcon class="text-white" name="cil-touch-app"/> Assign Task
-      </CButton>
+      <CCardHeader>Task List</CCardHeader>
+    <CCardBody>
       <CButton color="secondary" class="d-inline-block text-white" @click="() => { visibleLiveDemo = true }"><CIcon class="text-white" name="cil-clipboard"/> Tasks History</CButton>
        <!-- <div class="mt-3 col-4">
           <CFormInput type="text" id="search" placeholder="search"/>
         </div> -->
-      </div>
-              <CTable align="middle" class="mt-3 mb-0 mt-2 border border-1" hover responsive>
+            <CTable align="middle" class="mt-3 mb-0 mt-2 border border-1" hover responsive>
               <CTableHead color="light">
                 <CTableRow>
                   <CTableHeaderCell class="text-center">Assigned</CTableHeaderCell>
@@ -28,12 +20,12 @@
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                <CTableRow v-for="(item,index) in tasks" :key="index">
+                <CTableRow v-for="(item,index) in tasks" :key="index" :color="cek(item.taskStatus)">
                   <CTableDataCell class="text-center">
                     <div>{{ item.taskAssigne }}</div>
                   </CTableDataCell>
                   <CTableDataCell class="text-left">
-                    <div>{{ item.taskTittle }}</div>
+                    <div>{{ item.taskStatus != 'processed' ? item.taskTittle.split(',')[0] + " " + item.taskTittle.split(',')[1] + " ********" : item.taskTittle }}</div>
                   </CTableDataCell>
                   <CTableDataCell class="text-center">
                     <div>{{ item.taskRefNumber }}</div>
@@ -48,23 +40,63 @@
                     <div>{{ item.taskStatus }}</div>
                   </CTableDataCell>
                   <CTableDataCell class="text-center">
-                    <div>
-                    <CBadge class="me-2 rounded" color="light">
-                      <CIcon class="text-black" name="cil-circle"/>
+                    <div v-if="item.taskStatus!='processed'">
+                    <CBadge class="me-2 rounded-full" color="dark" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus)">
+                      <CIcon class="text-white" name="cil-aperture"/>
                     </CBadge>
-                    <CBadge class="me-2 rounded" color="warning">
-                      <CIcon class="text-white" name="cil-pencil"/>
-                    </CBadge>
-                    <CBadge color="danger" class="rounded">
-                      <CIcon class="text-white" name="cil-trash"/>
-                    </CBadge>
+                    </div>
+                    <div v-if="item.taskStatus=='processed'">
+                      <CIcon class="text-dark" name="cil-aperture"/>
                     </div>
                   </CTableDataCell>
                 </CTableRow>
               </CTableBody>
             </CTable>
       </CCardBody>
-    </CCard>
+</CCard>
+
+
+  <!-- Modal Detail Task -->
+  <CModal :visible="modalDetail" @close="() => { modalDetail = false }">
+    <CModalHeader :close-button="false">
+      <CModalTitle>Task Detail</CModalTitle>
+    </CModalHeader>
+    <CModalBody>
+      <p class="mb-0 fw-bold">Task Assigne :</p>
+      <p>{{ taskAssigne }}</p>
+      <p class="mb-0 fw-bold">Task Title :</p>
+      <p>{{ taskTittle }}</p>
+      <p class="mb-0 fw-bold">Task Ref Number :</p>
+      <p>{{ taskRefNumber }}</p>
+      <p class="mb-0 fw-bold">Task Sla Time :</p>
+      <p>{{ taskSlaTime }}</p>
+      <p class="mb-0 fw-bold">Task Expired Time :</p>
+      <p>{{ taskExpiredTime }}</p>
+      <p class="mb-0 fw-bold">Task Status :</p>
+      <p>{{ taskStatus }}</p>
+      <p class="mb-0 fw-bold">Task Created By :</p>
+      <p>{{ taskCreatedBy }}</p>
+      <p class="mb-0 fw-bold">Account Number :</p>
+      <p>{{ account_number }}</p>
+      <p class="mb-0 fw-bold">Card Holder :</p>
+      <p>{{ anRekening }}</p>
+      <p class="mb-0 fw-bold">Amount :</p>
+      <p>{{ amount }}</p>
+      <p class="mb-0 fw-bold">Mutation ID :</p>
+      <p>{{ mutation_id }}</p>
+      <p class="mb-0 fw-bold">Bank Type :</p>
+      <p>{{ bank_type }}</p>
+    </CModalBody>
+    <CModalFooter>
+      <CButton color="secondary" @click="() => { modalDetail = false }">
+        Cancel
+      </CButton>
+      <CButton color="primary" @click="proc()">Process</CButton>
+    </CModalFooter>
+  </CModal>
+  <!-- Modal Detail Task -->
+
+
 
     <!-- Modal -->
   <CModal :visible="visibleLiveDemo" @close="() => { visibleLiveDemo = false }">
@@ -79,16 +111,72 @@
       <CButton color="primary">Save changes</CButton>
     </CModalFooter>
   </CModal>
+  <!-- Modal -->
   </div>
 </template>
 <script>
 import axios from 'axios'
+import router from '../../router'
 import {onMounted,ref} from 'vue'
 export default {
   name: 'TaskList',
   data() {
     return {
         visibleLiveDemo: false,
+        modalDetail:false,
+        account_number: '',
+        anRekening: '',
+        amount: '',
+        mutation_id: '',
+        bank_type: '',
+        _id:'',
+        taskTitle:'',
+        taskRefNumber:'',
+        taskAssigne:'',
+        taskSlaTime:'',
+        taskExpiredTime:'',
+        taskStatus:'',
+        taskCreatedBy:'',
+    }
+  },
+  methods: {
+    process(account_number,anRekening,amount,mutation_id,bank_type,_id,taskAssigne,taskTittle,taskRefNumber,taskExpiredTime,taskCreatedBy,taskStatus)
+    {
+      this.modalDetail = true;
+      this.account_number = account_number;
+      this.anRekening = anRekening;
+      this.amount = amount;
+      this.mutation_id = mutation_id;
+      this.bank_type = bank_type;
+      this._id = _id;
+      this.taskAssigne=taskAssigne;
+      this.taskTittle=taskTittle;
+      this.taskRefNumber=taskRefNumber;
+      this.taskExpiredTime=taskExpiredTime;
+      this.taskCreatedBy=taskCreatedBy;
+      this.taskStatus = taskStatus;
+    },
+    proc(){
+      this.$swal({title:'Are you sure ?',icon:'info',showCancelButton:true,focusConfirm:false,confirmButtonText:'Process',cancelButtonText:'Cancel'})
+      .then((result)=>{
+        if(result.isConfirmed) {
+        // Update data
+        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${this._id}`,{taskStatus:'processed'},{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+        })
+          .then(()=> {
+            //
+          }).catch((err)=>{
+            console.log(err);
+        });
+
+            // Feedback
+            this.$swal('Saved','','success');
+            router.go()
+        }
+      })
     }
   },
   setup() {
@@ -98,7 +186,7 @@ export default {
     onMounted(()=> {
       // get data
       if (window.localStorage.role == 'admin') {
-        axios.get('http://localhost:3030/tasks',{
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
           headers: {
             Authorization:window.localStorage.getItem('accessToken')
           }
@@ -111,14 +199,14 @@ export default {
         });
 
       }else{
-        axios.get(`http://localhost:3030/tasks?taskAssigne=${window.localStorage.username}`,{
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=${window.localStorage.username}`,{
           headers: {
             Authorization:window.localStorage.getItem('accessToken')
           }
         })
         .then((result) => {
           console.log(result.data.data)
-          tasks.value = result.data.data;
+          tasks.value = result.data;
         }).catch((err) =>{
           console.log(err.response);
         });
@@ -126,7 +214,7 @@ export default {
     });
 
     function destroy(id,index) {
-      axios.delete(`http://localhost:3030/users/${id}`,{
+      axios.delete(`${process.env.VUE_APP_URL_API}/users/${id}`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -141,9 +229,19 @@ export default {
       })
     }
 
+    function cek(status) {
+      if(status == 'processed')
+      {
+        return 'danger';
+      } else {
+        return 'light';
+      }
+    }
+
     return {
       tasks,
-      destroy
+      destroy,
+      cek
     }
   }
 }

@@ -73,7 +73,7 @@ export default {
 
     onMounted(()=> {
       // get data
-      axios.get('http://localhost:3030/users',{
+      axios.get(`${process.env.VUE_APP_URL_API}/users`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -86,7 +86,7 @@ export default {
     });
 
     function destroy(id,index) {
-      axios.delete(`http://localhost:3030/users/${id}`,{
+      axios.delete(`${process.env.VUE_APP_URL_API}/users/${id}`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }

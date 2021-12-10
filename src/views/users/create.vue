@@ -74,7 +74,7 @@ export default {
     const validation = ref([]);
     const router = routers
     function store() {
-      axios.post('http://localhost:3030/users/', user)
+      axios.post(`${process.env.VUE_APP_URL_API}/users/`, user)
       .then(()=> {
         router.push({
           name:'Users'
