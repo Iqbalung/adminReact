@@ -59,6 +59,19 @@ const routes = [
           return next();
           }
         },
+        {
+          path:'/profile',
+          name:'Profile',
+          component:()=>import('@/views/worker/profile.vue'),
+          beforeEnter:(to,from,next)=> {
+            if(!window.localStorage.getItem('accessToken')) {
+              return next({
+                name:'Login'
+              })
+            }
+          return next();
+          }
+        },
       {
         path:'/users',
         name:'Users',
@@ -67,6 +80,12 @@ const routes = [
           if(!window.localStorage.getItem('accessToken')) {
             return next({
               name:'Login'
+            })
+          }
+          if(window.localStorage.getItem('role')== 'worker')
+          {
+            return next({
+              name:'Profile'
             })
           }
         return next();

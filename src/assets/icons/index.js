@@ -83,7 +83,8 @@ import {
   cilClipboard,
   cilTouchApp,
   cilCircle,
-  cilSearch
+  cilSearch,
+  cilAperture
 } from '@coreui/icons'
 
 export const iconsSet = Object.assign(
@@ -146,7 +147,8 @@ export const iconsSet = Object.assign(
     cilClipboard,
     cilTouchApp,
     cilCircle,
-    cilSearch
+    cilSearch,
+    cilAperture
   },
   {
     cifUs,
