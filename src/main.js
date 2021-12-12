@@ -19,7 +19,7 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 const app = createApp(App)
 app.use(new VueSocketIO({
   debug:true,
-  connection: SocketIO('http://localhost:3031'), //options object is Optional
+  connection: SocketIO('https://api-tasks-u4boz.ondigitalocean.app'), //options object is Optional
     vuex: {
       store,
       actionPrefix: "SOCKET_",
