@@ -139,7 +139,7 @@ export default {
     updateWorker(){
       console.log(this.sel);
       this.sel.forEach(element => {
-        axios.patch(`http://localhost:3030/tasks/${element}`,{taskAssigne:this.work},{
+        axios.patch(`https://api-tasks-u4boz.ondigitalocean.app/tasks/${element}`,{taskAssigne:this.work},{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -169,7 +169,7 @@ export default {
 
     onMounted(()=> {
       // get data
-      axios.get('http://localhost:3030/tasks',{
+      axios.get('https://api-tasks-u4boz.ondigitalocean.app/tasks',{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -182,7 +182,7 @@ export default {
       });
 
       // get worker
-      axios.get('http://localhost:3030/users?role=worker',{
+      axios.get('https://api-tasks-u4boz.ondigitalocean.app/users?role=worker',{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -195,7 +195,7 @@ export default {
     });
     //delete
     function destroy(id,index) {
-      axios.delete(`http://localhost:3030/users/${id}`,{
+      axios.delete(`https://api-tasks-u4boz.ondigitalocean.app/users/${id}`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -225,7 +225,7 @@ export default {
 
      for(let i in this.sel){
        console.log(this.sel[i]);
-      // axios.patch(`http://localhost:3030/tasks/${selected[i]}`,{taskAssigne:worker.username},{
+      // axios.patch(`https://api-tasks-u4boz.ondigitalocean.app/tasks/${selected[i]}`,{taskAssigne:worker.username},{
       //   headers: {
       //     Authorization:window.localStorage.getItem('accessToken')
       //   }

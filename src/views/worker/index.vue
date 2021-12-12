@@ -98,7 +98,7 @@ export default {
     onMounted(()=> {
       // get data
       if (window.localStorage.role == 'admin') {
-        axios.get('http://localhost:3030/tasks',{
+        axios.get('https://api-tasks-u4boz.ondigitalocean.app/tasks',{
           headers: {
             Authorization:window.localStorage.getItem('accessToken')
           }
@@ -111,7 +111,7 @@ export default {
         });
 
       }else{
-        axios.get(`http://localhost:3030/tasks?taskAssigne=${window.localStorage.username}`,{
+        axios.get(`https://api-tasks-u4boz.ondigitalocean.app/tasks?taskAssigne=${window.localStorage.username}`,{
           headers: {
             Authorization:window.localStorage.getItem('accessToken')
           }
@@ -126,7 +126,7 @@ export default {
     });
 
     function destroy(id,index) {
-      axios.delete(`http://localhost:3030/users/${id}`,{
+      axios.delete(`https://api-tasks-u4boz.ondigitalocean.app/users/${id}`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }

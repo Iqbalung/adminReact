@@ -74,7 +74,7 @@ export default {
     const validation = ref([]);
     const router = routers
     function store() {
-      axios.post('http://localhost:3030/users/', user)
+      axios.post('https://api-tasks-u4boz.ondigitalocean.app/users/', user)
       .then(()=> {
         router.push({
           name:'Users'

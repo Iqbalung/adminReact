@@ -78,7 +78,7 @@ export default {
 
     onMounted(()=>{
       // console.log(route.params.id);
-      axios.get(`http://localhost:3030/users/${route.params.id}`,{
+      axios.get(`https://api-tasks-u4boz.ondigitalocean.app/users/${route.params.id}`,{
          headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -93,7 +93,7 @@ export default {
     });
 
     function update() {
-      axios.put(`http://localhost:3030/users/${route.params.id}`,user,{
+      axios.put(`https://api-tasks-u4boz.ondigitalocean.app/users/${route.params.id}`,user,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }

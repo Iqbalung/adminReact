@@ -89,7 +89,7 @@ export default {
     handleClick() {
       console.log(this.form)
       axios
-        .post('http://localhost:3030/authentication', {
+        .post('https://api-tasks-u4boz.ondigitalocean.app/authentication', {
           strategy: 'local',
           email: this.form.username,
           password: this.form.password,
