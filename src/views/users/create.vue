@@ -37,16 +37,6 @@
               <div v-if="validation.password" class="text-danger">{{ validation.password.message }}</div>
             </div>
             <div class="mb-3">
-              <CFormLabel for="mistake"
-                >Mistake User</CFormLabel
-              >
-              <CFormTextarea
-                id="mistake"
-                rows="3"
-                v-model="user.mistake"
-              ></CFormTextarea>
-            </div>
-            <div class="mb-3">
               <CButton color="primary" class="rounded">Save</CButton>
             </div>
           </CForm>
@@ -74,7 +64,11 @@ export default {
     const validation = ref([]);
     const router = routers
     function store() {
-      axios.post('https://api-tasks-u4boz.ondigitalocean.app/users/', user)
+      axios.post(`${process.env.VUE_APP_URL_API}/users`, user,{
+         headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
       .then(()=> {
         router.push({
           name:'Users'

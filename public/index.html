@@ -32,6 +32,57 @@
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
     <meta name="theme-color" content="#ffffff">
+
+    <script src="https://unpkg.com/socket.io-client@1.7.3/dist/socket.io.js"></script>
+
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.0/socket.io.js" integrity="sha512-nYuHvSAhY5lFZ4ixSViOwsEKFvlxHMU2NHts1ILuJgOS6ptUmAGt/0i5czIgMOahKZ6JN84YFDA+mCdky7dD8A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+  <script>
+    console.log('oke')
+    socket = io('http://192.168.1.6:3031',{
+    extraHeaders: {
+      Authorization: `Bearer ${window.localStorage.getItem('accessToken')}`
+    }
+  })
+
+// socket.emit('create',function(){
+//   //
+// })
+// socket.emit('update',function(){
+//   //
+// })
+// socket.emit('patched',function(){
+//   //
+// })
+
+  socket.emit('create', 'authentication', {
+    strategy: 'local',
+    email: 'lina@gmail.com',
+    password: '12345678'
+  }, function(error, authResult) {
+    // console.log(authResult);
+    // authResult will be {"accessToken": "your token", "user": user }
+    // You can now send authenticated messages to the server
+  });
+  socket.emit('update', 'authentication', {
+    strategy: 'local',
+    email: 'lina@gmail.com',
+    password: '12345678'
+  }, function(error, authResult) {
+    // console.log(authResult);
+    // authResult will be {"accessToken": "your token", "user": user }
+    // You can now send authenticated messages to the server
+  });
+  socket.emit('patch', 'authentication', {
+    strategy: 'local',
+    email: 'lina@gmail.com',
+    password: '12345678'
+  }, function(error, authResult) {
+    // console.log(authResult);
+    // authResult will be {"accessToken": "your token", "user": user }
+    // You can now send authenticated messages to the server
+  });
+  </script>
+
   </head>
   <body>
     <noscript>
@@ -39,5 +90,7 @@
     </noscript>
       <div id="app"></div>
     <!-- built files will be auto injected -->
+
+
   </body>
 </html>

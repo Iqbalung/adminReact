@@ -37,18 +37,21 @@
               <CTableBody>
                 <CTableRow v-for="(item,index) in tasks" :key="index" :color="cek(item.taskStatus)">
                   <CTableDataCell class="text-center">
+                    <CForm id="checkStatusAssigne">
                     <div v-if="item.taskStatus!='processed'">
-                      <CFormCheck id="task{{ index }}" :value="item._id" @change="additem"/>
+                      <CFormCheck :disabled="cekCheck(item.taskAssigne)" id="task{{ index }}" :value="item._id" @change="additem"/>
                     </div>
                     <div v-if="item.taskStatus=='processed'">
                       <CFormCheck disabled/>
                     </div>
+                    </CForm>
                   </CTableDataCell>
                   <CTableDataCell class="text-center">
                     <div>{{ item.taskAssigne }}</div>
                   </CTableDataCell>
                   <CTableDataCell class="text-left">
-                    <div>{{ item.taskStatus != 'processed' ? item.taskTittle.split(',')[0] + " " + item.taskTittle.split(',')[1] + " ********" : item.taskTittle }}</div>
+                    <div>{{ item.taskTittle }}</div>
+                    <!-- <div>{{ item.taskStatus != 'processed' ? item.taskTittle.split(',')[0] + " " + item.taskTittle.split(',')[1] + " ********" : item.taskTittle }}</div> -->
                   </CTableDataCell>
                   <CTableDataCell class="text-center">
                     <div>{{ item.taskRefNumber }}</div>
@@ -161,10 +164,12 @@
       <CModalTitle>Task Detail</CModalTitle>
     </CModalHeader>
     <CModalBody>
-      <p class="mb-0 fw-bold">Task Assigne :</p>
-      <p>{{ taskAssigne }}</p>
+    <div class="d-flex justify-content-between">
+      <div class="">
       <p class="mb-0 fw-bold">Task Title :</p>
       <p>{{ taskTittle }}</p>
+      <p class="mb-0 fw-bold">Task Assigne :</p>
+      <p>{{ taskAssigne }}</p>
       <p class="mb-0 fw-bold">Task Ref Number :</p>
       <p>{{ taskRefNumber }}</p>
       <p class="mb-0 fw-bold">Task Sla Time :</p>
@@ -173,18 +178,22 @@
       <p>{{ taskExpiredTime }}</p>
       <p class="mb-0 fw-bold">Task Status :</p>
       <p>{{ taskStatus }}</p>
-      <p class="mb-0 fw-bold">Task Created By :</p>
-      <p>{{ taskCreatedBy }}</p>
+      </div>
+      <div>
       <p class="mb-0 fw-bold">Account Number :</p>
       <p>{{ account_number }}</p>
       <p class="mb-0 fw-bold">Card Holder :</p>
       <p>{{ anRekening }}</p>
+      <p class="mb-0 fw-bold">Bank Type :</p>
+      <p>{{ bank_type }}</p>
+      <p class="mb-0 fw-bold">Task Created By :</p>
+      <p>{{ taskCreatedBy }}</p>
       <p class="mb-0 fw-bold">Amount :</p>
       <p>{{ amount }}</p>
       <p class="mb-0 fw-bold">Mutation ID :</p>
       <p>{{ mutation_id }}</p>
-      <p class="mb-0 fw-bold">Bank Type :</p>
-      <p>{{ bank_type }}</p>
+      </div>
+    </div>
     </CModalBody>
     <CModalFooter>
       <CButton color="secondary" @click="() => { modalDetail = false }">
@@ -202,13 +211,9 @@ import axios from 'axios'
 import {reactive,onMounted,ref} from 'vue'
 export default {
   name: 'TaskList',
-  sockets:{
-    connect: function() {
-      console.log('socket to notificatino channel connected')
-    }
-  },
   data() {
     return {
+      tasks: [],
         visibleLiveDemo: false,
         modalAdd: false,
         modalAssign:false,
@@ -228,11 +233,18 @@ export default {
         taskCreatedBy:'',
         sel: [],
         work:'',
-        coba:"aku,kamu,dia",
-        apiF:process.env.VUE_APP_URL_API,
+
 
     }
   },
+  // watch() {
+  //       socket.on('tasks created', (message) => {
+  //       console.log('New message created', message);
+  //       loadTask();
+  //       console.log(tasks);
+
+  //     });
+  // },
   methods: {
     additem(event){
       console.log(event.target.checked);
@@ -247,7 +259,7 @@ export default {
     updateWorker(){
       console.log(this.sel);
       this.sel.forEach(element => {
-        axios.patch(`https://api-tasks-u4boz.ondigitalocean.app/tasks/${element}`,{taskAssigne:this.work},{
+        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:this.work,taskStatus:'Assigned'},{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -258,7 +270,11 @@ export default {
       })
       });
       this.$swal('Saved','','success');
-       router.go()
+      //  router.go()
+      document.querySelectorAll('input[type="checkbox]').forEach((item)=>{
+              item.checked = false;
+      });
+
 
     },
     clearAssign() {
@@ -266,7 +282,7 @@ export default {
       .then((result)=> {
         if(result.isConfirmed) {
         this.sel.forEach(element => {
-        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'',taskStatus:'Unassigned'},{
+        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigne',taskStatus:'unassigned'},{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -278,13 +294,13 @@ export default {
       })
       });
           this.$swal('Saved','','success');
-          router.go()
+          // router.go()
+            document.querySelectorAll('input[type="checkbox]').forEach((item)=>{
+              item.checked = false;
+            });
+
         }
       })
-    },
-    store(){
-      alert('ok');
-      console.log(this.apiF);
     },
     process(account_number,anRekening,amount,mutation_id,bank_type,_id,taskAssigne,taskTittle,taskRefNumber,taskExpiredTime,taskCreatedBy,taskStatus)
     {
@@ -320,31 +336,17 @@ export default {
 
             // Feedback
             this.$swal('Saved','','success');
-            router.go()
+            // router.go()
+            document.querySelectorAll('input[type="checkbox]').forEach((item)=>{
+              item.checked = false;
+            });
+
         }
       })
     },
-  },
-  watch() {
-    this.sockets.subscribe('created',function(data){
-      console.log('this oke',data)
-    })
-  },
-  mounted(){
-    console.log('oke')
-    this.sockets.subscribe("created", function(data) {
-        console.log("this event was fired by eg. sio.emit('created')",data)
-      })
-      // this.sockets.on('created', function(data) {
-      //     console.log('created',data)
-      // });
+
   },
   setup() {
-
-    // const {Tasks} = context.root.$FeathersVuex.api
-    // const {$store} = context.root
-    //reactive state
-    // const {items : userss } = useFind({model:Users})
     let tasks = ref([]);
     let selected = ref([]);
     let users = ref({});
@@ -362,21 +364,33 @@ export default {
 
 
     onMounted(()=> {
-      // get data
-      axios.get('https://api-tasks-u4boz.ondigitalocean.app/tasks',{
-        headers: {
-          Authorization:window.localStorage.getItem('accessToken')
-        }
-      })
-      .then((result) => {
-        // console.log(result.data.data)
-        tasks.value = result.data;
-      }).catch((err) =>{
-        console.log(err.response);
+
+        socket.on('tasks created', (message) => {
+        // console.log('New message created', message);
+        loadTask();
+        // console.log(tasks);
+
+      });
+        socket.on('tasks updated', (message) => {
+        // console.log('New message updated', message);
+        loadTask();
+        // console.log(tasks);
+
+      });
+        socket.on('tasks patched', (message) => {
+        // console.log('New message patched', message);
+        loadTask();
+
+        // console.log(tasks);
+
       });
 
+
+      // get data
+      loadTask()
+
       // get worker
-      axios.get('https://api-tasks-u4boz.ondigitalocean.app/users?role=worker',{
+      axios.get(`${process.env.VUE_APP_URL_API}/users?role=worker`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -391,7 +405,7 @@ export default {
     });
     //delete
     function destroy(id,index) {
-      axios.delete(`https://api-tasks-u4boz.ondigitalocean.app/users/${id}`,{
+      axios.delete(`${process.env.VUE_APP_URL_API}/users/${id}`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -405,6 +419,7 @@ export default {
         console.log(err.response);
       })
     }
+
 
     // select function
     function getSelect(event) {
@@ -421,7 +436,7 @@ export default {
 
      for(let i in this.sel){
        console.log(this.sel[i]);
-      // axios.patch(`https://api-tasks-u4boz.ondigitalocean.app/tasks/${selected[i]}`,{taskAssigne:worker.username},{
+      // axios.patch(`http://localhost:3030/tasks/${selected[i]}`,{taskAssigne:worker.username},{
       //   headers: {
       //     Authorization:window.localStorage.getItem('accessToken')
       //   }
@@ -443,15 +458,25 @@ export default {
         return 'light';
       }
     }
-    // const tasksParams = computed(()=> {
-    //    return {
-    //     query: {
-    //       $sort: { taskTittle: 1 },
-    //       $limit: 25
-    //     }
-    //   }
-    // })
-    // const {items : tas} = useFind({model:Tasks})
+    function cekCheck(assign){
+      if(assign != 'unassigne') {
+        return 'true';
+      }
+    }
+    function loadTask() {
+      console.log('meong');
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((result) => {
+        // console.log(result.data.data)
+        tasks.value = result.data;
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+    }
     return {
       tasks,
       destroy,
@@ -462,6 +487,8 @@ export default {
       worker,
       tsk,
       cek,
+      loadTask,
+      cekCheck,
     }
   }
 }

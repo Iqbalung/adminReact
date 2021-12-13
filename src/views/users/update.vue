@@ -27,26 +27,6 @@
               <div v-if="validation.username" class="text-danger">{{ validation.username.message }}</div>
             </div>
             <div class="mb-3">
-              <CFormLabel for="password">Password</CFormLabel>
-              <CFormInput
-                type="password"
-                id="password"
-                placeholder="Password"
-                v-model="user.password"
-              />
-              <div v-if="validation.password" class="text-danger">{{ validation.password.message }}</div>
-            </div>
-            <div class="mb-3">
-              <CFormLabel for="mistake"
-                >Mistake User</CFormLabel
-              >
-              <CFormTextarea
-                id="mistake"
-                rows="3"
-                v-model="user.mistake"
-              ></CFormTextarea>
-            </div>
-            <div class="mb-3">
               <CButton color="primary" class="rounded">Save</CButton>
             </div>
           </CForm>
@@ -68,9 +48,7 @@ export default {
       email: '',
       username:'',
       name:'',
-      password:'',
       role:'worker',
-      mistake:'',
     });
     const validation = ref([]);
     const router = routers;
@@ -78,7 +56,7 @@ export default {
 
     onMounted(()=>{
       // console.log(route.params.id);
-      axios.get(`https://api-tasks-u4boz.ondigitalocean.app/users/${route.params.id}`,{
+      axios.get(`${process.env.VUE_APP_URL_API}/users/${route.params.id}`,{
          headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -86,14 +64,13 @@ export default {
         user.email = result.data.email;
         user.username = result.data.username;
         user.name = result.data.name;
-        user.mistake = result.data.mistake;
       }).catch((err)=>{
         console.log(err.response.data)
       })
     });
 
     function update() {
-      axios.put(`https://api-tasks-u4boz.ondigitalocean.app/users/${route.params.id}`,user,{
+      axios.patch(`${process.env.VUE_APP_URL_API}/users/${route.params.id}`,user,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }

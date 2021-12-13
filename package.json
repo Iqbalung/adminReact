@@ -40,19 +40,9 @@
     "socket.io-client": "^4.4.0",
     "vue": "^3.2.23",
     "vue-3-socket.io": "^1.0.4",
-    "vue-demi": "^0.12.1",
     "vue-router": "^4.0.12",
     "vue-sweetalert2": "^5.0.2",
     "vuex": "^4.0.2"
-  },
-  "peerDependencies": {
-    "@vue/composition-api": "^1.4.1",
-    "vue": "^2.0.0 || >=3.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@vue/composition-api": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

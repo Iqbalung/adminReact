@@ -2,11 +2,6 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import VueSocketIO from 'vue-3-socket.io'
-// import feathers from '@feathersjs/feathers'
-// import fsocket from '@feathersjs/socketio-client'
-import SocketIO from 'socket.io-client'
-
 import CoreuiVue from '@coreui/vue'
 import CIcon from '@coreui/icons-vue'
 import { iconsSet as icons } from '@/assets/icons'
@@ -17,15 +12,6 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 // const feat = feathers();
 const app = createApp(App)
-app.use(new VueSocketIO({
-  debug:true,
-  connection: SocketIO('https://api-tasks-u4boz.ondigitalocean.app'), //options object is Optional
-    vuex: {
-      store,
-      actionPrefix: "SOCKET_",
-      mutationPrefix: "SOCKET_"
-    }
-}))
 app.use(store)
 app.use(router)
 app.use(CoreuiVue)

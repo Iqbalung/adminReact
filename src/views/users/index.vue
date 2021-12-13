@@ -18,7 +18,6 @@
                   <CTableHeaderCell class="text-center">Username</CTableHeaderCell>
                   <CTableHeaderCell class="text-center">Email</CTableHeaderCell>
                   <CTableHeaderCell class="text-center">Role</CTableHeaderCell>
-                  <CTableHeaderCell class="text-center">Mistake</CTableHeaderCell>
                   <CTableHeaderCell class="text-center">Action</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
@@ -38,9 +37,6 @@
                   </CTableDataCell>
                   <CTableDataCell class="text-center">
                      <div>{{item.role}}</div>
-                  </CTableDataCell>
-                  <CTableDataCell class="text-center">
-                    <div>{{item.mistake}}</div>
                   </CTableDataCell>
                   <CTableDataCell class="text-center">
                     <div>
@@ -73,7 +69,7 @@ export default {
 
     onMounted(()=> {
       // get data
-      axios.get('https://api-tasks-u4boz.ondigitalocean.app/users',{
+      axios.get(`${process.env.VUE_APP_URL_API}/users`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -86,7 +82,7 @@ export default {
     });
 
     function destroy(id,index) {
-      axios.delete(`https://api-tasks-u4boz.ondigitalocean.app/users/${id}`,{
+      axios.delete(`${process.env.VUE_APP_URL_API}/users/${id}`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }

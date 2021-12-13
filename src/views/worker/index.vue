@@ -174,7 +174,7 @@ export default {
 
             // Feedback
             this.$swal('Saved','','success');
-            router.go()
+            // router.go()
         }
       })
     }
@@ -184,37 +184,31 @@ export default {
     let tasks = ref([]);
 
     onMounted(()=> {
-      // get data
-      if (window.localStorage.role == 'admin') {
-        axios.get('https://api-tasks-u4boz.ondigitalocean.app/tasks',{
-          headers: {
-            Authorization:window.localStorage.getItem('accessToken')
-          }
-        })
-        .then((result) => {
-          console.log(result.data.data)
-          tasks.value = result.data.data;
-        }).catch((err) =>{
-          console.log(err.response);
-        });
 
-      }else{
-        axios.get(`https://api-tasks-u4boz.ondigitalocean.app/tasks?taskAssigne=${window.localStorage.username}`,{
-          headers: {
-            Authorization:window.localStorage.getItem('accessToken')
-          }
-        })
-        .then((result) => {
-          console.log(result.data.data)
-          tasks.value = result.data;
-        }).catch((err) =>{
-          console.log(err.response);
-        });
-      }
+        socket.on('tasks created', (message) => {
+        // console.log('New message created', message);
+        loadTask();
+        // console.log(tasks);
+
+      });
+        socket.on('tasks updated', (message) => {
+        // console.log('New message updated', message);
+        loadTask();
+        // console.log(tasks);
+
+      });
+        socket.on('tasks patched', (message) => {
+        // console.log('New message patched', message);
+        loadTask();
+        // console.log(tasks);
+
+      });
+      // get data
+      loadTask()
     });
 
     function destroy(id,index) {
-      axios.delete(`https://api-tasks-u4boz.ondigitalocean.app/users/${id}`,{
+      axios.delete(`${process.env.VUE_APP_URL_API}/users/${id}`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -237,11 +231,40 @@ export default {
         return 'light';
       }
     }
+     function loadTask() {
+    if (window.localStorage.role == 'admin') {
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
+          headers: {
+            Authorization:window.localStorage.getItem('accessToken')
+          }
+        })
+        .then((result) => {
+          console.log(result.data.data)
+          tasks.value = result.data.data;
+        }).catch((err) =>{
+          console.log(err.response);
+        });
+
+      }else{
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=${window.localStorage.username}`,{
+          headers: {
+            Authorization:window.localStorage.getItem('accessToken')
+          }
+        })
+        .then((result) => {
+          console.log(result.data.data)
+          tasks.value = result.data;
+        }).catch((err) =>{
+          console.log(err.response);
+        });
+      }
+    }
 
     return {
       tasks,
       destroy,
-      cek
+      cek,
+      loadTask
     }
   }
 }
