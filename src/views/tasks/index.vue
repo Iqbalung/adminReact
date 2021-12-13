@@ -1,12 +1,12 @@
 <template>
   <div>
     <CCard class="mb-4">
-        <CCardHeader>Task List</CCardHeader>
+        <CCardHeader>Task List {{ taskStat }}</CCardHeader>
       <CCardBody>
       <div class="flex-column">
-      <CButton color="primary" class="d-inline-block me-2" @click="() => { modalAdd=true}">
+      <!-- <CButton color="primary" class="d-inline-block me-2" @click="() => { modalAdd=true}">
           <CIcon class="text-white" name="cil-plus"/> Add Task
-      </CButton>
+      </CButton> -->
       <CButton color="danger" class="text-white d-inline-block me-2" @click="clearAssign()">
           <CIcon class="text-white" name="cil-trash"/> Unnasigned
       </CButton>
@@ -14,11 +14,34 @@
           <CIcon class="text-white" name="cil-touch-app"/> Assign Task
       </CButton>
       <CButton color="secondary" class="d-inline-block text-white" @click="() => { visibleLiveDemo = true }"><CIcon class="text-white" name="cil-clipboard"/> Tasks History</CButton>
-       <!-- <div class="mt-3 col-4">
-          <CFormInput type="text" id="search" placeholder="search"/>
-        </div> -->
+
+
+    <!-- <CFormSelect v-model="statFilter" @change="filtersel" class="float-end status">
+      <option value="all">Select</option>
+      <option value="unprocess">Unprocess</option>
+      <option value="assigned">Assigned</option>
+      <option value="processed">Processed</option>
+      <option value="done">Done</option>
+    </CFormSelect> -->
+
+      <CFormSelect
+      @change="filterSelect"
+        class="float-end status"
+        aria-label="Default select example"
+        :options="[
+          { label: 'Unprocess', value: 'unprocess' },
+          { label: 'Assign', value: 'assigned' },
+          { label: 'Processed', value: 'processed' },
+          { label: 'Done', value: 'done' },
+      ]">
+    </CFormSelect>
+    <div class="float-end me-2">
+          <CFormInput type="text" id="search" @keyup="searchTitle" placeholder="search"/>
+    </div>
+    <div class="float-none"></div>
       </div>
-              <CTable align="middle" class="mt-3 mb-0 mt-2 border border-1" hover responsive>
+      <div class="table-wrapper mt-2">
+            <CTable align="middle" class="mt-3 mb-0 mt-2 border border-1" hover responsive>
               <CTableHead color="light">
                 <CTableRow>
                   <CTableHeaderCell class="text-center">
@@ -39,7 +62,7 @@
                   <CTableDataCell class="text-center">
                     <CForm id="checkStatusAssigne">
                     <div v-if="item.taskStatus!='processed'">
-                      <CFormCheck :disabled="cekCheck(item.taskAssigne)" id="task{{ index }}" :value="item._id" @change="additem"/>
+                      <CFormCheck :disabled="cekCheck(item.taskAssigne)" id="taskchekbox" :value="item._id" @change="additem"/>
                     </div>
                     <div v-if="item.taskStatus=='processed'">
                       <CFormCheck disabled/>
@@ -85,6 +108,8 @@
                 </CTableRow>
               </CTableBody>
             </CTable>
+      </div>
+
       </CCardBody>
     </CCard>
 
@@ -205,6 +230,18 @@
   <!-- Modal Detail Task -->
   </div>
 </template>
+
+<style>
+.table-wrapper {
+  max-height: 350px;
+  overflow: auto;
+}
+.status {
+  max-width: 130px;
+}
+
+</style>
+
 <script>
 import router from '../../router'
 import axios from 'axios'
@@ -233,6 +270,9 @@ export default {
         taskCreatedBy:'',
         sel: [],
         work:'',
+        taskStat:'',
+        statFilter:'all'
+
 
 
     }
@@ -246,6 +286,11 @@ export default {
   //     });
   // },
   methods: {
+    // filtersel(){
+    //   if(this.statFilter!='') {
+    //     console.log(this.statFilter);
+    //   }
+    // },
     additem(event){
       console.log(event.target.checked);
       console.log(event.target.value);
@@ -282,7 +327,7 @@ export default {
       .then((result)=> {
         if(result.isConfirmed) {
         this.sel.forEach(element => {
-        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigne',taskStatus:'unassigned'},{
+        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigne',taskStatus:'unassigne'},{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -344,9 +389,19 @@ export default {
         }
       })
     },
+    change(){
+      alert('ok');
+      // let check = document.getElementById("taskchekbox");
+    },
 
   },
+  watch() {
+    loadTask(taskStats.value)
+  },
   setup() {
+    // let taskStat = ref([]);
+    let searchTitt = ref([]);
+    let taskStats = ref([]);
     let tasks = ref([]);
     let selected = ref([]);
     let users = ref({});
@@ -367,27 +422,28 @@ export default {
 
         socket.on('tasks created', (message) => {
         // console.log('New message created', message);
-        loadTask();
+           loadTask(taskStats)
+
         // console.log(tasks);
 
       });
         socket.on('tasks updated', (message) => {
         // console.log('New message updated', message);
-        loadTask();
+             loadTask(taskStats.value)
+
         // console.log(tasks);
 
       });
         socket.on('tasks patched', (message) => {
         // console.log('New message patched', message);
-        loadTask();
+              loadTask(taskStats.value)
+
 
         // console.log(tasks);
 
       });
-
-
       // get data
-      loadTask()
+      loadTask(taskStats.value)
 
       // get worker
       axios.get(`${process.env.VUE_APP_URL_API}/users?role=worker`,{
@@ -463,20 +519,105 @@ export default {
         return 'true';
       }
     }
-    function loadTask() {
-      console.log('meong');
-        axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
+    function loadTask(taskStat,searchTit) {
+        console.log(taskStat)
+    if(taskStats.value.length == 0) {
+      console.log(true);
+          axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
       })
       .then((result) => {
-        // console.log(result.data.data)
+        console.log("hasil",result)
         tasks.value = result.data;
       }).catch((err) =>{
         console.log(err.response);
       });
+      // jika search title
+      if(searchTitt.value.length!=0){
+         console.log('hake');
+          axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskTittle=`+searchTit,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((result) => {
+        console.log("hasil",result)
+        tasks.value = result.data;
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+
+      }
+    } else {
+      console.log(false)
+      axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=`+taskStat,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((result) => {
+        console.log(result)
+        tasks.value = result.data;
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+
+       // jika search title
+      if(searchTitt.value.length!=0){
+         console.log('hake');
+          axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=`+taskStat+`&taskTittle=`+searchTit,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((result) => {
+        console.log("hasil",result)
+        tasks.value = result.data;
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+
+      }
+
+
+
+
     }
+
+    }
+
+    function filterSelect(e){
+      if(e.target.options.selectedIndex > -1){
+        let filter = e.target.options[e.target.selectedIndex].value;
+        // console.log(filter)
+       taskStats.value = e.target.options[e.target.selectedIndex].value
+
+       loadTask(taskStats.value)
+      // console.log(taskStats.value);
+      //  console.log(statFilter);
+      //  console.log(taskStats.value);
+      //   axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=${filter}`,{
+      //   headers: {
+      //     Authorization:window.localStorage.getItem('accessToken')
+      //   }
+      // })
+      // .then((result) => {
+      //   // console.log(result.data.data)
+      //   tasks.value = result.data;
+      // }).catch((err) =>{
+      //   console.log(err.response);
+      // });
+      }
+    }
+    function searchTitle(e) {
+      searchTitt.value = e.target.value
+      // console.log(searchTit.value);
+      loadTask(taskStats.value,searchTitt.value)
+
+    }
+
     return {
       tasks,
       destroy,
@@ -489,6 +630,9 @@ export default {
       cek,
       loadTask,
       cekCheck,
+      taskStats,
+      filterSelect,
+      searchTitle
     }
   }
 }

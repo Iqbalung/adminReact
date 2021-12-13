@@ -62,10 +62,12 @@
       <CModalTitle>Task Detail</CModalTitle>
     </CModalHeader>
     <CModalBody>
-      <p class="mb-0 fw-bold">Task Assigne :</p>
-      <p>{{ taskAssigne }}</p>
+      <div class="d-flex justify-content-between">
+      <div class="">
       <p class="mb-0 fw-bold">Task Title :</p>
       <p>{{ taskTittle }}</p>
+      <p class="mb-0 fw-bold">Task Assigne :</p>
+      <p>{{ taskAssigne }}</p>
       <p class="mb-0 fw-bold">Task Ref Number :</p>
       <p>{{ taskRefNumber }}</p>
       <p class="mb-0 fw-bold">Task Sla Time :</p>
@@ -74,18 +76,22 @@
       <p>{{ taskExpiredTime }}</p>
       <p class="mb-0 fw-bold">Task Status :</p>
       <p>{{ taskStatus }}</p>
-      <p class="mb-0 fw-bold">Task Created By :</p>
-      <p>{{ taskCreatedBy }}</p>
+      </div>
+      <div>
       <p class="mb-0 fw-bold">Account Number :</p>
       <p>{{ account_number }}</p>
       <p class="mb-0 fw-bold">Card Holder :</p>
       <p>{{ anRekening }}</p>
+      <p class="mb-0 fw-bold">Bank Type :</p>
+      <p>{{ bank_type }}</p>
+      <p class="mb-0 fw-bold">Task Created By :</p>
+      <p>{{ taskCreatedBy }}</p>
       <p class="mb-0 fw-bold">Amount :</p>
       <p>{{ amount }}</p>
       <p class="mb-0 fw-bold">Mutation ID :</p>
       <p>{{ mutation_id }}</p>
-      <p class="mb-0 fw-bold">Bank Type :</p>
-      <p>{{ bank_type }}</p>
+      </div>
+    </div>
     </CModalBody>
     <CModalFooter>
       <CButton color="secondary" @click="() => { modalDetail = false }">

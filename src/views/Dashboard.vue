@@ -1,7 +1,8 @@
 <template>
   <div>
-    <WidgetsStatsA />
-    <CRow>
+    <WidgetTask/>
+
+    <CRow class="mt-3">
       <CCol :md="12">
         <CCard class="mb-4">
           <CCardBody>
@@ -278,6 +279,7 @@ import avatar6 from '@/assets/images/avatars/6.jpg'
 import MainChartExample from './charts/MainChartExample'
 import WidgetsStatsA from './widgets/WidgetsStatsTypeA.vue'
 import WidgetsStatsD from './widgets/WidgetsStatsTypeD.vue'
+import WidgetTask from './widgets/WidgetStat.vue'
 
 export default {
   name: 'Dashboard',
@@ -285,6 +287,7 @@ export default {
     MainChartExample,
     WidgetsStatsA,
     WidgetsStatsD,
+    WidgetTask
   },
   setup() {
     const progressGroupExample1 = [
