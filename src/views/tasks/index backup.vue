@@ -1,42 +1,44 @@
 <template>
   <div>
-    <CCard class="mb-4 overflow-auto">
+    <CCard class="mb-4">
         <CCardHeader>Task List {{ taskStat }}</CCardHeader>
       <CCardBody>
-      <div class="d-flex justify-content-between">
+      <div class="flex-column">
       <!-- <CButton color="primary" class="d-inline-block me-2" @click="() => { modalAdd=true}">
           <CIcon class="text-white" name="cil-plus"/> Add Task
       </CButton> -->
-      <div>
-      <CButton color="danger" class="text-white me-2" @click="clearAssign()">
+      <CButton color="danger" class="text-white d-inline-block me-2" @click="clearAssign()">
           <CIcon class="text-white" name="cil-trash"/> Unnasigned
       </CButton>
-
-      <CButton color="dark" class="me-2" @click="() => { modalAssign=true}">
+      <CButton color="dark" class="d-inline-block me-2" @click="() => { modalAssign=true}">
           <CIcon class="text-white" name="cil-touch-app"/> Assign Task
       </CButton>
+      <CButton color="secondary" class="d-inline-block text-white" @click="() => { visibleLiveDemo = true }"><CIcon class="text-white" name="cil-clipboard"/> Tasks History</CButton>
 
-      <CButton color="secondary" class="text-white" @click="() => { visibleLiveDemo = true }">
-        <CIcon class="text-white" name="cil-clipboard"/>
-        Tasks History
-      </CButton>
-      </div>
 
-    <div class="d-flex">
-    <CFormInput type="text" class="w-50 me-2" id="search" @keyup="searchTitle" placeholder="search"/>
+    <!-- <CFormSelect v-model="statFilter" @change="filtersel" class="float-end status">
+      <option value="all">Select</option>
+      <option value="unprocess">Unprocess</option>
+      <option value="assigned">Assigned</option>
+      <option value="processed">Processed</option>
+      <option value="done">Done</option>
+    </CFormSelect> -->
+
       <CFormSelect
       @change="filterSelect"
-        class="w-50"
+        class="float-end status"
         aria-label="Default select example"
         :options="[
           { label: 'Unprocess', value: 'unprocess' },
-          { label: 'Unassign', value: 'unassigned' },
+          { label: 'Assign', value: 'assigned' },
           { label: 'Processed', value: 'processed' },
           { label: 'Done', value: 'done' },
       ]">
     </CFormSelect>
+    <div class="float-end me-2">
+          <CFormInput type="text" id="search" @keyup="searchTitle" placeholder="search"/>
     </div>
-    <!-- <div class="float-none"></div> -->
+    <div class="float-none"></div>
       </div>
       <!-- <div class="table-wrapper mt-2"> -->
               <!-- Fixed header table-->
@@ -199,6 +201,236 @@
   </CModal>
   <!-- Modal Detail Task -->
   </div>
+  <div>
+    <CCard class="mb-4">
+        <CCardHeader>Task List {{ taskStat }}</CCardHeader>
+      <CCardBody>
+      <div class="flex-column">
+      <!-- <CButton color="primary" class="d-inline-block me-2" @click="() => { modalAdd=true}">
+          <CIcon class="text-white" name="cil-plus"/> Add Task
+      </CButton> -->
+      <CButton color="danger" class="text-white d-inline-block me-2" @click="clearAssign()">
+          <CIcon class="text-white" name="cil-trash"/> Unnasigned
+      </CButton>
+      <CButton color="dark" class="d-inline-block me-2" @click="() => { modalAssign=true}">
+          <CIcon class="text-white" name="cil-touch-app"/> Assign Task
+      </CButton>
+      <CButton color="secondary" class="d-inline-block text-white" @click="() => { visibleLiveDemo = true }"><CIcon class="text-white" name="cil-clipboard"/> Tasks History</CButton>
+
+
+    <!-- <CFormSelect v-model="statFilter" @change="filtersel" class="float-end status">
+      <option value="all">Select</option>
+      <option value="unprocess">Unprocess</option>
+      <option value="assigned">Assigned</option>
+      <option value="processed">Processed</option>
+      <option value="done">Done</option>
+    </CFormSelect> -->
+
+      <CFormSelect
+      @change="filterSelect"
+        class="float-end status"
+        aria-label="Default select example"
+        :options="[
+          { label: 'Unprocess', value: 'unprocess' },
+          { label: 'Assign', value: 'assigned' },
+          { label: 'Processed', value: 'processed' },
+          { label: 'Done', value: 'done' },
+      ]">
+    </CFormSelect>
+    <div class="float-end me-2">
+          <CFormInput type="text" id="search" @keyup="searchTitle" placeholder="search"/>
+    </div>
+    <div class="float-none"></div>
+      </div>
+      <!-- <div class="table-wrapper mt-2"> -->
+            <CTable align="middle" class="mt-3 mb-0 mt-2 border border-1" hover responsive>
+              <CTableHead color="light">
+                <CTableRow>
+                  <CTableHeaderCell class="text-center">
+                    <CIcon name="cil-people" />
+                    <!-- <CFormCheck/> -->
+                  </CTableHeaderCell>
+                  <CTableHeaderCell class="text-center">Assigned</CTableHeaderCell>
+                  <CTableHeaderCell class="text-center">Title</CTableHeaderCell>
+                  <CTableHeaderCell class="text-center">Ref Number</CTableHeaderCell>
+                  <CTableHeaderCell class="text-center">Sla Time</CTableHeaderCell>
+                  <CTableHeaderCell class="text-center">Expired Time</CTableHeaderCell>
+                  <CTableHeaderCell class="text-center">Status</CTableHeaderCell>
+                  <CTableHeaderCell class="text-center">Detail Task</CTableHeaderCell>
+                </CTableRow>
+              </CTableHead>
+              <CTableBody>
+                <CTableRow v-for="(item,index) in tasks" :key="index" :color="cek(item.taskStatus)">
+                  <CTableDataCell class="text-center">
+                    <CForm id="checkStatusAssigne">
+                    <div v-if="item.taskStatus!='processed'">
+                      <CFormCheck :disabled="cekCheck(item.taskAssigne)" id="taskchekbox" :value="item._id" @change="additem"/>
+                    </div>
+                    <div v-if="item.taskStatus=='processed'">
+                      <CFormCheck disabled/>
+                    </div>
+                    </CForm>
+                  </CTableDataCell>
+                  <CTableDataCell class="text-center">
+                    <div>{{ item.taskAssigne }}</div>
+                  </CTableDataCell>
+                  <CTableDataCell class="text-left">
+                    <div>{{ item.taskTittle }}</div>
+                    <!-- <div>{{ item.taskStatus != 'processed' ? item.taskTittle.split(',')[0] + " " + item.taskTittle.split(',')[1] + " ********" : item.taskTittle }}</div> -->
+                  </CTableDataCell>
+                  <CTableDataCell class="text-center">
+                    <div>{{ item.taskRefNumber }}</div>
+                  </CTableDataCell>
+                  <CTableDataCell class="text-center">
+                    <div>{{ item.taskSlaTime }}</div>
+                  </CTableDataCell>
+                  <CTableDataCell class="text-center">
+                     <div>{{ item.taskExpiredTime }}</div>
+                  </CTableDataCell>
+                  <CTableDataCell class="text-center">
+                    <div>{{ item.taskStatus }}</div>
+                  </CTableDataCell>
+                  <CTableDataCell class="text-center">
+                    <div v-if="item.taskStatus!='processed'">
+                    <CBadge class="me-2 rounded-full" color="dark" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus)">
+                      <CIcon class="text-white" name="cil-aperture"/>
+                    </CBadge>
+                    <!-- <CBadge class="me-2 rounded" color="warning">
+                      <CIcon class="text-white" name="cil-pencil"/>
+                    </CBadge> -->
+                    <!-- <CBadge color="danger" class="rounded">
+                      <CIcon class="text-white" name="cil-trash"/>
+                    </CBadge> -->
+                    </div>
+                    <div v-if="item.taskStatus=='processed'">
+                      <CIcon class="text-dark" name="cil-aperture"/>
+                    </div>
+
+                  </CTableDataCell>
+                </CTableRow>
+              </CTableBody>
+            </CTable>
+      <!-- </div> -->
+
+      </CCardBody>
+    </CCard>
+
+    <!-- Modal Add Tasks -->
+  <CModal  :visible="modalAdd" @close="() => { modalAdd = false }">
+    <CModalHeader>
+      <CModalTitle>Add Task</CModalTitle>
+    </CModalHeader>
+    <CModalBody>
+     <CForm @submit.prevent="store()">
+            <div class="mb-3">
+              <CFormLabel for="taskTittle">Task Title</CFormLabel>
+              <CFormInput type="text" v-model="tsk.taskTittle" id="taskTittle" placeholder="Task title"/>
+              <!-- <div class="text-danger">Task Title Required</div> -->
+            </div>
+            <div class="mb-3">
+              <CFormLabel for="taskRefNumber">Ref Number</CFormLabel>
+              <CFormInput type="text" v-model="tsk.taskRefNumber" id="taskRefNumber" placeholder="Task Ref Number"/>
+              <!-- <div class="text-danger">Task Ref Number Required</div> -->
+            </div>
+            <div class="mb-3">
+              <CFormLabel for="taskSlaTime">Sla Time</CFormLabel>
+              <CFormInput type="date" id="taskSlaTime" v-model="tsk.taskSlaTime" placeholder="Task Sla Time"/>
+              <!-- <div class="text-danger">Task Sla Time Required</div> -->
+            </div>
+            <div class="mb-3">
+              <CFormLabel for="taskExpiredTime">Expired Time</CFormLabel>
+              <CFormInput type="date" id="taskExpiredTime" v-model="tsk.taskExpiredTime" placeholder="Task Expired Time"/>
+              <!-- <div class="text-danger">Task Expired Time Required</div> -->
+            </div>
+            <div class="mb-3">
+              <CButton color="primary" class="rounded">Save</CButton>
+            </div>
+          </CForm>
+
+    </CModalBody>
+  </CModal>
+    <!-- Toast Confirm -->
+
+    <!-- Modal Assigment -->
+    <CModal  :visible="modalAssign" @close="() => { modalAssign = false }">
+    <CModalHeader>
+      <CModalTitle>Modal Assignment</CModalTitle>
+    </CModalHeader>
+    <CModalBody>
+      <CForm @submit.prevent="updateWorker()">
+      <div class="mb-3">
+      <CFormSelect v-model="work" aria-label="Default select example">
+        <option>Unassigned</option>
+        <option v-for="(user,index) in users" :key="index" :value="user.username">{{ user.username }}</option>
+      </CFormSelect>
+      </div>
+      <CButton color="primary">Save changes</CButton>
+    </CForm>
+    </CModalBody>
+  </CModal>
+    <!-- Modal Assigment -->
+
+    <!-- Modal History -->
+  <CModal  :visible="visibleLiveDemo" @close="() => { visibleLiveDemo = false }">
+    <CModalHeader>
+      <CModalTitle>Modal title</CModalTitle>
+    </CModalHeader>
+    <CModalBody>Woohoo, you're reading this text in a modal!</CModalBody>
+    <CModalFooter>
+      <CButton color="secondary" @click="() => { visibleLiveDemo = false }">
+        Close
+      </CButton>
+      <CButton color="primary">Save changes</CButton>
+    </CModalFooter>
+  </CModal>
+  <!-- Modal History -->
+
+    <!-- Modal Detail Task -->
+  <CModal :visible="modalDetail" @close="() => { modalDetail = false }">
+    <CModalHeader :close-button="false">
+      <CModalTitle>Task Detail</CModalTitle>
+    </CModalHeader>
+    <CModalBody>
+    <div class="d-flex justify-content-between">
+      <div class="">
+      <p class="mb-0 fw-bold">Task Title :</p>
+      <p>{{ taskTittle }}</p>
+      <p class="mb-0 fw-bold">Task Assigne :</p>
+      <p>{{ taskAssigne }}</p>
+      <p class="mb-0 fw-bold">Task Ref Number :</p>
+      <p>{{ taskRefNumber }}</p>
+      <p class="mb-0 fw-bold">Task Sla Time :</p>
+      <p>{{ taskSlaTime }}</p>
+      <p class="mb-0 fw-bold">Task Expired Time :</p>
+      <p>{{ taskExpiredTime }}</p>
+      <p class="mb-0 fw-bold">Task Status :</p>
+      <p>{{ taskStatus }}</p>
+      </div>
+      <div>
+      <p class="mb-0 fw-bold">Account Number :</p>
+      <p>{{ account_number }}</p>
+      <p class="mb-0 fw-bold">Card Holder :</p>
+      <p>{{ anRekening }}</p>
+      <p class="mb-0 fw-bold">Bank Type :</p>
+      <p>{{ bank_type }}</p>
+      <p class="mb-0 fw-bold">Task Created By :</p>
+      <p>{{ taskCreatedBy }}</p>
+      <p class="mb-0 fw-bold">Amount :</p>
+      <p>{{ amount }}</p>
+      <p class="mb-0 fw-bold">Mutation ID :</p>
+      <p>{{ mutation_id }}</p>
+      </div>
+    </div>
+    </CModalBody>
+    <CModalFooter>
+      <CButton color="secondary" @click="() => { modalDetail = false }">
+        Cancel
+      </CButton>
+      <CButton color="primary" @click="proc()">Process</CButton>
+    </CModalFooter>
+  </CModal>
+  <!-- Modal Detail Task -->
+  </div>
 </template>
 
 <style>
@@ -233,11 +465,6 @@
     height: 300px;
     overflow-y: auto;
     width: 100%;
-    overflow: auto;
-}
-.table-fixed thead {
-  width: 100%;
-  overflow: auto;
 }
 
 .table-fixed thead,
@@ -324,7 +551,7 @@ export default {
     updateWorker(){
       console.log(this.sel);
       this.sel.forEach(element => {
-        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:this.work,taskStatus:'unprocess'},{
+        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:this.work,taskStatus:'Assigned'},{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -335,7 +562,7 @@ export default {
       })
       });
       this.$swal('Saved','','success');
-       router.go()
+      //  router.go()
       document.querySelectorAll('input[type="checkbox]').forEach((item)=>{
               item.checked = false;
       });
@@ -347,7 +574,7 @@ export default {
       .then((result)=> {
         if(result.isConfirmed) {
         this.sel.forEach(element => {
-        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigne',taskStatus:'unprocess'},{
+        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigne',taskStatus:'unassigne'},{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -359,7 +586,7 @@ export default {
       })
       });
           this.$swal('Saved','','success');
-          router.go()
+          // router.go()
             document.querySelectorAll('input[type="checkbox]').forEach((item)=>{
               item.checked = false;
             });
@@ -401,7 +628,7 @@ export default {
 
             // Feedback
             this.$swal('Saved','','success');
-            router.go()
+            // router.go()
             document.querySelectorAll('input[type="checkbox]').forEach((item)=>{
               item.checked = false;
             });
@@ -540,10 +767,10 @@ export default {
       }
     }
     function loadTask(taskStat,searchTit) {
-    console.log(taskStat)
+        console.log(taskStat)
     if(taskStats.value.length == 0) {
       console.log(true);
-          axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=unprocess`,{
+          axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -557,7 +784,7 @@ export default {
       // jika search title
       if(searchTitt.value.length!=0){
          console.log('hake');
-          axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=unprocess&taskTittle=`+searchTit,{
+          axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskTittle=`+searchTit,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -572,10 +799,7 @@ export default {
       }
     } else {
       console.log(false)
-      if(taskStat=='unassigned')
-      {
-
-        axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=unassigne`,{
+      axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=`+taskStat,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -601,42 +825,6 @@ export default {
       }).catch((err) =>{
         console.log(err.response);
       });
-
-      }
-
-      } else {
-
-        axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=`+taskStat,{
-        headers: {
-          Authorization:window.localStorage.getItem('accessToken')
-        }
-      })
-      .then((result) => {
-        console.log(result)
-        tasks.value = result.data;
-      }).catch((err) =>{
-        console.log(err.response);
-      });
-
-       // jika search title
-      if(searchTitt.value.length!=0){
-         console.log('hake');
-          axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=`+taskStat+`&taskTittle=`+searchTit,{
-        headers: {
-          Authorization:window.localStorage.getItem('accessToken')
-        }
-      })
-      .then((result) => {
-        console.log("hasil",result)
-        tasks.value = result.data;
-      }).catch((err) =>{
-        console.log(err.response);
-      });
-
-      }
-
-
-
 
       }
 
