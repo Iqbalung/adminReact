@@ -3,10 +3,11 @@
     <CCard class="mb-4 overflow-auto">
         <CCardHeader>Task List {{ taskStat }}</CCardHeader>
       <CCardBody>
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-between align-items-center">
       <!-- <CButton color="primary" class="d-inline-block me-2" @click="() => { modalAdd=true}">
           <CIcon class="text-white" name="cil-plus"/> Add Task
       </CButton> -->
+      <!-- <CFormCheck id="taskchekbox" :value="{_id:'1234',name:'rani'}" @change="change()"/> -->
       <div>
       <CButton color="danger" class="text-white me-2" @click="clearAssign()">
           <CIcon class="text-white" name="cil-trash"/> Unnasigned
@@ -16,17 +17,23 @@
           <CIcon class="text-white" name="cil-touch-app"/> Assign Task
       </CButton>
 
-      <CButton color="secondary" class="text-white" @click="() => { visibleLiveDemo = true }">
+      <!-- <CButton color="secondary" class="text-white" @click="() => { visibleLiveDemo = true }">
         <CIcon class="text-white" name="cil-clipboard"/>
         Tasks History
-      </CButton>
+      </CButton> -->
       </div>
 
-    <div class="d-flex">
-    <CFormInput type="text" class="w-50 me-2" id="search" @keyup="searchTitle" placeholder="search"/>
+    <div class="d-flex align-items-center">
+      <div class="me-1">
+          Total
+          <CBadge class="d-inline-block rounded-circle" color="dark">{{ tasks.length }}</CBadge>
+        </div>
+      <div class="me-1">
+      <CFormInput type="text" id="search" @keyup="() => {visibleLiveDemo = true}" placeholder="search"/>
+      </div>
+    <div class="me-1">
       <CFormSelect
       @change="filterSelect"
-        class="w-50"
         aria-label="Default select example"
         :options="[
           { label: 'Unprocess', value: 'unprocess' },
@@ -36,19 +43,20 @@
       ]">
     </CFormSelect>
     </div>
+    </div>
     <!-- <div class="float-none"></div> -->
       </div>
       <!-- <div class="table-wrapper mt-2"> -->
               <!-- Fixed header table-->
                 <div class="table-responsive mt-3">
-                    <table class="table table-fixed text-center">
+                    <table class="table table-fixed">
                         <thead>
                             <tr>
                                 <th scope="col" class="col-1"><CIcon name="cil-people" /></th>
                                 <th scope="col" class="col-2">Assigned</th>
                                 <th scope="col" class="col-5">Task Title</th>
                                 <th scope="col" class="col-2">Status</th>
-                                <th scope="col" class="col-2">Detail Task</th>
+                                <th scope="col" class="col-2 text-center">Detail Task</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -64,7 +72,7 @@
                                 <td class="col-2">{{ item.taskAssigne }}</td>
                                 <td class="col-5">{{ item.taskTittle }}</td>
                                 <td class="col-2">{{ item.taskStatus }}</td>
-                                <td class="col-2">
+                                <td class="col-2 text-center">
                                   <div v-if="item.taskStatus!='processed'">
                                     <CBadge class="me-2 rounded-full" color="dark" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus)">
                                       <CIcon class="text-white" name="cil-aperture"/>
@@ -141,9 +149,22 @@
     <!-- Modal History -->
   <CModal  :visible="visibleLiveDemo" @close="() => { visibleLiveDemo = false }">
     <CModalHeader>
-      <CModalTitle>Modal title</CModalTitle>
+      <CModalTitle>Task History</CModalTitle>
     </CModalHeader>
-    <CModalBody>Woohoo, you're reading this text in a modal!</CModalBody>
+    <CModalBody>
+      <div class="mb-0">
+      <CCallout class="p-2 mb-0" color="light">
+          <span>UpdatedAt: 20-juni-2020</span>
+          <p class="mb-0">Task Updated by Lina</p>
+      </CCallout>
+      </div>
+      <div>
+      <CCallout class="p-2" color="light">
+          <span>UpdatedAt: 20-juni-2020</span>
+          <p class="mb-0">Task Updated by Lina</p>
+      </CCallout>
+      </div>
+    </CModalBody>
     <CModalFooter>
       <CButton color="secondary" @click="() => { visibleLiveDemo = false }">
         Close

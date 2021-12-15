@@ -3,18 +3,27 @@
     <CCard class="mb-4">
       <CCardHeader>Task List</CCardHeader>
     <CCardBody>
-       <div class="d-flex justify-content-between">
-      <CButton color="secondary" class="text-white" @click="showToast('halo')"><CIcon class="text-white" name="cil-clipboard"/> Tasks History</CButton>
-
-      <CFormSelect style="width:140px" @change="getFilter">
+      <div class="d-flex justify-content-end">
+      <!-- <div>
+      <CButton color="secondary" class="text-white" @click="()=>{visibleLiveDemo=true}"><CIcon class="text-white" name="cil-clipboard"/> Tasks History</CButton>
+      </div> -->
+      <div class="d-flex justify-content-center align-content-center align-items-center">
+        <div class="me-2">
+          Total
+          <CBadge class="d-inline-block rounded-circle" color="dark">{{ tasks.length }}</CBadge>
+        </div>
+        <div>
+      <CFormSelect class="d-d-inline-block" style="width:140px" @change="getFilter">
           <option value="unprocess">Unprocess</option>
           <option value="processed">Processed</option>
           <option value="done">Done</option>
       </CFormSelect>
+        </div>
+      </div>
        </div>
 
        <div class="table-responsive mt-3">
-                    <table class="table table-fixed text-center">
+                    <table class="table table-fixed">
                         <thead>
                             <tr>
                                 <!-- <th scope="col" class="col-1"><CIcon name="cil-people" /></th> -->
@@ -23,7 +32,7 @@
                                 <th scope="col" class="col-5">Task Title</th>
                                 <th scope="col" class="col-3">Task Ref Number</th>
                                 <th scope="col" class="col-2">Status</th>
-                                <th scope="col" class="col-2">Detail Task</th>
+                                <th scope="col" class="col-2 text-center">Detail Task</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -37,17 +46,40 @@
                                   </div>
                                 </td> -->
                                 <!-- <td class="col-2">{{ item.taskAssigne }}</td> -->
-                                <td class="col-5">{{ item.taskTittle }}</td>
-                                <td class="col-3">{{ item.taskRefNumber }}</td>
-                                <td class="col-2">{{ item.taskStatus }}</td>
+                                <!-- <td class="col-1">
+                                  <CFormCheck id="taskchekbox" :value="item._id"/>
+                                </td> -->
+                                <td class="col-5">
+                                  <div>
+                                    {{ item.taskTittle }}
+                                  </div>
+                                </td>
+                                <td class="col-3">
+                                 <div>
+                                   {{ item.taskRefNumber }}
+                                 </div>
+                                </td>
                                 <td class="col-2">
-                                  <div v-if="item.taskStatus!='processed'">
-                                    <CBadge class="me-2 rounded-full" color="dark" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus)">
+                                  <div>
+                                  {{ item.taskStatus }}
+                                  </div>
+                                </td>
+                                <td class="col-2 text-center">
+                                  <div v-if="item.taskStatus!='processed'" class="d-d-inline-block p-0 m-0">
+                                    <CBadge class="me-1 rounded-full p-0" color="dark" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus)">
                                       <CIcon class="text-white" name="cil-aperture"/>
                                     </CBadge>
+                                    <CBadge class="rounded-full d-inline-block p-0" color="secondary" @click="showHistory(item.taskHistory)">
+                                      <CIcon class="text-white" name="cil-clipboard"/>
+                                    </CBadge>
                                     </div>
-                                    <div v-if="item.taskStatus=='processed'">
+                                    <div v-if="item.taskStatus=='processed'" class="d-inline-block p-0 m-0">
+                                      <CBadge class="me-1 rounded-full p-0" color="light">
                                       <CIcon class="text-dark" name="cil-aperture"/>
+                                      </CBadge>
+                                      <CBadge class="rounded-full d-inline-block p-0" color="secondary" @click="showHistory(item.taskHistory)">
+                                      <CIcon class="text-white" name="cil-clipboard"/>
+                                      </CBadge>
                                   </div>
                               </td>
                             </tr>
@@ -109,14 +141,40 @@
     <!-- Modal -->
   <CModal :visible="visibleLiveDemo" @close="() => { visibleLiveDemo = false }">
     <CModalHeader>
-      <CModalTitle>Modal title</CModalTitle>
+      <CModalTitle>Task History</CModalTitle>
     </CModalHeader>
-    <CModalBody>Woohoo, you're reading this text in a modal!</CModalBody>
+    <CModalBody>
+      <!-- <div class="mb-0">
+      <CCallout class="p-2 mb-0" color="light">
+          <span>UpdatedAt: 20-juni-2020</span>
+          <p class="mb-0">Data assigned by admin</p>
+      </CCallout>
+      </div>
+      <div>
+      <CCallout class="p-2" color="light">
+          <span>UpdatedAt: 20-juni-2020</span>
+          <p class="mb-0">Data assigned by crone</p>
+      </CCallout>
+      </div> -->
+    <div class="timeline-area" >
+      <div class="content" v-for="(item,index) in history" :key="index">
+        <p>{{ item.updatedAt }}</p>
+        <h5 class="fw-bold">{{ item.status }}</h5>
+      </div>
+      <!-- <div class="content">
+        <p>Full-stack developer</p>
+        <p>Google</p>
+      </div>
+      <div class="content">
+        <p>Full-stack developer</p>
+        <p>Google</p>
+      </div> -->
+    </div>
+      </CModalBody>
     <CModalFooter>
       <CButton color="secondary" @click="() => { visibleLiveDemo = false }">
         Close
       </CButton>
-      <CButton color="primary">Save changes</CButton>
     </CModalFooter>
   </CModal>
   <!-- Modal -->
@@ -167,6 +225,53 @@
         clear: both;
         display: block;
 }
+/* timeline */
+.timeline-area {
+  margin:5px auto;
+  width: 360px;
+  border-left: 2px solid #ccc;
+  padding:0 20px 0 30px;
+}
+.content {
+/* padding: 10px 10px; */
+padding-top:5px ;
+padding-left: 5px;
+border: 1px solid #ccc;
+position: relative;
+height: 50px;
+left: -10px;
+margin-bottom: 20px;
+}
+.content::before {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #000;
+  border: 3px solid #ddd;
+  position: absolute;
+  top: 10px;
+  left: -27px;
+}
+.content::after {
+  content:'';
+  border-style: solid;
+  border-color: transparent #ddd transparent transparent;
+  border-width: 8px;
+  position: absolute;
+  top:7px;
+  left: -17px;
+}
+.content p {
+  font-size: 12px;
+  margin-bottom: 0;
+  margin-top:0;
+}
+.content h5 {
+  font-size: 12px;
+}
+
 </style>
 
 <script>
@@ -193,6 +298,7 @@ export default {
         taskStatus:'',
         taskCreatedBy:'',
         selectedTask : [],
+        history: [],
         // toasts:[]
     }
   },
@@ -214,6 +320,12 @@ export default {
     //       content: 'Lorem ipsum dolor cet emit'
     //     })
     // },
+    showHistory(history) {
+      this.visibleLiveDemo = true;
+      this.history = history;
+      // console.log(this.history);
+      // console.log(id);
+    },
     process(account_number,anRekening,amount,mutation_id,bank_type,_id,taskAssigne,taskTittle,taskRefNumber,taskExpiredTime,taskCreatedBy,taskStatus)
     {
       this.modalDetail = true;
@@ -248,7 +360,7 @@ export default {
 
             // Feedback
             this.$swal('Saved','','success');
-            // router.go()
+            router.go()
         }
       })
     },
@@ -273,6 +385,7 @@ export default {
 
     onMounted(()=> {
       console.log(tasks);
+      // console.log(tasks.value.length);
         socket.on('tasks created', (message) => {
         // console.log('New message created', message);
 
@@ -293,7 +406,10 @@ export default {
         console.log('tasksbro',message);
         console.log('title',message.taskTittle);
         // alert('oke');
-        showToast('Task Update',message.taskTittle);
+        if(message.taskAssigne == window.localStorage.getItem('username'))
+        {
+          showToast('Task Update',message.taskTittle);
+        }
 
       });
         // this.methods.showToast();
@@ -362,7 +478,6 @@ export default {
           console.log(err.response);
         });
        }
-
 
        }
 
