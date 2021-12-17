@@ -3,6 +3,7 @@
     <CCard class="mb-4">
       <CCardHeader>Task List</CCardHeader>
     <CCardBody>
+
       <div class="d-flex justify-content-end">
       <!-- <div>
       <CButton color="secondary" class="text-white" @click="()=>{visibleLiveDemo=true}"><CIcon class="text-white" name="cil-clipboard"/> Tasks History</CButton>
@@ -21,7 +22,6 @@
         </div>
       </div>
        </div>
-
        <div class="table-responsive mt-3">
                     <table class="table table-fixed">
                         <thead>
@@ -51,7 +51,26 @@
                                 </td> -->
                                 <td class="col-5">
                                   <div>
-                                    {{ item.taskTittle }}
+                                    {{ item.taskTittle.substring(0,30) +' '}}
+                                    <!-- <button class="bg-dark btn-small m-0 p-0">
+                                      <CIcon class="text-white m-0 p-0" name="cil-clipboard"/>
+                                    </button> -->
+                                    <CTooltip content="Copy Account Number And Amount!" placement="right">
+                                      <template #toggler="{ on }">
+                                    <CBadge class="rounded-full d-inline-block p-0" v-on="on" color="dark" @click="copyRek(item.taskData.account_number,item.taskData.amount)">
+                                      <CIcon class="text-white" name="cil-wallet"/>
+                                    </CBadge>
+                                      </template>
+                                    </CTooltip>
+                                    <!-- {{ ' ' }} -->
+                                    <!-- <CTooltip content="Copy Amount!" placement="right">
+                                      <template #toggler="{ on }">
+                                    <CBadge class="rounded-full d-inline-block p-0" v-on="on" color="dark" @click="copyAmt(item.taskData.amount)">
+                                      <CIcon class="text-white" name="cil-dollar"/>
+                                    </CBadge>
+                                      </template>
+                                    </CTooltip> -->
+
                                   </div>
                                 </td>
                                 <td class="col-3">
@@ -278,6 +297,7 @@ margin-bottom: 20px;
 import axios from 'axios'
 import router from '../../router'
 import {onMounted,ref} from 'vue'
+import useClipboard from 'vue-clipboard3'
 export default {
   name: 'TaskList',
   data() {
@@ -320,6 +340,22 @@ export default {
     //       content: 'Lorem ipsum dolor cet emit'
     //     })
     // },
+    copyRek(norek,amount){
+       let { toClipboard }=useClipboard();
+       toClipboard(`Account Number : ${norek}; Amount : ${amount}`);
+       console.log('copied');
+    },
+    copyAmt(amount) {
+      let { toClipboard }=useClipboard();
+       toClipboard(`Amount : ${amount}`);
+       console.log('copied');
+    },
+    copydong() {
+      // toClipboard('',{text:'aku sayang kamu'});
+      let { toClipboard }=useClipboard();
+      toClipboard('AKu sayang kamu');
+      console.log('copyed');
+    },
     showHistory(history) {
       this.visibleLiveDemo = true;
       this.history = history;
@@ -343,6 +379,65 @@ export default {
       this.taskStatus = taskStatus;
     },
     proc(){
+      this.$swal({title:'Are you sure ?',icon:'info',showCancelButton:true,focusConfirm:false,confirmButtonText:'Process',cancelButtonText:'Cancel'})
+      .then((result)=>{
+        if(result.isConfirmed) {
+
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks/${this._id}`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((results)=> {
+        let date = new Date();
+        let taskh = results.data.taskHistory;
+        taskh.push({status: `task processed by ${window.localStorage.getItem('username')}`, updatedAt:date.toISOString()})
+        console.log(taskh);
+    // Axios update
+      axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${this._id}`,{taskStatus:'processed',taskTimeProcess:date.toISOString(),taskHistory:taskh},{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then(()=> {
+        //
+      }).catch((err)=>{
+        console.log(err);
+      })
+
+    // Axios update
+
+
+      }).catch((err)=>{
+        console.log(err);
+      })
+
+      this.$swal('Saved','','success');
+
+
+
+
+
+
+
+        // Update data
+        // axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${this._id}`,{taskStatus:'processed',timeProcess:Date.now},{
+        // headers: {
+        //   Authorization:window.localStorage.getItem('accessToken')
+        // }
+        // })
+        //   .then(()=> {
+        //     //
+        //   }).catch((err)=>{
+        //     console.log(err);
+        // });
+
+            // Feedback
+            // router.go()
+        }
+      })
+    },
+    procs(){
       this.$swal({title:'Are you sure ?',icon:'info',showCancelButton:true,focusConfirm:false,confirmButtonText:'Process',cancelButtonText:'Cancel'})
       .then((result)=>{
         if(result.isConfirmed) {

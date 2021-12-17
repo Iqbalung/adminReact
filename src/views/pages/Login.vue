@@ -95,6 +95,7 @@ export default {
           password: this.form.password,
         })
         .then(function (response) {
+          window.localStorage.setItem('urlApi',process.env.VUE_APP_URL_API);
           window.localStorage.setItem('_id', response.data.user._id);
           window.localStorage.setItem('accessToken', response.data.accessToken);
           window.localStorage.setItem('username', response.data.user.username);

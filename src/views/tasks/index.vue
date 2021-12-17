@@ -48,6 +48,11 @@
       </div>
       <!-- <div class="table-wrapper mt-2"> -->
               <!-- Fixed header table-->
+              <!-- <button @click="getDate">Get Date</button> -->
+              <!-- {{ checkedItems }}
+              <button @click="cobadong">clickdong</button>
+              <button @click="updateWorker">cobakirim</button>
+              <button @click="()=> {checkedItems = []}">Clear cek</button> -->
                 <div class="table-responsive mt-3">
                     <table class="table table-fixed">
                         <thead>
@@ -63,14 +68,16 @@
                             <tr v-for="(item,index) in tasks" :key="index" :class="'table-'+cek(item.taskStatus)">
                                 <td scope="row" class="col-1">
                                   <div v-if="item.taskStatus!='processed'">
-                                  <CFormCheck :disabled="cekCheck(item.taskAssigne)" id="taskchekbox" :value="item._id" @change="additem"/>
+                                    <input type="checkbox" v-model="checkedItems" :value="item._id" @change="additem(item.taskHistory)">
+
+                                  <!-- <CFormCheck  id="item._id" v-model="checkedItems" value="item.id"/> -->
                                   </div>
                                   <div v-if="item.taskStatus=='processed'">
                                     <CFormCheck disabled/>
                                   </div>
                                 </td>
                                 <td class="col-2">{{ item.taskAssigne }}</td>
-                                <td class="col-5">{{ item.taskTittle }}</td>
+                                <td class="col-5 overflow-auto"> <div class="overflow-auto">{{ item.taskTittle.substring(0,35) }}</div></td>
                                 <td class="col-2">{{ item.taskStatus }}</td>
                                 <td class="col-2 text-center">
                                   <div v-if="item.taskStatus!='processed'">
@@ -312,7 +319,9 @@ export default {
         sel: [],
         work:'',
         taskStat:'',
-        statFilter:'all'
+        statFilter:'all',
+        checkedItems: [],
+        tskHistory: {}
 
 
 
@@ -332,17 +341,83 @@ export default {
     //     console.log(this.statFilter);
     //   }
     // },
-    additem(event){
-      console.log(event.target.checked);
-      console.log(event.target.value);
-      if(event.target.checked)
-      {
-        this.sel.push(event.target.value);
-      } else {
-        this.sel.pop();
-      }
+    getDate(){
+      let date = new Date();
+      console.log(date.toISOString());
+    },
+    cobaget(element,){
+      axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((result)=> {
+        console.log(result.data.taskHistory);
+      }).catch((err)=>{
+        console.log(err);
+      })
     },
     updateWorker(){
+      this.checkedItems.forEach(element =>{
+      axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((result)=> {
+      let date = new Date();
+        let taskh = result.data.taskHistory;
+        taskh.push({status: `task assigned by lina ${window.localStorage.getItem('username')}`, updatedAt:date.toISOString()})
+        console.log(taskh);
+    // Axios update
+      axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:this.work,taskHistory:taskh},{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then(()=> {
+        //
+      }).catch((err)=>{
+        console.log(err);
+      })
+
+    // Axios update
+
+
+      }).catch((err)=>{
+        console.log(err);
+      })
+
+      })
+        console.log('success update');
+        this.checkedItems = [];
+        this.modalAssign = false;
+        this.$swal('Saved','','success');
+        // loadTask(taskStats.value)
+
+    },
+    cobadong(){
+      this.checkedItems.forEach(element=> {
+        this.tskHistory[element] = [{status:'created by crone'},{status:'assigned by lina'}]
+      })
+      console.log(this.tskHistory);
+    },
+    additem(history){
+      // console.log(event.target.checked);
+      // console.log(event.target.value);
+      console.log(this.checkedItems);
+      // console.log(history[0]);
+      // this.tskHistory[this.checkedItems[0]] = history[0];
+      // console.log(this.tskHistory);
+      // this.tskHistory[checkedItems]
+      // if(event.target.checked)
+      // {
+      //   this.sel.push(event.target.value);
+      // } else {
+      //   this.sel.pop();
+      // }
+    },
+    updateWorkers(){
       console.log(this.sel);
       this.sel.forEach(element => {
         axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:this.work,taskStatus:'unprocess'},{
@@ -357,13 +432,72 @@ export default {
       });
       this.$swal('Saved','','success');
        router.go()
-      document.querySelectorAll('input[type="checkbox]').forEach((item)=>{
-              item.checked = false;
-      });
+      // document.querySelectorAll('input[type="checkbox]').forEach((item)=>{
+      //         item.checked = false;
+      // });
 
 
     },
-    clearAssign() {
+     clearAssign() {
+      this.$swal({title:'Are Sure ?',icon:'info',showCancelButton:true,focusConfirm:false,confirmButtonText:'Yes, Sure',cancelButtonText:'Cancel'})
+      .then((result)=> {
+        if(result.isConfirmed) {
+        this.checkedItems.forEach(element => {
+
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((results)=> {
+        let taskh = results.data.taskHistory[0];
+        // taskh.push({status: `assigned by lina ${window.localStorage.getItem('username')}}`, updatedAt:Date.now})
+        console.log(taskh);
+    // Axios update
+      axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigne',taskHistory:taskh},{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then(()=> {
+        //
+      }).catch((err)=>{
+        console.log(err);
+      })
+
+    // Axios update
+
+
+      }).catch((err)=>{
+        console.log(err);
+      })
+
+
+      //   axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigne',taskStatus:'unprocess'},{
+      //   headers: {
+      //     Authorization:window.localStorage.getItem('accessToken')
+      //   }
+      // })
+      // .then(()=> {
+      //  //
+      // }).catch((err)=>{
+      //   console.log(err);
+      // })
+
+      });
+        console.log('success update');
+        this.checkedItems = [];
+        // this.modalAssign = false;
+        this.$swal('Saved','','success');
+          // router.go()
+            // document.querySelectorAll('input[type="checkbox]').forEach((item)=>{
+            //   item.checked = false;
+            // });
+
+        }
+      })
+    },
+    clearAssigns() {
       this.$swal({title:'Are Sure ?',icon:'info',showCancelButton:true,focusConfirm:false,confirmButtonText:'Yes, Sure',cancelButtonText:'Cancel'})
       .then((result)=> {
         if(result.isConfirmed) {
@@ -405,6 +539,41 @@ export default {
       this.taskStatus = taskStatus;
     },
     proc(){
+      this.$swal({title:'Are you sure ?',icon:'info',showCancelButton:true,focusConfirm:false,confirmButtonText:'Process',cancelButtonText:'Cancel'})
+      .then((result)=>{
+        if(result.isConfirmed) {
+
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks/${this._id}`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((results)=> {
+        let date = new Date();
+        let taskh = results.data.taskHistory;
+        taskh.push({status: `task processed by ${window.localStorage.getItem('username')}`, updatedAt:date.toISOString()})
+        console.log(taskh);
+    // Axios update
+      axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${this._id}`,{taskStatus:'processed',taskTimeProcess:date.toISOString(),taskHistory:taskh},{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then(()=> {
+        //
+      }).catch((err)=>{
+        console.log(err);
+      })
+    // Axios update
+      }).catch((err)=>{
+        console.log(err);
+      })
+
+      this.$swal('Saved','','success');
+        }
+      })
+    },
+    procs(){
       this.$swal({title:'Are you sure ?',icon:'info',showCancelButton:true,focusConfirm:false,confirmButtonText:'Process',cancelButtonText:'Cancel'})
       .then((result)=>{
         if(result.isConfirmed) {

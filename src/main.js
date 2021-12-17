@@ -9,9 +9,13 @@ import DocsCallout from '@/components/DocsCallout'
 import DocsExample from '@/components/DocsExample'
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
+import useClipboard from 'vue-clipboard3';
+// import clipboardjs from 'clipboard';
 
 // const feat = feathers();
 const app = createApp(App)
+// app.use(clipboardjs)
+app.use(useClipboard);
 app.use(store)
 app.use(router)
 app.use(CoreuiVue)

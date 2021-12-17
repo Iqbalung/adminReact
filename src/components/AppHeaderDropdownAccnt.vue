@@ -59,6 +59,7 @@ export default {
       window.localStorage.removeItem('role')
       window.localStorage.removeItem('username')
       window.localStorage.removeItem('_id')
+      window.localStorage.removeItem('urlApi');
       router.push({ name:'Login' })
     },
   },
