@@ -15,6 +15,9 @@
         :icon="logoNegative"
         :height="35"
       /> -->
+      <span>
+        Admin Withdraw
+      </span>
       <CIcon
         custom-class-name="sidebar-brand-narrow"
         :icon="sygnet"

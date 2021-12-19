@@ -11,7 +11,10 @@
       <div class="d-flex justify-content-center align-content-center align-items-center">
         <div class="me-2">
           Total
-          <CBadge class="d-inline-block rounded-circle" color="dark">{{ tasks.length }}</CBadge>
+          <button class="btn btn-primary" type="button" disabled>
+            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" style="margin-right:30px;"></span>
+            <span class="sr-only">  {{ tasks.length }}</span>
+        </button>
         </div>
         <div>
       <CFormSelect class="d-d-inline-block" style="width:140px" @change="getFilter">
