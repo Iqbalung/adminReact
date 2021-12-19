@@ -543,7 +543,7 @@ export default {
         return 'true';
       }
     }
-     function loadTask(filter) {
+    function loadTask(filter) {
        if(selectedFilter.value.length === 0)
        {
         //  console.log('ora ono filter')
@@ -576,9 +576,9 @@ export default {
 
        }
 
-    function getFilter(e) {
+    async function getFilter(e) {
       if(e.target.options.selectedIndex > -1){
-        let filter = e.target.options[e.target.selectedIndex].value;
+        let filter = await e.target.options[e.target.selectedIndex].value;
         selectedFilter.value = e.target.options[e.target.selectedIndex].value;
         // console.log(selectedTask);
         loadTask(selectedFilter.value);
