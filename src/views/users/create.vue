@@ -15,6 +15,7 @@
               <CFormLabel for="email">Email address</CFormLabel>
               <CFormInput type="email" id="email" placeholder="User email" v-model="user.email"/>
               <div v-if="validation.email" class="text-danger">{{ validation.email.message }}</div>
+              <div v-if="valid" class="text-danger">{{ valid.message }}</div>
             </div>
             <div class="mb-3">
               <CFormLabel for="name">Full name</CFormLabel>
@@ -62,6 +63,7 @@ export default {
       mistake:'',
     });
     const validation = ref([]);
+    let valid = ref([]);
     const router = routers
     function store() {
       axios.post(`${process.env.VUE_APP_URL_API}/users`, user,{
@@ -75,11 +77,13 @@ export default {
         })
       }).catch((err)=>{
         validation.value = err.response.data.errors
+        valid.value = err.response.data;
       })
     }
     return {
       user,
       validation,
+      valid,
       router,
       store
     }

@@ -6,6 +6,7 @@
           <CCardGroup>
             <CCard class="p-4">
               <CCardBody>
+              <div v-if="validation.message" class="text-danger text-center">{{ validation.message }}</div>
                 <CForm>
                   <h1>Login</h1>
                   <p class="text-medium-emphasis">Sign In to your account</p>
@@ -83,6 +84,7 @@ export default {
         username: '',
         password: '',
       },
+      validation: []
     }
   },
   methods: {
@@ -102,8 +104,9 @@ export default {
           window.localStorage.setItem('role', response.data.user.role);
           router.push({ path: '/dashboard' })
         })
-        .catch(function (error) {
+        .catch((error) => {
           console.log(error)
+          this.validation = error.response.data;
         })
     },
   },

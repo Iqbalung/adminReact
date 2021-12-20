@@ -4,6 +4,10 @@
         <CCardHeader>Task List {{ taskStat }}</CCardHeader>
       <CCardBody>
       <div class="d-flex justify-content-between align-items-center">
+      <!-- <CButton color="primary" class="d-inline-block me-2" @click="() => { modalAdd=true}">
+          <CIcon class="text-white" name="cil-plus"/> Add Task
+      </CButton> -->
+      <!-- <CFormCheck id="taskchekbox" :value="{_id:'1234',name:'rani'}" @change="change()"/> -->
       <div>
       <CButton color="danger" class="text-white me-2" @click="clearAssign()">
           <CIcon class="text-white" name="cil-trash"/> Unnasigned
@@ -12,7 +16,13 @@
       <CButton color="dark" class="me-2" @click="() => { modalAssign=true}">
           <CIcon class="text-white" name="cil-touch-app"/> Assign Task
       </CButton>
+
+      <!-- <CButton color="secondary" class="text-white" @click="() => { visibleLiveDemo = true }">
+        <CIcon class="text-white" name="cil-clipboard"/>
+        Tasks History
+      </CButton> -->
       </div>
+
     <div class="d-flex align-items-center">
       <div class="me-1">
           Total
@@ -27,14 +37,23 @@
         aria-label="Default select example"
         :options="[
           { label: 'Unprocess', value: 'unprocess' },
+          { label: 'Unassign', value: 'unassigned' },
           { label: 'Processed', value: 'processed' },
           { label: 'Done', value: 'done' },
       ]">
     </CFormSelect>
     </div>
     </div>
+    <!-- <div class="float-none"></div> -->
       </div>
-            <div class="table-responsive mt-3">
+      <!-- <div class="table-wrapper mt-2"> -->
+              <!-- Fixed header table-->
+              <!-- <button @click="getDate">Get Date</button> -->
+              <!-- {{ checkedItems }}
+              <button @click="cobadong">clickdong</button>
+              <button @click="updateWorker">cobakirim</button>
+              <button @click="()=> {checkedItems = []}">Clear cek</button> -->
+                <div class="table-responsive mt-3">
                     <table class="table table-fixed">
                         <thead>
                             <tr>
@@ -50,6 +69,7 @@
                                 <td scope="row" class="col-1">
                                   <div v-if="item.taskStatus!='processed'">
                                     <input type="checkbox" v-model="checkedItems" :value="item._id" @change="additem(item.taskHistory)">
+
                                   <!-- <CFormCheck  id="item._id" v-model="checkedItems" value="item.id"/> -->
                                   </div>
                                   <div v-if="item.taskStatus=='processed'">
@@ -57,7 +77,7 @@
                                   </div>
                                 </td>
                                 <td class="col-2">{{ item.taskAssigne }}</td>
-                                <td class="col-5 overflow-auto"> <div class="overflow-auto">{{ item.taskTittle }}</div></td>
+                                <td class="col-5 overflow-auto"> <div class="overflow-auto">{{ item.taskTittle.substring(0,35) }}</div></td>
                                 <td class="col-2">{{ item.taskStatus }}</td>
                                 <td class="col-2 text-center">
                                   <div v-if="item.taskStatus!='processed'">
@@ -75,12 +95,12 @@
 
                 </div><!-- End -->
       <!-- </div> -->
-          <CPagination size="sm" aria-label="Page navigation example">
-              <CPaginationItem @click="previousPage">Previous</CPaginationItem>
-              <CPaginationItem :active="checkPagination(item)" v-for="(item,index) in Math.ceil(tasks.total/perPage)" :key="index" @click="getPage">
+          <CPagination aria-label="Page navigation example">
+              <CPaginationItem href="#">Previous</CPaginationItem>
+              <CPaginationItem :active="checkPagination(item)" v-for="(item,index) in Math.round(tasks.total/perPage)" :key="index" @click="getPage">
               {{ item }}
               </CPaginationItem>
-              <CPaginationItem @click="nextPage">Next</CPaginationItem>
+              <CPaginationItem href="#">Next</CPaginationItem>
           </CPagination>
       </CCardBody>
     </CCard>
@@ -224,6 +244,26 @@
 .status {
   max-width: 130px;
 }
+/* .fixed_header{
+    table-layout: fixed;
+} */
+
+/* .fixed_header tbody{
+  display:block;
+  overflow:auto;
+  height:200px;
+  width:100%;
+}
+
+.fixed_header thead tr{
+  display:block;
+  width: 100%;
+}
+
+.fixed_header th, .fixed_header td {
+  text-align: left;
+  width:100%;
+} */
 .table-fixed tbody {
     height: 300px;
     overflow-y: auto;
@@ -290,9 +330,34 @@ export default {
         checkedItems: [],
         tskHistory: {},
         perPage: 100,
+        currentPage:1,
+        rows: 0,
+        pageIn : 0
+
+
+
+
     }
   },
+  // watch() {
+  //       socket.on('tasks created', (message) => {
+  //       console.log('New message created', message);
+  //       loadTask();
+  //       console.log(tasks);
+
+  //     });
+  // },
   methods: {
+    // filtersel(){
+    //   if(this.statFilter!='') {
+    //     console.log(this.statFilter);
+    //   }
+    // },
+
+    getDate(){
+      let date = new Date();
+      console.log(date.toISOString());
+    },
     updateWorker(){
       this.checkedItems.forEach(element =>{
       axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
@@ -318,6 +383,8 @@ export default {
       })
 
     // Axios update
+
+
       }).catch((err)=>{
         console.log(err);
       })
@@ -328,6 +395,49 @@ export default {
         this.modalAssign = false;
         this.$swal('Saved','','success');
         // loadTask(taskStats.value)
+
+    },
+    cobadong(){
+      this.checkedItems.forEach(element=> {
+        this.tskHistory[element] = [{status:'created by crone'},{status:'assigned by lina'}]
+      })
+      console.log(this.tskHistory);
+    },
+    additem(history){
+      // console.log(event.target.checked);
+      // console.log(event.target.value);
+      console.log(this.checkedItems);
+      // console.log(history[0]);
+      // this.tskHistory[this.checkedItems[0]] = history[0];
+      // console.log(this.tskHistory);
+      // this.tskHistory[checkedItems]
+      // if(event.target.checked)
+      // {
+      //   this.sel.push(event.target.value);
+      // } else {
+      //   this.sel.pop();
+      // }
+    },
+    updateWorkers(){
+      console.log(this.sel);
+      this.sel.forEach(element => {
+        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:this.work,taskStatus:'unprocess'},{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then(()=> {
+      }).catch((err)=>{
+        console.log(err);
+      })
+      });
+      this.$swal('Saved','','success');
+       router.go()
+      // document.querySelectorAll('input[type="checkbox]').forEach((item)=>{
+      //         item.checked = false;
+      // });
+
+
     },
      clearAssign() {
       this.$swal({title:'Are Sure ?',icon:'info',showCancelButton:true,focusConfirm:false,confirmButtonText:'Yes, Sure',cancelButtonText:'Cancel'})
@@ -357,15 +467,34 @@ export default {
       })
 
     // Axios update
+
+
       }).catch((err)=>{
         console.log(err);
       })
 
 
+      //   axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigne',taskStatus:'unprocess'},{
+      //   headers: {
+      //     Authorization:window.localStorage.getItem('accessToken')
+      //   }
+      // })
+      // .then(()=> {
+      //  //
+      // }).catch((err)=>{
+      //   console.log(err);
+      // })
+
       });
         console.log('success update');
         this.checkedItems = [];
+        // this.modalAssign = false;
         this.$swal('Saved','','success');
+          // router.go()
+            // document.querySelectorAll('input[type="checkbox]').forEach((item)=>{
+            //   item.checked = false;
+            // });
+
         }
       })
     },
@@ -390,6 +519,7 @@ export default {
             document.querySelectorAll('input[type="checkbox]').forEach((item)=>{
               item.checked = false;
             });
+
         }
       })
     },
@@ -443,16 +573,51 @@ export default {
       this.$swal('Saved','','success');
         }
       })
-    }
+    },
+    procs(){
+      this.$swal({title:'Are you sure ?',icon:'info',showCancelButton:true,focusConfirm:false,confirmButtonText:'Process',cancelButtonText:'Cancel'})
+      .then((result)=>{
+        if(result.isConfirmed) {
+        // Update data
+        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${this._id}`,{taskStatus:'processed'},{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+        })
+          .then(()=> {
+            //
+          }).catch((err)=>{
+            console.log(err);
+        });
+
+            // Feedback
+            this.$swal('Saved','','success');
+            router.go()
+            document.querySelectorAll('input[type="checkbox]').forEach((item)=>{
+              item.checked = false;
+            });
+
+        }
+      })
+    },
+    change(){
+      alert('ok');
+      // let check = document.getElementById("taskchekbox");
+    },
+
+  },
+  watch() {
+    loadTask(taskStats.value)
   },
   setup() {
+    // let taskStat = ref([]);
     let searchTitt = ref([]);
     let taskStats = ref([]);
     let tasks = ref([]);
     let selected = ref([]);
     let users = ref({});
     let countData = ref([]);
-    let page = ref(1);
+    let page = ref();
     let worker = reactive({
       username:''
     });
@@ -467,66 +632,28 @@ export default {
 
 
     onMounted(()=> {
-    var acknowledgedcreate = [];
 
         socket.on('tasks created', (message) => {
-         if(!~acknowledgedcreate.indexOf(message._id)){
+        // console.log('New message created', message);
+           loadTask(taskStats)
 
-            // add to array of acknowledged events
-            acknowledgedcreate.unshift(message._id);
+        // console.log(tasks);
 
-            // prevent array from growing to large
-            if(acknowledgedcreate.length > 20){
-                acknowledgedcreate.length = 20;
-            }
-
-            console.log('acknowledged',acknowledgedcreate);
-            console.log('tasksbro',message);
-            console.log('title',message.taskTittle);
-            // alert('oke');
-            // if(message.taskAssigne == window.localStorage.getItem('username'))
-            // {
-            loadTask(taskStats.value,searchTitt.value,page.value)
-            // if(message.taskStatus=='done'){
-            //     showToast('Transfer Berhasil ',message.taskTittle);
-            // }else{
-            //     showToast('Task Baru ',message.taskTittle);
-            // }
-            // }
-        }
       });
         socket.on('tasks updated', (message) => {
-             loadTask(taskStats.value,searchTitt.value,page.value)
+        // console.log('New message updated', message);
+             loadTask(taskStats.value)
+
+        // console.log(tasks);
+
       });
+        socket.on('tasks patched', (message) => {
+        // console.log('New message patched', message);
+              loadTask(taskStats.value)
 
-    var acknowledged = [];
-    socket.on('tasks patched', (message) => {
 
+        // console.log(tasks);
 
-        if(!~acknowledged.indexOf(message._id)){
-
-            // add to array of acknowledged events
-            acknowledged.unshift(message._id);
-
-            // prevent array from growing to large
-            if(acknowledged.length > 20){
-                acknowledged.length = 20;
-            }
-
-            console.log('acknowledged',acknowledged);
-            console.log('tasksbro',message);
-            console.log('title',message.taskTittle);
-            // alert('oke');
-            // if(message.taskAssigne == window.localStorage.getItem('username'))
-            // {
-            loadTask(taskStats.value,searchTitt.value,page.value)
-            // if(message.taskStatus=='done'){
-            //     showToast('Transfer Berhasil ',message.taskTittle);
-            // }else{
-            //     showToast('Task Baru ',message.taskTittle);
-            // }
-            // }
-        }
       });
       // get data
       loadTask(taskStats.value)
@@ -554,9 +681,43 @@ export default {
       })
       .then(()=> {
         tasks.value.splice(index,1);
+        // router.push({
+        //   name:'Users'
+        // })
       }).catch((err)=>{
         console.log(err.response);
       })
+    }
+
+
+    // select function
+    function getSelect(event) {
+      // console.log(event.target.checked);
+      // if(event.target.checked == false){
+      //   selected.value.splice(1)
+      // }
+        this.sel.push(event.target.value)
+      // selected.value.push(event.target.value);
+    }
+    //assigning function
+    function assigning() {
+      console.log(worker.username);
+
+     for(let i in this.sel){
+       console.log(this.sel[i]);
+      // axios.patch(`http://localhost:3030/tasks/${selected[i]}`,{taskAssigne:worker.username},{
+      //   headers: {
+      //     Authorization:window.localStorage.getItem('accessToken')
+      //   }
+      // })
+      // .then(()=> {
+      //   router.push({
+      //     name:'Tasks'
+      //   })
+      // }).catch((err)=>{
+      //   console.log(err);
+      // })
+     }
     }
     function cek(status) {
       if(status == 'processed')
@@ -571,17 +732,14 @@ export default {
         return 'true';
       }
     }
-    function loadTask(taskStat,searchTit,pages) {
-      let status = (taskStat != '') ? taskStat : 'unprocess';
-      let skip = (pages > 1) ? (pages-1) * 100 : 0;
-        console.log(status)
-        axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
+    function loadTask(taskStat,searchTit,page) {
+    console.log(taskStat)
+    if(taskStats.value.length == 0) {
+
+      console.log(true);
+          axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=unprocess`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
-        },
-        params: {
-          taskStatus:status,
-          $skip:skip
         }
       })
       .then((result) => {
@@ -591,6 +749,158 @@ export default {
       }).catch((err) =>{
         console.log(err.response);
       });
+      // jika search title
+      if(searchTitt.value.length!=0){
+         console.log('hake');
+          axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=unprocess&taskTittle=`+searchTit,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((result) => {
+        // console.log("hasil",result)
+        tasks.value = result.data;
+        countData.value = result.data.data;
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+
+      }
+
+      //jika ada pagination
+      if(page > 0) {
+
+        let skip = (page > 1) ? page * 100 : 0;
+      axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=unprocess&$skip=${skip}`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((result) => {
+        // console.log("hasil",result)
+        // console.log(result.data.data);
+        tasks.value = result.data;
+        countData.value = result.data.data;
+
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+
+      }
+
+    } else {
+      console.log(false)
+      if(taskStat=='unassigned')
+      {
+
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=unassigne`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((result) => {
+        console.log(result)
+        tasks.value = result.data;
+        countData.value = result.data.data;
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+
+       // jika search title
+      if(searchTitt.value.length!=0){
+         console.log('hake');
+          axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=`+taskStat+`&taskTittle=`+searchTit,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((result) => {
+        console.log("hasil",result)
+        tasks.value = result.data;
+        countData.value = result.data.data;
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+
+      }
+       //jika ada pagination
+      if(page > 0) {
+        // let skip = page * 100;
+        let skip = (page > 1) ? page * 100 : 0;
+      axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=unassigne&$skip=${skip}`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((result) => {
+        // console.log("hasil",result)
+        // console.log(result.data.data);
+        tasks.value = result.data;
+        countData.value = result.data.data;
+
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+
+      }
+
+      } else {
+
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=`+taskStat,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((result) => {
+        console.log(result)
+        tasks.value = result.data;
+        countData.value = result.data.data;
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+
+       // jika search title
+      if(searchTitt.value.length!=0){
+         console.log('hake');
+          axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=`+taskStat+`&taskTittle=`+searchTit,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((result) => {
+        console.log("hasil",result)
+        tasks.value = result.data;
+        countData.value = result.data.data;
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+      }
+
+        //jika ada pagination
+      if(page > 0) {
+        // let skip = page * 100;
+        let skip = (page > 1) ? page * 100 : 0;
+      axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=`+taskStat+`&$skip=${skip}`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((result) => {
+        // console.log("hasil",result)
+        // console.log(result.data.data);
+        tasks.value = result.data;
+        countData.value = result.data.data;
+
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+
+      }
+
+
+
+      }
+    }
     }
 
     function filterSelect(e){
@@ -600,6 +910,21 @@ export default {
        taskStats.value = e.target.options[e.target.selectedIndex].value
 
        loadTask(taskStats.value)
+      // console.log(taskStats.value);
+      //  console.log(statFilter);
+      //  console.log(taskStats.value);
+      //   axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskStatus=${filter}`,{
+      //   headers: {
+      //     Authorization:window.localStorage.getItem('accessToken')
+      //   }
+      // })
+      // .then((result) => {
+      //   // console.log(result.data)
+      //   tasks.value = result.data;
+      // countData.value = result.data.data;
+      // }).catch((err) =>{
+      //   console.log(err.response);
+      // });
       }
     }
     function searchTitle(e) {
@@ -618,6 +943,19 @@ export default {
       console.log(e.target.text);
       console.log('valuepage',page.value);
       let pg = e.target.text;
+      // let skip = parseInt(pg) * 100;
+      // axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=unassigne&$skip=${skip}`,{
+      //   headers: {
+      //     Authorization:window.localStorage.getItem('accessToken')
+      //   }
+      // })
+      // .then((result) => {
+      //   // console.log("hasil",result)
+      //   console.log(result.data.data);
+
+      // }).catch((err) =>{
+      //   console.log(err.response);
+      // });
 
     }
     function checkPagination(item) {
@@ -628,21 +966,14 @@ export default {
           return false
         }
     }
-    function nextPage() {
-      page.value += 1;
-      loadTask(taskStats.value,searchTitt.value,page.value)
-    }
-    function previousPage() {
-      page.value -=1;
-      loadTask(taskStats.value,searchTitt.value,page.value)
-
-    }
 
     return {
       tasks,
       destroy,
+      getSelect,
       selected,
       users,
+      assigning,
       worker,
       tsk,
       cek,
@@ -653,9 +984,7 @@ export default {
       searchTitle,
       countData,
       getPage,
-      checkPagination,
-      nextPage,
-      previousPage
+      checkPagination
     }
   }
 }

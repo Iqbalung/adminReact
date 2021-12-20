@@ -86,6 +86,9 @@ import {
   cilSearch,
   cilAperture,
   cilWallet,
+  cilApps,
+  cilClearAll,
+  cilCloudUpload
 } from '@coreui/icons'
 
 export const iconsSet = Object.assign(
@@ -151,6 +154,9 @@ export const iconsSet = Object.assign(
     cilSearch,
     cilAperture,
     cilWallet,
+    cilApps,
+    cilClearAll,
+    cilCloudUpload
   },
   {
     cifUs,

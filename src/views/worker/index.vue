@@ -17,7 +17,7 @@
         </button>
         </div>
         <div>
-      <CFormSelect class="d-d-inline-block" style="width:140px" @change="getFilter">
+      <CFormSelect class="d-inline-block" style="width:140px" @change="getFilter">
           <option value="unprocess">Unprocess</option>
           <option value="processed">Processed</option>
           <option value="done">Done</option>
@@ -54,15 +54,15 @@
                                 </td> -->
                                 <td class="col-5">
                                   <div>
-                                    {{ item.taskTittle.substring(0,30) +' '}}
+                                    {{ item.taskTittle +' '}}
                                     <!-- <button class="bg-dark btn-small m-0 p-0">
                                       <CIcon class="text-white m-0 p-0" name="cil-clipboard"/>
                                     </button> -->
                                     <CTooltip content="Copy Account Number And Amount!" placement="right">
                                       <template #toggler="{ on }">
-                                    <CBadge class="rounded-full d-inline-block p-0" v-on="on" color="dark" @click="copyRek(item.taskData.account_number,item.taskData.amount)">
+                                    <CButton size="sm" class="rounded-full d-inline-block p-0" v-on="on" color="info" @click="copyRek(item.taskData.account_number,item.taskData.amount)">
                                       <CIcon class="text-white" name="cil-wallet"/>
-                                    </CBadge>
+                                    </CButton>
                                       </template>
                                     </CTooltip>
                                     <!-- {{ ' ' }} -->
@@ -87,26 +87,27 @@
                                   </div>
                                 </td>
                                 <td class="col-2 text-center">
-                                  <div v-if="item.taskStatus!='processed'" class="d-d-inline-block p-0 m-0">
-                                    <CBadge class="me-1 rounded-full p-0" color="dark" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus)">
-                                      <CIcon class="text-white" name="cil-aperture"/>
-                                    </CBadge>
-                                    <CBadge class="rounded-full d-inline-block p-0" color="secondary" @click="showHistory(item.taskHistory)">
-                                      <CIcon class="text-white" name="cil-clipboard"/>
-                                    </CBadge>
+                                  <div v-if="item.taskStatus!='processed'" class="d-inline-block p-0 m-0">
+                                    <CButton size="sm" class="me-1 rounded-full p-0" color="primary" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus)">
+                                      <CIcon class="text-white" name="cil-cloud-upload"/>
+                                    </CButton>
+                                    <CButton size="sm" class="rounded-full p-0" color="success" @click="showHistory(item.taskHistory)">
+                                      <CIcon class="text-white" name="cil-clear-all"/>
+                                    </CButton>
                                     </div>
                                     <div v-if="item.taskStatus=='processed'" class="d-inline-block p-0 m-0">
-                                      <CBadge class="me-1 rounded-full p-0" color="light">
-                                      <CIcon class="text-dark" name="cil-aperture"/>
-                                      </CBadge>
-                                      <CBadge class="rounded-full d-inline-block p-0" color="secondary" @click="showHistory(item.taskHistory)">
-                                      <CIcon class="text-white" name="cil-clipboard"/>
-                                      </CBadge>
+                                      <CButton class="me-1 rounded-full p-0" color="light">
+                                      <CIcon class="text-dark" name="cil-cloud-upload"/>
+                                      </CButton>
+                                      <CButton class="rounded-full d-inline-block p-0" color="success" @click="showHistory(item.taskHistory)">
+                                      <CIcon class="text-white" name="cil-clear-all"/>
+                                      </CButton>
                                   </div>
                               </td>
                             </tr>
                         </tbody>
                     </table>
+
                 </div><!-- End -->
       </CCardBody>
 </CCard>
@@ -218,34 +219,31 @@
 
 <style>
 .table-fixed tbody {
-    height: 300px;
-    overflow-y: auto;
-    width: 100%;
-    overflow: auto;
-}
-.table-fixed thead {
+  height: 300px;
+  overflow-y: auto;
   width: 100%;
-  overflow: auto;
 }
 
 .table-fixed thead,
 .table-fixed tbody,
 .table-fixed tr,
-.table-fixed td,
 .table-fixed th {
-    display: block;
+  display: block;
 }
 
 .table-fixed tbody td,
 .table-fixed tbody th,
 .table-fixed thead > tr > th {
-    float: left;
-    position: relative;
+  float: left;
+  position: relative;
 }
-.table-fixed thead > tr > th ::after {
-   content: '';
-        clear: both;
-        display: block;
+
+
+.table-fixed tbody th::after,
+.table-fixed thead > tr > th::after {
+  content: '';
+  clear: both;
+  display: block;
 }
 /* timeline */
 .timeline-area {
@@ -322,6 +320,7 @@ export default {
         taskCreatedBy:'',
         selectedTask : [],
         history: [],
+
         // toasts:[]
     }
   },
@@ -489,7 +488,7 @@ export default {
         if(message.taskAssigne == window.localStorage.getItem('username'))
         {
           loadTask();
-          
+
         }
         //loadTask();
         // console.log(tasks);
@@ -534,8 +533,8 @@ export default {
             // handle once per event
         }
         // console.log('New message patched', message);
-        
-        
+
+
 
       });
         // this.methods.showToast();
