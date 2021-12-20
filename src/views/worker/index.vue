@@ -486,8 +486,12 @@ export default {
       // console.log(tasks.value.length);
         socket.on('tasks created', (message) => {
         // console.log('New message created', message);
-
-        loadTask();
+        if(message.taskAssigne == window.localStorage.getItem('username'))
+        {
+          loadTask();
+          
+        }
+        //loadTask();
         // console.log(tasks);
 
       });
@@ -500,13 +504,18 @@ export default {
       });
         socket.on('tasks patched', (message) => {
         // console.log('New message patched', message);
-        loadTask();
+        
         console.log('tasksbro',message);
         console.log('title',message.taskTittle);
         // alert('oke');
         if(message.taskAssigne == window.localStorage.getItem('username'))
         {
-          showToast('Task Update',message.taskTittle);
+          loadTask();
+          if(message.taskStatus=='done'){
+            showToast('Transfer Berhasil ',message.taskTittle);
+          }else{
+            showToast('Task Baru ',message.taskTittle);
+          }
         }
 
       });
@@ -546,11 +555,11 @@ export default {
         return 'true';
       }
     }
-    function loadTask(filter) {
+    async function loadTask(filter) {
        if(selectedFilter.value.length === 0)
        {
         //  console.log('ora ono filter')
-        axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=${window.localStorage.username}&taskStatus=unprocess`,{
+        await axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=${window.localStorage.username}&taskStatus=unprocess`,{
           headers: {
             Authorization:window.localStorage.getItem('accessToken')
           }
@@ -564,7 +573,7 @@ export default {
 
        } else {
         //  console.log('ono filter bro');
-        axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=${window.localStorage.username}&taskStatus=${filter}`,{
+        await axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=${window.localStorage.username}&taskStatus=${filter}`,{
           headers: {
             Authorization:window.localStorage.getItem('accessToken')
           }
