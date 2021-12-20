@@ -502,21 +502,40 @@ export default {
         // console.log(tasks);
 
       });
+
+      var acknowledged = [];
         socket.on('tasks patched', (message) => {
+
+
+        if(!~acknowledged.indexOf(message._id)){
+
+            // add to array of acknowledged events
+            acknowledged.unshift(message._id);
+
+            // prevent array from growing to large
+            if(acknowledged.length > 20){
+                acknowledged.length = 20;
+            }
+
+            console.log('acknowledged',acknowledged);
+            console.log('tasksbro',message);
+            console.log('title',message.taskTittle);
+            // alert('oke');
+            if(message.taskAssigne == window.localStorage.getItem('username'))
+            {
+            loadTask();
+            if(message.taskStatus=='done'){
+                showToast('Transfer Berhasil ',message.taskTittle);
+            }else{
+                showToast('Task Baru ',message.taskTittle);
+            }
+            }
+
+            // handle once per event
+        }
         // console.log('New message patched', message);
         
-        console.log('tasksbro',message);
-        console.log('title',message.taskTittle);
-        // alert('oke');
-        if(message.taskAssigne == window.localStorage.getItem('username'))
-        {
-          loadTask();
-          if(message.taskStatus=='done'){
-            showToast('Transfer Berhasil ',message.taskTittle);
-          }else{
-            showToast('Task Baru ',message.taskTittle);
-          }
-        }
+        
 
       });
         // this.methods.showToast();
@@ -555,17 +574,17 @@ export default {
         return 'true';
       }
     }
-    async function loadTask(filter) {
+    function loadTask(filter) {
        if(selectedFilter.value.length === 0)
        {
         //  console.log('ora ono filter')
-        await axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=${window.localStorage.username}&taskStatus=unprocess`,{
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=${window.localStorage.username}&taskStatus=unprocess`,{
           headers: {
             Authorization:window.localStorage.getItem('accessToken')
           }
         })
         .then((result) => {
-          console.log(result.data.data)
+          console.log(result.data)
           tasks.value = result.data;
         }).catch((err) =>{
           console.log(err.response);
@@ -573,13 +592,13 @@ export default {
 
        } else {
         //  console.log('ono filter bro');
-        await axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=${window.localStorage.username}&taskStatus=${filter}`,{
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=${window.localStorage.username}&taskStatus=${filter}`,{
           headers: {
             Authorization:window.localStorage.getItem('accessToken')
           }
         })
         .then((result) => {
-          console.log(result.data.data)
+          console.log(result.data)
           tasks.value = result.data;
         }).catch((err) =>{
           console.log(err.response);
