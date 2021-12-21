@@ -1,10 +1,9 @@
 <template>
   <div>
     <CCard class="mb-4">
-      <CCardHeader>
-        Task List
-      </CCardHeader>
+      <CCardHeader>Task List</CCardHeader>
     <CCardBody>
+
       <div class="d-flex justify-content-end">
       <!-- <div>
       <CButton color="secondary" class="text-white" @click="()=>{visibleLiveDemo=true}"><CIcon class="text-white" name="cil-clipboard"/> Tasks History</CButton>
@@ -327,7 +326,6 @@ export default {
         taskCreatedBy:'',
         selectedTask : [],
         history: [],
-        perPage:100
 
         // toasts:[]
     }
@@ -487,8 +485,6 @@ export default {
     let tasks = ref([]);
     let selectedFilter = ref([]);
     let toasts = ref([]);
-    let page = ref(1);
-
 
     onMounted(()=> {
       console.log(tasks);
@@ -583,18 +579,13 @@ export default {
         return 'true';
       }
     }
-    function loadTask(filter,pages) {
-       //  console.log('ora ono filter')
-      let status = (filter != '') ? filter : 'unprocess';
-      let skip = (pages > 1) ? (pages-1) * 100 : 0;
-        axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
+    function loadTask(filter,page) {
+       if(selectedFilter.value.length === 0)
+       {
+        //  console.log('ora ono filter')
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=${window.localStorage.username}&taskStatus=unprocess`,{
           headers: {
             Authorization:window.localStorage.getItem('accessToken')
-          },
-          params: {
-            taskAssigne: window.localStorage.getItem('username'),
-            taskStatus:status,
-            $skip:skip
           }
         })
         .then((result) => {
@@ -604,9 +595,22 @@ export default {
           console.log(err.response);
         });
 
+       } else {
+        //  console.log('ono filter bro');
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks?taskAssigne=${window.localStorage.username}&taskStatus=${filter}`,{
+          headers: {
+            Authorization:window.localStorage.getItem('accessToken')
+          }
+        })
+        .then((result) => {
+          console.log(result.data)
+          tasks.value = result.data;
+        }).catch((err) =>{
+          console.log(err.response);
+        });
+       }
 
-
-    }
+       }
 
     async function getFilter(e) {
       if(e.target.options.selectedIndex > -1){

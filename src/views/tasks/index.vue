@@ -5,21 +5,27 @@
       <CCardBody>
       <div class="d-flex justify-content-between align-items-center">
       <div>
-      <CButton color="danger" class="text-white me-2" @click="clearAssign()">
+      <CButton v-show="role=='admin'" color="danger" class="text-white me-2" @click="clearAssign()">
           <CIcon class="text-white" name="cil-trash"/> Unnasigned
       </CButton>
 
-      <CButton color="dark" class="me-2" @click="() => { modalAssign=true}">
+      <CButton v-show="role=='admin'" color="dark" class="me-2" @click="() => { modalAssign=true}">
           <CIcon class="text-white" name="cil-touch-app"/> Assign Task
       </CButton>
       </div>
     <div class="d-flex align-items-center">
-      <div class="me-1">
+      <!-- <div class="me-1">
           Total
           <CBadge class="d-inline-block rounded-circle" color="dark">{{ countData.length }}</CBadge>
+        </div> -->
+        <div class="me-2">
+          <button class="btn btn-primary" type="button" disabled>
+            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" style="margin-right:30px;"></span>
+            <span class="sr-only">  {{ tasks.total }}</span>
+        </button>
         </div>
       <div class="me-1">
-      <CFormInput type="text" id="search" @keyup="() => {visibleLiveDemo = true}" placeholder="search"/>
+      <CFormInput type="text" id="search" @keypress="searchTitle" placeholder="search"/>
       </div>
     <div class="me-1">
       <CFormSelect
@@ -35,33 +41,58 @@
     </div>
       </div>
             <div class="table-responsive mt-3">
-                    <table class="table table-fixed">
+                    <table class="table table-responsive table-fixed">
                         <thead>
                             <tr>
-                                <th scope="col" class="col-1"><CIcon name="cil-people" /></th>
-                                <th scope="col" class="col-2">Assigned</th>
-                                <th scope="col" class="col-5">Task Title</th>
+                                <th v-show="role=='admin'" scope="col" class="col-1"><CIcon name="cil-people" /></th>
+                                <th v-show="role=='admin'" scope="col" class="col-2">Assigned</th>
+                                <th v-show="role=='admin'" scope="col" class="col-3">Task Title</th>
+                                <th v-show="role!='admin'" scope="col" class="col-6">Task Title</th>
+                                <th scope="col" class="col-2">Amount</th>
                                 <th scope="col" class="col-2">Status</th>
                                 <th scope="col" class="col-2 text-center">Detail Task</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(item,index) in tasks.data" :key="index" :class="'table-'+cek(item.taskStatus)">
-                                <td scope="row" class="col-1">
+                            <tr v-for="(item,index) in tasks.data" :key="index" :class="'table-responsive '+'table-'+cek(item.taskStatus)">
+                                <td v-show="role=='admin'" scope="row" class="col-1">
                                   <div v-if="item.taskStatus!='processed'">
-                                    <input type="checkbox" v-model="checkedItems" :value="item._id" @change="additem(item.taskHistory)">
+                                    <input type="checkbox" v-model="checkedItems" :value="item._id">
                                   <!-- <CFormCheck  id="item._id" v-model="checkedItems" value="item.id"/> -->
                                   </div>
                                   <div v-if="item.taskStatus=='processed'">
                                     <CFormCheck disabled/>
                                   </div>
                                 </td>
-                                <td class="col-2">{{ item.taskAssigne }}</td>
-                                <td class="col-5 overflow-auto"> <div class="overflow-auto">{{ item.taskTittle }}</div></td>
+                                <td v-show="role=='admin'" class="col-2">{{ item.taskAssigne }}</td>
+                                <td v-show="role=='admin'" class="col-3 overflow-auto">
+                                  <div class="overflow-auto">{{ item.taskTittle.substring(0,23) }}
+                                  <CTooltip content="Copy Account Number And Amount!" placement="right">
+                                    <template #toggler="{ on }">
+                                    <CButton size="sm" class="rounded-full d-inline-block p-0" v-on="on" color="warning" @click="copyRek(item.taskData.account_number,item.taskData.amount)">
+                                      <CIcon class="text-white" name="cil-wallet"/>
+                                    </CButton>
+                                      </template>
+                                    </CTooltip>
+                                  </div>
+                                </td>
+                                <td v-show="role!='admin'" class="col-6 overflow-auto">
+                                  <div class="overflow-auto">
+                                    {{ item.taskTittle }}
+                                    <CTooltip content="Copy Account Number And Amount!" placement="right">
+                                    <template #toggler="{ on }">
+                                    <CButton size="sm" class="rounded-full d-inline-block p-0" v-on="on" color="warning" @click="copyRek(item.taskData.account_number,item.taskData.amount)">
+                                      <CIcon class="text-white" name="cil-wallet"/>
+                                    </CButton>
+                                      </template>
+                                    </CTooltip>
+                                  </div>
+                                </td>
+                                <td class="col-2">{{ item.taskData.amount }}</td>
                                 <td class="col-2">{{ item.taskStatus }}</td>
                                 <td class="col-2 text-center">
                                   <div v-if="item.taskStatus!='processed'">
-                                    <CBadge class="me-2 rounded-full" color="dark" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus)">
+                                    <CBadge class="me-2 rounded-full" color="dark" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
                                       <CIcon class="text-white" name="cil-aperture"/>
                                     </CBadge>
                                     </div>
@@ -77,11 +108,18 @@
       <!-- </div> -->
           <CPagination size="sm" aria-label="Page navigation example">
               <CPaginationItem @click="previousPage">Previous</CPaginationItem>
-              <CPaginationItem :active="checkPagination(item)" v-for="(item,index) in Math.ceil(tasks.total/perPage)" :key="index" @click="getPage">
+              <CPaginationItem :active="checkPagination(item)" v-for="(item,index) in getPaginate" :key="index" @click="getPage">
               {{ item }}
               </CPaginationItem>
               <CPaginationItem @click="nextPage">Next</CPaginationItem>
           </CPagination>
+          <br>
+      <!-- <b-pagination
+      v-model="currentPage"
+      :total-rows="400"
+      :per-page="30"
+      aria-controls=""
+    ></b-pagination> -->
       </CCardBody>
     </CCard>
 
@@ -188,6 +226,12 @@
       <p>{{ taskExpiredTime }}</p>
       <p class="mb-0 fw-bold">Task Status :</p>
       <p>{{ taskStatus }}</p>
+      <p class="mb-0 fw-bold">Task History :</p>
+      <p v-for="(item,index) in taskHistory" :key="index">
+        {{ item.updatedAt  }}
+        <br/>
+        {{ item.status }}
+      </p>
       </div>
       <div>
       <p class="mb-0 fw-bold">Account Number :</p>
@@ -213,6 +257,19 @@
     </CModalFooter>
   </CModal>
   <!-- Modal Detail Task -->
+   <!-- Toast Task -->
+   <CToaster placement="top-end">
+    <CToast v-for="(toast, index) in toasts" :key="index">
+      <CToastHeader closeButton>
+      <span class="me-auto fw-bold">{{toast.title}}</span>
+      <small>7 min ago</small>
+      </CToastHeader>
+      <CToastBody>
+        {{ toast.content }}
+      </CToastBody>
+    </CToast>
+  </CToaster>
+  <!-- Toast Task -->
   </div>
 </template>
 
@@ -261,6 +318,8 @@
 import router from '../../router'
 import axios from 'axios'
 import {reactive,onMounted,ref} from 'vue'
+import useClipboard from 'vue-clipboard3'
+
 export default {
   name: 'TaskList',
   data() {
@@ -283,6 +342,7 @@ export default {
         taskExpiredTime:'',
         taskStatus:'',
         taskCreatedBy:'',
+        taskHistory : [],
         sel: [],
         work:'',
         taskStat:'',
@@ -290,9 +350,26 @@ export default {
         checkedItems: [],
         tskHistory: {},
         perPage: 100,
+        role : window.localStorage.getItem('role'),
+        currentPage:1
+    }
+  },
+  computed: {
+    getPaginate(){
+      return Math.ceil(this.tasks.total/this.perPage)
     }
   },
   methods: {
+    copyRek(norek,amount){
+       let { toClipboard }=useClipboard();
+       toClipboard(`Account Number : ${norek}; Amount : ${amount}`);
+       console.log('copied');
+    },
+    copyAmt(amount) {
+      let { toClipboard }=useClipboard();
+       toClipboard(`Amount : ${amount}`);
+       console.log('copied');
+    },
     updateWorker(){
       this.checkedItems.forEach(element =>{
       axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
@@ -341,7 +418,7 @@ export default {
         }
       })
       .then((results)=> {
-        let taskh = results.data.taskHistory[0];
+        let taskh = results.data.data.taskHistory[0];
         // taskh.push({status: `assigned by lina ${window.localStorage.getItem('username')}}`, updatedAt:Date.now})
         console.log(taskh);
     // Axios update
@@ -393,7 +470,7 @@ export default {
         }
       })
     },
-    process(account_number,anRekening,amount,mutation_id,bank_type,_id,taskAssigne,taskTittle,taskRefNumber,taskExpiredTime,taskCreatedBy,taskStatus)
+    process(account_number,anRekening,amount,mutation_id,bank_type,_id,taskAssigne,taskTittle,taskRefNumber,taskExpiredTime,taskCreatedBy,taskStatus,taskHistory)
     {
       this.modalDetail = true;
       this.account_number = account_number;
@@ -408,6 +485,9 @@ export default {
       this.taskExpiredTime=taskExpiredTime;
       this.taskCreatedBy=taskCreatedBy;
       this.taskStatus = taskStatus;
+      this.taskHistory = taskHistory;
+      console.log(this.taskHistory);
+      console.log(this.mutation_id);
     },
     proc(){
       this.$swal({title:'Are you sure ?',icon:'info',showCancelButton:true,focusConfirm:false,confirmButtonText:'Process',cancelButtonText:'Cancel'})
@@ -421,7 +501,7 @@ export default {
       })
       .then((results)=> {
         let date = new Date();
-        let taskh = results.data.taskHistory;
+        let taskh = results.data.data.taskHistory;
         taskh.push({status: `task processed by ${window.localStorage.getItem('username')}`, updatedAt:date.toISOString()})
         console.log(taskh);
     // Axios update
@@ -447,6 +527,7 @@ export default {
   },
   setup() {
     let searchTitt = ref([]);
+    let toasts = ref([]);
     let taskStats = ref([]);
     let tasks = ref([]);
     let selected = ref([]);
@@ -480,19 +561,24 @@ export default {
                 acknowledgedcreate.length = 20;
             }
 
-            console.log('acknowledged',acknowledgedcreate);
-            console.log('tasksbro',message);
-            console.log('title',message.taskTittle);
+            // console.log('acknowledged',acknowledgedcreate);
+            // console.log('tasksbro',message);
+            // console.log('title',message.taskTittle);
             // alert('oke');
-            // if(message.taskAssigne == window.localStorage.getItem('username'))
-            // {
-            loadTask(taskStats.value,searchTitt.value,page.value)
-            // if(message.taskStatus=='done'){
-            //     showToast('Transfer Berhasil ',message.taskTittle);
-            // }else{
-            //     showToast('Task Baru ',message.taskTittle);
-            // }
-            // }
+            loadTask(taskStats.value,searchTitt.value,page.value);
+            // console.log('role user',message.taskAssigne)
+          if(message.taskAssigne == window.localStorage.getItem('username'))
+            {
+              if(message.taskStatus=='done'){
+                showToast('Transfer Berhasil ',message.taskTittle);
+            // loadTask(taskStats.value,searchTitt.value,page.value);
+
+            }else{
+              showToast('Task Baru ',message.taskTittle);
+            // loadTask(taskStats.value,searchTitt.value,page.value);
+
+            }
+            }
         }
       });
         socket.on('tasks updated', (message) => {
@@ -513,24 +599,23 @@ export default {
                 acknowledged.length = 20;
             }
 
-            console.log('acknowledged',acknowledged);
-            console.log('tasksbro',message);
-            console.log('title',message.taskTittle);
+            // console.log('acknowledged',acknowledged);
+            // console.log('tasksbro',message);
+            // console.log('title',message.taskTittle);
             // alert('oke');
-            // if(message.taskAssigne == window.localStorage.getItem('username'))
-            // {
-            loadTask(taskStats.value,searchTitt.value,page.value)
-            // if(message.taskStatus=='done'){
-            //     showToast('Transfer Berhasil ',message.taskTittle);
-            // }else{
-            //     showToast('Task Baru ',message.taskTittle);
-            // }
-            // }
+              loadTask(taskStats.value,searchTitt.value,page.value);
+            if(message.taskAssigne == window.localStorage.getItem('username'))
+            {
+              if(message.taskStatus=='done'){
+                showToast('Transfer Berhasil ',message.taskTittle);
+            }else{
+              showToast('Task Baru ',message.taskTittle);
+            }
+            }
         }
       });
       // get data
-      loadTask(taskStats.value)
-
+      loadTask(taskStats.value,searchTitt.value,page.value);
       // get worker
       axios.get(`${process.env.VUE_APP_URL_API}/users?role=worker`,{
         headers: {
@@ -572,17 +657,32 @@ export default {
       }
     }
     function loadTask(taskStat,searchTit,pages) {
+      console.log(searchTitt);
       let status = (taskStat != '') ? taskStat : 'unprocess';
+      let taskAssigne =`${window.localStorage.getItem('username')}`;
       let skip = (pages > 1) ? (pages-1) * 100 : 0;
+      let param_admin = {
+        taskStatus:status,
+        $skip:skip,
+        $search: searchTit
+
+      }
+      let param_users = {
+          taskStatus:status,
+          $skip:skip,
+          taskAssigne:taskAssigne,
+          $search: searchTit
+
+      }
+      let params = (window.localStorage.getItem('role')=='admin') ? param_admin : param_users;
+        console.log(params)
+        console.log(taskAssigne);
         console.log(status)
         axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         },
-        params: {
-          taskStatus:status,
-          $skip:skip
-        }
+        params: params
       })
       .then((result) => {
         console.log("hasil",result)
@@ -604,11 +704,18 @@ export default {
     }
     function searchTitle(e) {
       searchTitt.value = e.target.value
+      console.log(searchTitt.value);
       // console.log(searchTit.value);
-      loadTask(taskStats.value,searchTitt.value)
+      loadTask(taskStats.value,searchTitt.value,page.value);
 
     }
-
+     function showToast(title,content){
+       toasts.value.push({
+         title:title,
+         content:content
+       });
+       console.log(toasts.value);
+    }
   function getPage(e){
       console.log(e.target);
       console.log(e.target.value)
@@ -655,7 +762,8 @@ export default {
       getPage,
       checkPagination,
       nextPage,
-      previousPage
+      previousPage,
+      toasts
     }
   }
 }

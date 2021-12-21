@@ -37,12 +37,6 @@ const routes = [
                 name:'Login'
               })
             }
-            if(window.localStorage.getItem('role')== 'worker')
-            {
-              return next({
-                name:'Worker'
-              })
-            }
           return next();
           }
         },
