@@ -236,6 +236,7 @@
 .table-fixed tr,
 .table-fixed th {
   display: block;
+  overflow: auto;
 }
 
 .table-fixed tbody td,
