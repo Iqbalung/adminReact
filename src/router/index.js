@@ -54,6 +54,53 @@ const routes = [
           }
         },
         {
+          path:'/bank',
+          name:'Bank Account',
+          component: () => import('@/views/bank_account/index.vue'),
+          beforeEnter:(to,from,next)=> {
+            if(!window.localStorage.getItem('accessToken')) {
+              return next({
+                name:'Login'
+              })
+            }
+            // if(window.localStorage.getItem('role')== 'worker')
+            // {
+            //   return next({
+            //     name:'Profile'
+            //   })
+            // }
+          return next();
+          }
+        },
+        {
+          path:'/bank/create',
+          name:'Create Bank',
+          component: () => import('@/views/bank_account/create.vue')
+          ,
+          beforeEnter:(to,from,next)=> {
+            if(!window.localStorage.getItem('accessToken')) {
+              return next({
+                name:'Login'
+              })
+            }
+          return next();
+          }
+        },
+        {
+          path:'/bank/update/:id',
+          name:'Update Bank',
+          component: () => import('@/views/bank_account/update.vue')
+          ,
+          beforeEnter:(to,from,next)=> {
+            if(!window.localStorage.getItem('accessToken')) {
+              return next({
+                name:'Login'
+              })
+            }
+          return next();
+          }
+        },
+        {
           path:'/profile',
           name:'Profile',
           component:()=>import('@/views/worker/profile.vue'),

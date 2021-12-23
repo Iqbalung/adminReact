@@ -13,12 +13,15 @@ import useClipboard from 'vue-clipboard3';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-vue-3/dist/bootstrap-vue-3.css'
 import BootstrapVue3 from 'bootstrap-vue-3'
+import Datepicker from 'vue3-date-time-picker';
+import 'vue3-date-time-picker/dist/main.css'
 // import clipboardjs from 'clipboard';
 
 
 // const feat = feathers();
 const app = createApp(App)
 // app.use(clipboardjs)
+app.component('Datepicker',Datepicker);
 app.use(BootstrapVue3)
 app.use(useClipboard);
 app.use(store)

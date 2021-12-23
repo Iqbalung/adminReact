@@ -1,3 +1,14 @@
+const bank = {
+  component: 'CNavItem',
+  name: 'Bank',
+  to: '/bank',
+  icon: 'cil-chart-pie',
+};
+
+// const bank_account = {
+//   (this.window.localStorage.getItem('role')== 'admin') ? bank : null;
+// };
+
 export default [
   {
     component: 'CNavItem',
@@ -5,16 +16,23 @@ export default [
     to: '/dashboard',
     icon: 'cil-speedometer',
   },
+  {
+    component: 'CNavItem',
+    name: 'Bank',
+    to: '/bank',
+    icon: 'cil-credit-card',
+  },
   // {
   //     component: 'CNavTitle',
   //     name: 'Tasks',
   // },
-    {
+  {
     component: 'CNavItem',
     name: 'Tasks',
     to: '/tasks',
-    icon: 'cil-chart-pie',
+    icon: 'cil-task',
   },
+
   // {
   //   component: 'CNavTitle',
   //   name: 'Users',

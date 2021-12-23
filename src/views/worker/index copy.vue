@@ -610,7 +610,7 @@ export default {
         });
        }
 
-       }
+    }
 
     async function getFilter(e) {
       if(e.target.options.selectedIndex > -1){

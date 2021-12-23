@@ -1,10 +1,11 @@
 <template>
   <div>
     <CCard class="mb-4 overflow-auto">
-        <CCardHeader>Task List {{ taskStat }}</CCardHeader>
+        <CCardHeader>Task List</CCardHeader>
       <CCardBody>
       <div class="d-flex justify-content-between align-items-center">
-      <div>
+      <div class="d-flex">
+    <div class="me-2">
     <CDropdown v-show="role=='admin'" color="secondary">
       <CDropdownToggle color="dark"> <CIcon class="text-white" name="cil-touch-app"/> Assignment</CDropdownToggle>
       <CDropdownMenu>
@@ -12,6 +13,7 @@
         <CDropdownItem @click="clearAssign()"><CIcon class="text-dark" name="cil-trash"/> Unnasign</CDropdownItem>
       </CDropdownMenu>
     </CDropdown>
+    </div>
       <!-- <CButton v-show="role=='admin'" color="danger" class="text-white me-2" @click="clearAssign()">
           <CIcon class="text-white" name="cil-trash"/> Unnasigned
       </CButton>
@@ -19,6 +21,9 @@
       <CButton v-show="role=='admin'" color="dark" class="me-2" @click="() => { modalAssign=true}">
           <CIcon class="text-white" name="cil-touch-app"/> Assign Task
       </CButton> -->
+        <div>
+          <Datepicker v-model="date" range @closed="pickDate"></Datepicker>
+        </div>
       </div>
     <div class="d-flex align-items-center">
       <!-- <div class="me-1">
@@ -138,6 +143,9 @@
                                       detail
                                   </div>
                               </td>
+                            </tr>
+                            <tr v-show="tasks.total==0" class="border-0">
+                              <td class="col-12 py-3">No records found</td>
                             </tr>
                         </tbody>
                     </table>
@@ -310,6 +318,7 @@
     </CToast>
   </CToaster>
   <!-- Toast Task -->
+  <!-- <CButton color="danger" @click.prevent="play">Show</CButton> -->
   </div>
 </template>
 
@@ -367,6 +376,8 @@ import router from '../../router'
 import axios from 'axios'
 import {reactive,onMounted,ref} from 'vue'
 import useClipboard from 'vue-clipboard3'
+import useSound from 'vue-use-sound'
+import pristine from './pristine.mp3'
 
 export default {
   name: 'TaskList',
@@ -399,7 +410,7 @@ export default {
         tskHistory: {},
         perPage: 100,
         role : window.localStorage.getItem('role'),
-        currentPage:1
+        currentPage:1,
     }
   },
   computed: {
@@ -591,6 +602,7 @@ export default {
     }
   },
   setup() {
+    let date = ref();
     let searchTitt = ref([]);
     let currentPages= ref(1);
     let toasts = ref([]);
@@ -613,6 +625,13 @@ export default {
 
 
     onMounted(()=> {
+
+      // date
+      const startDate = new Date();
+      const endDate = new Date(new Date().setDate(startDate.getDate() + 1));
+      date.value = [startDate, endDate];
+
+      // socket
     var acknowledgedcreate = [];
 
         socket.on('tasks created', (message) => {
@@ -630,7 +649,7 @@ export default {
             // console.log('tasksbro',message);
             // console.log('title',message.taskTittle);
             // alert('oke');
-            loadTask(taskStats.value,searchTitt.value,currentPages.value);
+            loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
             // console.log('role user',message.taskAssigne)
           if(message.taskAssigne == window.localStorage.getItem('username'))
             {
@@ -647,7 +666,7 @@ export default {
         }
       });
         socket.on('tasks updated', (message) => {
-             loadTask(taskStats.value,searchTitt.value,currentPages.value)
+             loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1])
       });
 
     var acknowledged = [];
@@ -668,7 +687,7 @@ export default {
             // console.log('tasksbro',message);
             // console.log('title',message.taskTittle);
             // alert('oke');
-              loadTask(taskStats.value,searchTitt.value,currentPages.value);
+              loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
             if(message.taskAssigne == window.localStorage.getItem('username'))
             {
               console.log('task statusnya',message.taskStatus);
@@ -682,7 +701,7 @@ export default {
         }
       });
       // get data
-      loadTask(taskStats.value,searchTitt.value,currentPages.value);
+      loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
       // get worker
       axios.get(`${process.env.VUE_APP_URL_API}/users?role=worker`,{
         headers: {
@@ -723,18 +742,21 @@ export default {
         return 'true';
       }
     }
-    function loadTask(taskStat,searchTit,pages) {
+    function loadTask(taskStat,searchTit,pages,from, to) {
       console.log(searchTitt);
       let status = (taskStat != '') ? taskStat : 'unprocess';
       let taskAssigne =`${window.localStorage.getItem('username')}`;
       let skip = (pages > 1) ? (pages-1) * 100 : 0;
       let param_admin = {
+        'createdAt[$gte]' : from,
+        'createdAt[$lte]' :to,
         taskStatus:status,
         $skip:skip,
         $search: searchTit
-
       }
       let param_users = {
+          'createdAt[$gte]' : from,
+          'createdAt[$lte]' :to,
           taskStatus:status,
           $skip:skip,
           taskAssigne:taskAssigne,
@@ -773,7 +795,7 @@ export default {
       searchTitt.value = e.target.value
       console.log(searchTitt.value);
       // console.log(searchTit.value);
-      loadTask(taskStats.value,searchTitt.value,currentPages.value);
+      loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
 
     }
      function showToast(title,content,time){
@@ -792,10 +814,46 @@ export default {
        console.log(dt);
     }
     function changePg() {
-    loadTask(taskStats.value,searchTitt.value,currentPages.value)
+    loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1])
+    }
+    function pickDate() {
+    console.log(date.value);
+    loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1])
+      // let from = date.value[0];
+      // let to = date.value[1];
+      // axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
+      //   headers: {
+      //     Authorization:window.localStorage.getItem('accessToken')
+      //   },
+      //   params: {
+      //       'createdAt[$gte]' : from,
+      //       'createdAt[$lte]' :to
+
+      //   }
+      //   // query: {
+      //   //   createdAt : {
+      //   //     $gte:date.value[0],
+      //   //     $lte:date.value[1]
+      //   //   }
+      //   // }
+      // })
+      // .then((result) => {
+      //   console.log("hasil cari tanggal",result)
+      //   // tasks.value = result.data;
+      //   // countData.value = result.data.data;
+      // }).catch((err) =>{
+      //   console.log(err.response);
+      // });
+
+    }
+    function play(){
+      // let notif = new Audio('pristine.mp3');
+      // notif.play();
+      useSound(pristine);
     }
 
     return {
+      date,
       tasks,
       currentPages,
       destroy,
@@ -811,7 +869,9 @@ export default {
       searchTitle,
       countData,
       toasts,
-      changePg
+      changePg,
+      pickDate,
+      play
     }
   }
 }
