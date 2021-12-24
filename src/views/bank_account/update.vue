@@ -1,7 +1,7 @@
 <template>
   <div>
     <CCard class="mb-4">
-      <CCardHeader>Update Bank Account</CCardHeader>
+      <CCardHeader class="bg-white">Update Bank Account</CCardHeader>
       <CCardBody>
         <router-link :to="{ name: 'Bank Account' }">
           <CButton color="primary">

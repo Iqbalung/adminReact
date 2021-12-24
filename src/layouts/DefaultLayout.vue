@@ -12,6 +12,26 @@
     </div>
   </div>
 </template>
+<style>
+body::-webkit-scrollbar {
+  width: 14px;
+  /* width of the entire scrollbar */
+}
+
+body::-webkit-scrollbar-track {
+  background: white;
+  /* color of the tracking area */
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: black;
+  /* color of the scroll thumb */
+  border-radius: 20px;
+  /* roundness of the scroll thumb */
+  border: 3px solid white;
+  /* creates padding around scroll thumb */
+}
+</style>
 <script>
 import { CContainer } from '@coreui/vue'
 import AppFooter from '@/components/AppFooter.vue'

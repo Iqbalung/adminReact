@@ -1,7 +1,7 @@
 <template>
   <div>
     <CCard class="mb-4">
-      <CCardHeader>Create User</CCardHeader>
+      <CCardHeader class="bg-white">Create User</CCardHeader>
       <CCardBody>
         <router-link :to="{ name: 'Users' }">
           <CButton color="primary">

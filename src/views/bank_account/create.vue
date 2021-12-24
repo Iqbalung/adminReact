@@ -1,7 +1,7 @@
 <template>
   <div>
     <CCard class="mb-4">
-      <CCardHeader>Create Bank Account</CCardHeader>
+      <CCardHeader class="bg-white">Create Bank Account</CCardHeader>
       <CCardBody>
         <router-link :to="{ name: 'Bank Account' }">
           <CButton color="primary">

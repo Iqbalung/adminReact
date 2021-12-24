@@ -92,7 +92,8 @@ import {
   cilClone,
   cilCopy,
   cilLibrary,
-  cilCreditCard
+  cilCreditCard,
+  cilThumbDown
 } from '@coreui/icons'
 
 export const iconsSet = Object.assign(
@@ -165,6 +166,7 @@ export const iconsSet = Object.assign(
     cilCopy,
     cilLibrary,
     cilCreditCard,
+    cilThumbDown
 
   },
   {

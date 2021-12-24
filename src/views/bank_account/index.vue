@@ -1,7 +1,7 @@
 <template>
 <div>
 <CCard class="mb-4">
-          <CCardHeader>Bank List</CCardHeader>
+          <CCardHeader class="bg-white">Bank List</CCardHeader>
           <CCardBody>
             <router-link  :to="{name:'Create Bank'}" v-show="role=='admin'">
               <CButton color="primary">

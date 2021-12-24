@@ -1,12 +1,12 @@
 <template>
   <div>
     <CCard class="mb-4 overflow-auto">
-        <CCardHeader>Task List</CCardHeader>
+        <CCardHeader class="bg-white">Task List</CCardHeader>
       <CCardBody>
       <div class="d-flex justify-content-between align-items-center">
       <div class="d-flex">
-    <div class="me-2">
-    <CDropdown v-show="role=='admin'" color="secondary">
+    <div class="me-2" v-show="role=='admin'">
+    <CDropdown color="secondary">
       <CDropdownToggle color="dark"> <CIcon class="text-white" name="cil-touch-app"/> Assignment</CDropdownToggle>
       <CDropdownMenu>
         <CDropdownItem @click="() => { modalAssign=true}"><CIcon class="text-dark" name="cil-touch-app"/> Assign Task</CDropdownItem>
@@ -21,8 +21,8 @@
       <CButton v-show="role=='admin'" color="dark" class="me-2" @click="() => { modalAssign=true}">
           <CIcon class="text-white" name="cil-touch-app"/> Assign Task
       </CButton> -->
-        <div>
-          <Datepicker v-model="date" range @closed="pickDate"></Datepicker>
+        <div class="w-full">
+          <Datepicker v-model="date" range @closed="pickDate" style="width:250px;" :enableTimePicker="false"></Datepicker>
         </div>
       </div>
     <div class="d-flex align-items-center">
@@ -54,7 +54,7 @@
     </div>
       </div>
             <div class="table-responsive mt-3">
-                    <table class="table table-responsive table-fixed">
+                    <table class="table table-fixed">
                         <thead>
                             <tr>
                                 <th v-show="role=='admin'" scope="col" class="col-1 px-1"><CIcon name="cil-people" /></th>
@@ -81,7 +81,7 @@
                                     <CFormCheck disabled/>
                                   </div>
                                 </td>
-                                <td v-show="role=='admin'" class="col-2">{{ new Date(item.createdAt).toLocaleDateString() + ':' + new Date(item.createdAt).toLocaleTimeString('en-GB') }}</td>
+                                <td v-show="role=='admin'" class="col-2">{{ new Date(item.createdAt).toLocaleDateString() }}</td>
                                 <td v-show="role=='admin'" class="col-2">{{ item.taskAssigne }}</td>
                                 <td v-show="role=='admin'" class="col-3 overflow-auto">
                                   <div class="overflow-auto">{{ item.taskTittle.substring(0,23) }}
@@ -97,15 +97,15 @@
                                 </td>
                                 <td v-show="role!='admin'" class="col-2">
                                   <div>
-                                     {{ new Date(item.createdAt).toLocaleDateString() + ':' + new Date(item.createdAt).toLocaleTimeString('en-GB') }}
+                                     {{ new Date(item.createdAt).toLocaleDateString() }}
+                                     <!--  + ':' + new Date(item.createdAt).toLocaleTimeString('en-GB') -->
                                   </div>
                                 </td>
                                 <td v-show="role!='admin'" class="col-4 overflow-auto">
                                   <div class="overflow-auto">
-                                    {{ item.taskTittle }}
+                                    {{ item.taskTittle.substring(0,35) }}
                                     <CTooltip content="Copy Account Number And Amount!" placement="right">
                                     <template #toggler="{ on }">
-
                                     <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copyRek(item.taskData.account_number,item.taskData.amount)">
                                       <CIcon name="cil-copy"/>
                                     </CButton>
@@ -116,7 +116,7 @@
                                 <td class="col-2">{{ rupiah(item.taskData.amount) }}</td>
                                 <td v-show="role=='admin'" class="col-1">{{ item.taskStatus }}</td>
                                 <td v-show="role!='admin'" class="col-2">{{ item.taskStatus }}</td>
-                                <td v-show="role!='admin'" class="col-2 text-center p-1">
+                                <td v-show="role!='admin'" class="col-2 text-center">
                                   <div v-if="item.taskStatus!='processed'">
                                     <!-- <CButton size="sm" class="rounded-full d-inline-block p-0" color="dark" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
                                       <CIcon class="text-white" name="cil-aperture"/>
@@ -131,7 +131,7 @@
                                       detail
                                   </div>
                               </td>
-                                <td v-show="role=='admin'" class="col-1 text-center p-1">
+                                <td v-show="role=='admin'" class="col-1 p-1">
                                   <div v-if="item.taskStatus!='processed'">
                                     <CButton size="sm" class="text-primary" variant="ghost" color="light" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
                                       <!-- <CIcon class="text-white" name="cil-library"/> -->
@@ -318,7 +318,20 @@
     </CToast>
   </CToaster>
   <!-- Toast Task -->
-  <!-- <CButton color="danger" @click.prevent="play">Show</CButton> -->
+  <!-- Tester toast -->
+  <!-- <CButton color="danger" @click.prevent="sTs">Show</CButton>
+  <CToaster placement="top-end">
+    <CToast v-for="(ts, index) in tscob" :key="index">
+      <CToastHeader closeButton>
+      <span class="me-auto fw-bold">{{ts.title}}</span>
+      <small>{{ ts.time }}</small>
+      </CToastHeader>
+      <CToastBody>
+        {{ ts.content }}
+      </CToastBody>
+    </CToast>
+  </CToaster> -->
+
   </div>
 </template>
 
@@ -349,12 +362,16 @@
 }
 .table-fixed td {
   height: 60px;
-  overflow: hidden;
-  padding: 0;
-  align-items: center;
+  /* overflow: hidden; */
+  padding: 0px;
+  /* align-items: center; */
 }
 .table-fixed td div {
-  margin: auto;
+  /* margin: auto; */
+}
+.table-fixed th {
+  padding: 0;
+  /* margin:0; */
 }
 
 .table-fixed tbody td,
@@ -369,6 +386,26 @@
         display: block;
 }
 
+.table-fixed tbody::-webkit-scrollbar {
+  width: 8px;
+  /* width of the entire scrollbar */
+}
+
+.table-fixed tbody::-webkit-scrollbar-track {
+  background: white;
+  /* color of the tracking area */
+}
+
+.table-fixed tbody::-webkit-scrollbar-thumb {
+  background-color: black;
+  /* color of the scroll thumb */
+  border-radius: 20px;
+  /* roundness of the scroll thumb */
+  border: 1px solid white;
+  /* creates padding around scroll thumb */
+}
+
+
 </style>
 
 <script>
@@ -376,9 +413,6 @@ import router from '../../router'
 import axios from 'axios'
 import {reactive,onMounted,ref} from 'vue'
 import useClipboard from 'vue-clipboard3'
-import useSound from 'vue-use-sound'
-import pristine from './pristine.mp3'
-
 export default {
   name: 'TaskList',
   data() {
@@ -411,6 +445,7 @@ export default {
         perPage: 100,
         role : window.localStorage.getItem('role'),
         currentPage:1,
+
     }
   },
   computed: {
@@ -602,10 +637,13 @@ export default {
     }
   },
   setup() {
+    let urlMusic = require('./pristine.mp3');
+    let player =  new Audio();
     let date = ref();
     let searchTitt = ref([]);
     let currentPages= ref(1);
     let toasts = ref([]);
+    let tscob = ref([]);
     let taskStats = ref([]);
     let tasks = ref([]);
     let selected = ref([]);
@@ -810,6 +848,7 @@ export default {
          content:content,
          time: dt
        });
+       playSound();
        console.log(toasts.value);
        console.log(dt);
     }
@@ -846,10 +885,17 @@ export default {
       // });
 
     }
-    function play(){
-      // let notif = new Audio('pristine.mp3');
-      // notif.play();
-      useSound(pristine);
+    function playSound(){
+      player.src = urlMusic;
+      player.play();
+    }
+    function sTs(){
+       tscob.value.push({
+         title:"tesbro",
+         content:"hanya test",
+         time: "7 min ago"
+       });
+       playSound();
     }
 
     return {
@@ -871,7 +917,9 @@ export default {
       toasts,
       changePg,
       pickDate,
-      play
+      playSound,
+      sTs,
+      tscob
     }
   }
 }

@@ -1,7 +1,7 @@
 <template>
 <div>
 <CCard class="mb-4">
-          <CCardHeader>Users List</CCardHeader>
+          <CCardHeader class="bg-white">Users List</CCardHeader>
           <CCardBody>
             <router-link  :to="{name:'Create Users'}">
               <CButton color="primary">
@@ -49,6 +49,11 @@
                       <CIcon class="text-white" name="cil-trash"/>
                     </CBadge>
                     </div>
+                  </CTableDataCell>
+                </CTableRow>
+                <CTableRow>
+                  <CTableDataCell colspan="6" v-show="users.length <= 0">
+                    No records found
                   </CTableDataCell>
                 </CTableRow>
               </CTableBody>
