@@ -87,6 +87,20 @@ const routes = [
           }
         },
         {
+          path:'/bank/import',
+          name:'Import Excel',
+          component: () => import('@/views/bank_account/import.vue')
+          ,
+          beforeEnter:(to,from,next)=> {
+            if(!window.localStorage.getItem('accessToken')) {
+              return next({
+                name:'Login'
+              })
+            }
+          return next();
+          }
+        },
+        {
           path:'/bank/update/:id',
           name:'Update Bank',
           component: () => import('@/views/bank_account/update.vue')

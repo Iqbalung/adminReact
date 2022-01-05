@@ -45,6 +45,7 @@
         aria-label="Default select example"
         :options="[
           { label: 'Unprocess', value: 'unprocess' },
+          { label: 'Unassigned', value: 'unassigned' },
           { label: 'Processed', value: 'processed' },
           { label: 'Done', value: 'done' },
       ]">
@@ -665,8 +666,8 @@ export default {
     onMounted(()=> {
 
       // date
-      const startDate = new Date();
-      const endDate = new Date(new Date().setDate(startDate.getDate() + 1));
+      const startDate = new Date().setDate(new Date().getDate() - 1);
+      const endDate = new Date();
       date.value = [startDate, endDate];
 
       // socket
