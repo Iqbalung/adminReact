@@ -28,6 +28,10 @@
               <div v-if="validation.username" class="text-danger">{{ validation.username.message }}</div>
             </div>
             <div class="mb-3">
+              <CFormLabel for="rekening">Rekening</CFormLabel>
+              <MultiSelect :options="banks" mode="tags" placeholder="Rekening" searchable v-model="bank" />
+            </div>
+            <div class="mb-3">
               <CFormLabel for="password">Password</CFormLabel>
               <CFormInput
                 type="password"
@@ -47,11 +51,13 @@
   </div>
 </template>
 <script>
-import { reactive, ref } from 'vue'
-import routers from '../../router'
+import { reactive, ref, onMounted } from 'vue'
 import axios from 'axios'
+import MultiSelect from '@vueform/multiselect'
+import routers from '../../router'
 export default {
   name: 'Create User',
+  components: { MultiSelect },
   setup() {
     // data binding
     const user = reactive({
@@ -62,6 +68,8 @@ export default {
       role:'worker',
       mistake:'',
     });
+    const bank = ref();
+    const banks = ref([]);
     const validation = ref([]);
     let valid = ref([]);
     const router = routers
@@ -80,8 +88,26 @@ export default {
         valid.value = err.response.data;
       })
     }
+    onMounted(function() {
+      axios.get(`${process.env.VUE_APP_URL_API}/bank`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      }).then(results => {
+        return results.data.data.map(result => ({
+          label: result.username,
+          value: result._id
+        }))
+      }).then(results => {
+        banks.value = results
+      }).catch(function (err) {
+        console.log(err.response)
+      })
+    })
     return {
       user,
+      bank,
+      banks,
       validation,
       valid,
       router,
@@ -90,3 +116,5 @@ export default {
   }
 }
 </script>
+
+<style src="@vueform/multiselect/themes/default.css"></style>

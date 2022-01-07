@@ -8,6 +8,11 @@
               <CIcon class="text-white" name="cil-plus"/> Add Bank
               </CButton>
             </router-link>
+            <router-link :to="{name:'Import Excel'}" v-show="role=='admin'">
+              <CButton class="ms-2" color="success">
+              <CIcon class="text-white" name="cil-plus"/> Import Excel
+              </CButton>
+            </router-link>
               <CTable align="middle" class="mt-3 mb-0 mt-2 border border-1" hover responsive>
               <CTableHead color="light">
                 <CTableRow>
