@@ -13,7 +13,8 @@ export default [
   {
     component: 'CNavItem',
     name: 'Dashboard',
-    to: '/dashboard',
+    to: 'http://128.199.233.113:5601/goto/7442e202fc72428478c410982e9eea30',
+    type: 'external-link',
     icon: 'cil-speedometer',
   },
   {

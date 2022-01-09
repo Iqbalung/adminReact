@@ -9,8 +9,8 @@
     <CDropdown color="secondary">
       <CDropdownToggle color="dark"> <CIcon class="text-white" name="cil-touch-app"/> Assignment</CDropdownToggle>
       <CDropdownMenu>
-        <CDropdownItem @click="() => { modalAssign=true}"><CIcon class="text-dark" name="cil-touch-app"/> Assign Task</CDropdownItem>
-        <CDropdownItem @click="clearAssign()"><CIcon class="text-dark" name="cil-trash"/> Unnasign</CDropdownItem>
+        <CDropdownItem component="button" @click="() => { modalAssign=true}"><CIcon class="text-dark" name="cil-touch-app"/> Assign Task</CDropdownItem>
+        <CDropdownItem component="button" @click="clearAssign()"><CIcon class="text-dark" name="cil-trash"/> Unnasign</CDropdownItem>
       </CDropdownMenu>
     </CDropdown>
     </div>
@@ -40,17 +40,12 @@
       <CFormInput type="text" id="search" @keypress="searchTitle" placeholder="search"/>
       </div>
     <div class="me-1">
-      <CFormSelect
-      @change="filterSelect"
-        aria-label="Default select example"
-        :options="[
-          { label: 'Unprocess', value: 'unprocess' },
-          { label: 'Unassigned', value: 'unassigned' },
-          { label: 'Processed', value: 'processed' },
-          { label: 'Done', value: 'done' },
-      ]">
-    </CFormSelect>
-
+      <CDropdown color="light">
+        <CDropdownToggle color="dark">{{ filterListActive.label }}</CDropdownToggle>
+        <CDropdownMenu>
+          <CDropdownItem component="button" v-for="(filter, key) in filterLists" @click="filterSelect(filter)">{{ filter.label }}</CDropdownItem>
+        </CDropdownMenu>
+      </CDropdown>
     </div>
     </div>
       </div>
@@ -412,7 +407,7 @@
 <script>
 import router from '../../router'
 import axios from 'axios'
-import {reactive,onMounted,ref} from 'vue'
+import {reactive,onMounted,watch,ref} from 'vue'
 import useClipboard from 'vue-clipboard3'
 export default {
   name: 'TaskList',
@@ -534,7 +529,7 @@ export default {
         // taskh.push({status: `assigned by lina ${window.localStorage.getItem('username')}}`, updatedAt:Date.now})
         console.log(taskh);
     // Axios update
-      axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigne',taskHistory:taskh},{
+      axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigned',taskHistory:taskh},{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -563,7 +558,7 @@ export default {
       .then((result)=> {
         if(result.isConfirmed) {
         this.sel.forEach(element => {
-        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigne',taskStatus:'unprocess'},{
+        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigned',taskStatus:'unprocess'},{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -650,6 +645,13 @@ export default {
     let selected = ref([]);
     let users = ref({});
     let countData = ref([]);
+    let filterLists = ref([
+        { label: 'Unprocess', value: 'unprocess' },
+        { label: 'Unassigned', value: 'unassigned' },
+        { label: 'Processed', value: 'processed' },
+        { label: 'Done', value: 'done' },
+    ])
+    let filterListActive = ref(filterLists.value[0])
     let worker = reactive({
       username:''
     });
@@ -662,6 +664,9 @@ export default {
       taskStatus:'Unassigned',
     });
 
+    watch(date, value => {
+      loadTask(filterListActive.value, '', 1, value[0], value[1])
+    })
 
     onMounted(()=> {
 
@@ -782,7 +787,6 @@ export default {
       }
     }
     function loadTask(taskStat,searchTit,pages,from, to) {
-      console.log(searchTitt);
       let status = (taskStat != '') ? taskStat : 'unprocess';
       let taskAssigne =`${window.localStorage.getItem('username')}`;
       let skip = (pages > 1) ? (pages-1) * 100 : 0;
@@ -803,9 +807,6 @@ export default {
 
       }
       let params = (window.localStorage.getItem('role')=='admin') ? param_admin : param_users;
-        console.log(params)
-        console.log(taskAssigne);
-        console.log(status)
         axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
@@ -821,14 +822,9 @@ export default {
       });
     }
 
-    function filterSelect(e){
-      if(e.target.options.selectedIndex > -1){
-        let filter = e.target.options[e.target.selectedIndex].value;
-        // console.log(filter)
-       taskStats.value = e.target.options[e.target.selectedIndex].value
-
-       loadTask(taskStats.value)
-      }
+    function filterSelect(status){
+     loadTask(status.value, '', 1, date.value[0], date.value[1])
+     filterListActive.value = status
     }
     function searchTitle(e) {
       searchTitt.value = e.target.value
@@ -913,6 +909,7 @@ export default {
       cekCheck,
       taskStats,
       filterSelect,
+      filterListActive,
       searchTitle,
       countData,
       toasts,
@@ -920,7 +917,8 @@ export default {
       pickDate,
       playSound,
       sTs,
-      tscob
+      tscob,
+      filterLists
     }
   }
 }

@@ -8,25 +8,8 @@ const routes = [
     path: '/',
     name: 'Home',
     component: DefaultLayout,
-    redirect: '/dashboard',
+    redirect: '/tasks',
     children: [
-      {
-        path: '/dashboard',
-        name: 'Dashboard',
-        // route level code-splitting
-        // this generates a separate chunk (about.[hash].js) for this route
-        // which is lazy-loaded when the route is visited.
-        component: () =>
-          import(/* webpackChunkName: "dashboard" */ '@/views/Dashboard.vue'),
-          beforeEnter:(to,from,next)=> {
-            if(!window.localStorage.getItem('accessToken')) {
-              return next({
-                name:'Login'
-              })
-            }
-          return next();
-          }
-        },
         {
           path:'/tasks',
           name:'Tasks',
@@ -150,6 +133,20 @@ const routes = [
         path:'/users/create',
         name:'Create Users',
         component: () => import('@/views/users/create.vue')
+        ,
+        beforeEnter:(to,from,next)=> {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name:'Login'
+            })
+          }
+        return next();
+        }
+      },
+      {
+        path:'/users/import',
+        name:'Import Users',
+        component: () => import('@/views/users/import.vue')
         ,
         beforeEnter:(to,from,next)=> {
           if(!window.localStorage.getItem('accessToken')) {
