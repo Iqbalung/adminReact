@@ -79,6 +79,41 @@ const AppSidebarNav = defineComponent({
         )
       }
 
+      if (item.type === 'external-link') {
+        return h(
+          resolveComponent(item.component),
+          {
+            href: item.to,
+            onClick: e => {
+              e.preventDefault()
+              
+              window.open(item.to, '_blank')
+            } 
+          },
+          {
+            default: () => [
+              item.icon &&
+                h(resolveComponent('CIcon'), {
+                  customClassName: 'nav-icon',
+                  name: item.icon,
+                }),
+              item.name,
+              item.badge &&
+                h(
+                  CBadge,
+                  {
+                    class: 'ms-auto',
+                    color: item.badge.color,
+                  },
+                  {
+                    default: () => item.badge.text,
+                  },
+                ),
+            ],
+          },
+        )
+      }
+
       return item.to
         ? h(
             RouterLink,

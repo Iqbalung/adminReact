@@ -29,7 +29,8 @@
             </div>
             <div class="mb-3">
               <CFormLabel for="rekening">Rekening</CFormLabel>
-              <MultiSelect :options="banks" mode="tags" placeholder="Rekening" searchable v-model="bank" />
+              <MultiSelect :options="bankOptions" mode="tags" placeholder="Rekening" searchable v-model="user.banks" />
+              <div v-if="validation.banks" class="text-danger">{{ validation.banks.message }}</div>
             </div>
             <div class="mb-3">
               <CFormLabel for="password">Password</CFormLabel>
@@ -67,9 +68,9 @@ export default {
       password:'',
       role:'worker',
       mistake:'',
+      banks: []
     });
-    const bank = ref();
-    const banks = ref([]);
+    const bankOptions = ref([]);
     const validation = ref([]);
     let valid = ref([]);
     const router = routers
@@ -99,15 +100,14 @@ export default {
           value: result._id
         }))
       }).then(results => {
-        banks.value = results
+        bankOptions.value = results
       }).catch(function (err) {
         console.log(err.response)
       })
     })
     return {
       user,
-      bank,
-      banks,
+      bankOptions,
       validation,
       valid,
       router,

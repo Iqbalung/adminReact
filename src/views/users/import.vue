@@ -2,7 +2,7 @@
     <CCard>
         <CCardHeader class="bg-white">Import Excel</CCardHeader>
         <CCardBody>
-            <router-link :to="{ name: 'Bank Account' }">
+            <router-link :to="{ name: 'Users' }">
             <CButton color="primary">
                 <CIcon class="text-white" name="cil-arrow-left" /> Back
             </CButton>
@@ -45,16 +45,16 @@
 
                         const imports = []
 
-                        for (const bank of worksheetJson) {
-                            imports.push(axios.post(`${process.env.VUE_APP_URL_API}/bank`, bank, {
+                        for (const user of worksheetJson) {
+                            imports.push(axios.post(`${process.env.VUE_APP_URL_API}/users`, user, {
                                 headers: {
                                     Authorization: window.localStorage.getItem('accessToken')
                                 }
-                            }))
+                            }))                            
                         }
 
                         Promise.all(imports)
-                            .then(() => router.push({ name: "Bank Account" }))
+                            .then(() => router.push({ name: "Users" }))
                             .catch(console.log)
                     }
                     reader.readAsArrayBuffer(file.value)

@@ -6,8 +6,8 @@
           <CCardGroup>
             <CCard class="p-4">
               <CCardBody>
-              <div v-if="validation.message" class="text-danger text-center">{{ validation.message }}</div>
                 <CForm>
+                  <CAlert color="danger" v-if="validation.message">{{ validation.message }}</CAlert>
                   <h1>Login</h1>
                   <p class="text-medium-emphasis">Sign In to your account</p>
                   <CInputGroup class="mb-3">
@@ -89,7 +89,6 @@ export default {
   },
   methods: {
     handleClick() {
-      console.log(this.form)
       axios
         .post(`${process.env.VUE_APP_URL_API}/authentication`, {
           strategy: 'local',
@@ -102,10 +101,9 @@ export default {
           window.localStorage.setItem('accessToken', response.data.accessToken);
           window.localStorage.setItem('username', response.data.user.username);
           window.localStorage.setItem('role', response.data.user.role);
-          router.push({ path: '/dashboard' })
+          router.push({ path: '/tasks' })
         })
         .catch((error) => {
-          console.log(error)
           this.validation = error.response.data;
         })
     },

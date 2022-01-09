@@ -4,8 +4,13 @@
           <CCardHeader class="bg-white">Users List</CCardHeader>
           <CCardBody>
             <router-link  :to="{name:'Create Users'}">
-              <CButton color="primary">
+              <CButton class="me-2" color="primary">
               <CIcon class="text-white" name="cil-plus"/> Add User
+              </CButton>
+            </router-link>
+            <router-link  :to="{name:'Import Users'}">
+              <CButton color="success">
+              <CIcon class="text-white" name="cil-plus"/> Import User
               </CButton>
             </router-link>
               <CTable align="middle" class="mt-3 mb-0 mt-2 border border-1" hover responsive>
@@ -18,6 +23,7 @@
                   <CTableHeaderCell class="text-center">Username</CTableHeaderCell>
                   <CTableHeaderCell class="text-center">Email</CTableHeaderCell>
                   <CTableHeaderCell class="text-center">Role</CTableHeaderCell>
+                  <CTableHeaderCell class="text-center">Rekening</CTableHeaderCell>
                   <CTableHeaderCell class="text-center">Action</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
@@ -37,6 +43,14 @@
                   </CTableDataCell>
                   <CTableDataCell class="text-center">
                      <div>{{item.role}}</div>
+                  </CTableDataCell>
+                  <CTableDataCell class="text-center">
+                    <ul class="list-unstyled" v-if="item.banks?.length">
+                      <li v-for="(bank, key) in item.banks" :key="key"><CBadge color="primary">{{ bank.username }}</CBadge></li>
+                    </ul>
+                    <span v-else>
+                      -
+                    </span>
                   </CTableDataCell>
                   <CTableDataCell class="text-center">
                     <div>
