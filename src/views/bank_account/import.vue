@@ -55,7 +55,7 @@
 
                         Promise.all(imports)
                             .then(() => router.push({ name: "Bank Account" }))
-                            .catch(console.log)
+                            .catch(err => console.log(err.response))
                     }
                     reader.readAsArrayBuffer(file.value)
                 } else {
