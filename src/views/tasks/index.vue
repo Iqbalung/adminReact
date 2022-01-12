@@ -211,10 +211,7 @@
     <CModalBody>
       <CForm @submit.prevent="updateWorker()">
       <div class="mb-3">
-      <CFormSelect v-model="work" aria-label="Default select example">
-        <option>Unassigned</option>
-        <option v-for="(user,index) in users" :key="index" :value="user.username">{{ user.username }}</option>
-      </CFormSelect>
+      <MultiSelect :options="users" placeholder="Users" v-model="work" searchable />
       </div>
       <CButton color="primary">Save changes</CButton>
     </CForm>
@@ -409,8 +406,10 @@ import router from '../../router'
 import axios from 'axios'
 import {reactive,onMounted,watch,ref} from 'vue'
 import useClipboard from 'vue-clipboard3'
+import MultiSelect from '@vueform/multiselect'
 export default {
   name: 'TaskList',
+  components: { MultiSelect },
   data() {
     return {
       tasks: [],
@@ -751,9 +750,13 @@ export default {
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
-      }).then((result)=> {
-        // console.log(result.data);
-        users.value = result.data;
+      }).then(res => {
+        users.value = res.data.map(user => {
+          return {
+            label: user.username,
+            value: user.username,
+          }
+        })
       }).catch((err) =>{
         console.log(err.response);
       });
@@ -923,3 +926,5 @@ export default {
   }
 }
 </script>
+
+<style src="@vueform/multiselect/themes/default.css"></style>
