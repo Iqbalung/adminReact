@@ -6,7 +6,7 @@
           <CCardGroup>
             <CCard class="p-4">
               <CCardBody>
-                <CForm>
+                <CForm v-on:submit.prevent="login">
                   <CAlert color="danger" v-if="validation.message">{{ validation.message }}</CAlert>
                   <h1>Login</h1>
                   <p class="text-medium-emphasis">Sign In to your account</p>
@@ -34,7 +34,6 @@
                   <CRow>
                     <CCol :xs="6">
                       <CButton
-                        @click="handleClick"
                         color="primary"
                         class="px-4"
                       >
@@ -76,6 +75,7 @@
 import axios from 'axios'
 // import router from 'vue-router'
 import router from '../../router'
+
 export default {
   name: 'Login',
   data() {
@@ -88,7 +88,7 @@ export default {
     }
   },
   methods: {
-    handleClick() {
+    login() {
       axios
         .post(`${process.env.VUE_APP_URL_API}/authentication`, {
           strategy: 'local',
@@ -96,17 +96,28 @@ export default {
           password: this.form.password,
         })
         .then(function (response) {
-          window.localStorage.setItem('urlApi',process.env.VUE_APP_URL_API);
-          window.localStorage.setItem('_id', response.data.user._id);
-          window.localStorage.setItem('accessToken', response.data.accessToken);
-          window.localStorage.setItem('username', response.data.user.username);
-          window.localStorage.setItem('role', response.data.user.role);
-          router.push({ path: '/tasks' })
+          axios.patch(`${process.env.VUE_APP_URL_API}/users/${response.data.user._id}`, { login_status: true }, {
+            headers: {
+              Authorization: response.data.accessToken
+            }
+          })
+            .then(res => {
+              window.localStorage.setItem('urlApi',process.env.VUE_APP_URL_API);
+              window.localStorage.setItem('_id', response.data.user._id);
+              window.localStorage.setItem('accessToken', response.data.accessToken);
+              window.localStorage.setItem('username', response.data.user.username);
+              window.localStorage.setItem('role', response.data.user.role);
+              
+              router.push({ path: '/tasks' })
+            }).catch(err => {
+              console.log(err.response)
+            })
+
         })
         .catch((error) => {
           this.validation = error.response.data;
         })
     },
-  },
+  }
 }
 </script>

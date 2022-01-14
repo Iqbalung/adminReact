@@ -48,6 +48,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import avatar from '@/assets/images/avatars/8.jpg'
 import avat from '@/assets/images/avatars/pic.jpg'
 import router from '../router'
@@ -55,12 +56,21 @@ export default {
   name: 'AppHeaderDropdownAccnt',
   methods: {
     handleClick() {
-      window.localStorage.removeItem('accessToken')
-      window.localStorage.removeItem('role')
-      window.localStorage.removeItem('username')
-      window.localStorage.removeItem('_id')
-      window.localStorage.removeItem('urlApi');
-      router.push({ name:'Login' })
+      axios.patch(`${process.env.VUE_APP_URL_API}/users/${window.localStorage.getItem('_id')}`, { login_status: false }, {
+        headers: {
+          Authorization: window.localStorage.getItem('accessToken')
+        }
+      })
+        .then(res => {
+          window.localStorage.removeItem('role')
+          window.localStorage.removeItem('username')
+          window.localStorage.removeItem('_id')
+          window.localStorage.removeItem('urlApi');
+          window.localStorage.removeItem('accessToken')
+          router.push({ name:'Login' })
+        }).catch(err => {
+          console.log(err.response)
+        })
     },
   },
   setup() {
