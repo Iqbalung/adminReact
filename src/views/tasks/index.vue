@@ -211,7 +211,14 @@
     <CModalBody>
       <CForm @submit.prevent="updateWorker()">
       <div class="mb-3">
-      <MultiSelect :options="users" placeholder="Users" v-model="work" searchable />
+      <MultiSelect :options="users" placeholder="Users" v-model="work" searchable @open="getUser">
+        <template #option="props">
+          <div class="d-flex justify-content-between w-100">
+            <span>{{ props.option.label }}</span>
+            <CBadge color="success" shape="rounded-pill" v-if="props.option.status">Online</CBadge>
+          </div>
+        </template>
+      </MultiSelect>
       </div>
       <CButton color="primary">Save changes</CButton>
     </CForm>
@@ -746,6 +753,13 @@ export default {
       // get data
       loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
       // get worker
+      
+      getUser()
+
+    });
+
+    // Get User
+    function getUser() {
       axios.get(`${process.env.VUE_APP_URL_API}/users?role=worker`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
@@ -755,14 +769,14 @@ export default {
           return {
             label: user.username,
             value: user.username,
+            status: user.login_status
           }
         })
       }).catch((err) =>{
         console.log(err.response);
       });
+    }
 
-
-    });
     //delete
     function destroy(id,index) {
       axios.delete(`${process.env.VUE_APP_URL_API}/users/${id}`,{
@@ -909,6 +923,7 @@ export default {
       tsk,
       cek,
       loadTask,
+      getUser,
       cekCheck,
       taskStats,
       filterSelect,
