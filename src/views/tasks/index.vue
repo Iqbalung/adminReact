@@ -213,9 +213,14 @@
       <div class="mb-3">
       <MultiSelect :options="users" placeholder="Users" v-model="work" searchable @open="getUser">
         <template #option="props">
-          <div class="d-flex justify-content-between w-100">
-            <span>{{ props.option.label }}</span>
-            <CBadge color="success" shape="rounded-pill" v-if="props.option.status">Online</CBadge>
+          <div class="d-flex justify-content-between align-items-center w-100">
+            <span>{{ props.option.label }}</span>            
+            <div v-if="props.option.status">
+              <div style="width: 16px; height: 16px;" class="rounded-circle bg-success"></div>
+            </div>
+            <div v-else>
+              <div style="width: 16px; height: 16px; background-color: #eee;" class="rounded-circle"></div>
+            </div>
           </div>
         </template>
       </MultiSelect>
