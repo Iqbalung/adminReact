@@ -37,7 +37,7 @@
         </button>
         </div>
       <div class="me-1">
-      <CFormInput type="text" id="search" @keypress="searchTitle" placeholder="search"/>
+      <CFormInput type="text" id="search" @keyup="searchTitle" placeholder="search"/>
       </div>
     <div class="me-1">
       <CDropdown color="light">
@@ -521,7 +521,7 @@ export default {
         this.checkedItems = [];
         this.modalAssign = false;
         this.$swal('Saved','','success');
-        // loadTask(taskStats.value)
+        // loadTask(filterListActive.value.value)
     },
      clearAssign() {
       this.$swal({title:'Are Sure ?',icon:'info',showCancelButton:true,focusConfirm:false,confirmButtonText:'Yes, Sure',cancelButtonText:'Cancel'})
@@ -676,7 +676,7 @@ export default {
     });
 
     watch(date, value => {
-      loadTask(filterListActive.value, '', 1, value[0], value[1])
+      loadTask(filterListActive.value.value, '', 1, value[0], value[1])
     })
 
     onMounted(()=> {
@@ -704,24 +704,24 @@ export default {
             // console.log('tasksbro',message);
             // console.log('title',message.taskTittle);
             // alert('oke');
-            loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
+            loadTask(filterListActive.value.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
             // console.log('role user',message.taskAssigne)
           if(message.taskAssigne == window.localStorage.getItem('username'))
             {
               if(message.taskStatus=='done'){
                 showToast('Transfer Berhasil ',message.taskTittle,message.createdAt);
-            // loadTask(taskStats.value,searchTitt.value,page.value);
+            // loadTask(filterListActive.value.value,searchTitt.value,page.value);
 
             }else{
               showToast('Task Baru ',message.taskTittle,message.createdAt);
-            // loadTask(taskStats.value,searchTitt.value,page.value);
+            // loadTask(filterListActive.value.value,searchTitt.value,page.value);
 
             }
             }
         }
       });
         socket.on('tasks updated', (message) => {
-             loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1])
+             loadTask(filterListActive.value.value,searchTitt.value,currentPages.value,date.value[0],date.value[1])
       });
 
     var acknowledged = [];
@@ -742,7 +742,7 @@ export default {
             // console.log('tasksbro',message);
             // console.log('title',message.taskTittle);
             // alert('oke');
-              loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
+              loadTask(filterListActive.value.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
             if(message.taskAssigne == window.localStorage.getItem('username'))
             {
               console.log('task statusnya',message.taskStatus);
@@ -756,7 +756,7 @@ export default {
         }
       });
       // get data
-      loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
+      loadTask(filterListActive.value.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
       // get worker
       
       getUser()
@@ -836,7 +836,6 @@ export default {
         params: params
       })
       .then((result) => {
-        console.log("hasil",result)
         tasks.value = result.data;
         countData.value = result.data.data;
       }).catch((err) =>{
@@ -845,14 +844,14 @@ export default {
     }
 
     function filterSelect(status){
-     loadTask(status.value, '', 1, date.value[0], date.value[1])
+      console.log(searchTitt.value)
+     loadTask(status.value, searchTitt.value, 1, date.value[0], date.value[1])
      filterListActive.value = status
     }
     function searchTitle(e) {
       searchTitt.value = e.target.value
       console.log(searchTitt.value);
-      // console.log(searchTit.value);
-      loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
+      loadTask(filterListActive.value.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
 
     }
      function showToast(title,content,time){
@@ -872,11 +871,11 @@ export default {
        console.log(dt);
     }
     function changePg() {
-    loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1])
+    loadTask(filterListActive.value.value,searchTitt.value,currentPages.value,date.value[0],date.value[1])
     }
     function pickDate() {
     console.log(date.value);
-    loadTask(taskStats.value,searchTitt.value,currentPages.value,date.value[0],date.value[1])
+    loadTask(filterListActive.value.value,searchTitt.value,currentPages.value,date.value[0],date.value[1])
       // let from = date.value[0];
       // let to = date.value[1];
       // axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
