@@ -54,15 +54,17 @@
                         <thead>
                             <tr>
                                 <th v-show="role=='admin'" scope="col" class="col-1 px-1"><CIcon name="cil-people" /></th>
-                                <th v-show="role=='admin'" scope="col" class="col-2 px-0">Created</th>
+                                <th v-show="role=='admin'" scope="col" class="col-1 px-0">Created</th>
                                 <th v-show="role=='admin'" scope="col" class="col-2 px-0">Assigned</th>
-                                <th v-show="role=='admin'" scope="col" class="col-3 px-0">Task Title</th>
+                                <th v-show="role=='admin'" scope="col" class="col-2 px-0">No Rekening</th>
+                                <th v-show="role=='admin'" scope="col" class="col-2 px-0">Nama</th>
                                 <th v-show="role!='admin'" scope="col" class="col-2">Created</th>
-                                <th v-show="role!='admin'" scope="col" class="col-4">Task Title</th>
-                                <th scope="col" class="col-2">Amount</th>
+                                <th v-show="role!='admin'" scope="col" class="col-3">No Rekening</th>
+                                <th v-show="role!='admin'" scope="col" class="col-3">Nama</th>
+                                <th scope="col" class="col-2">Jumlah</th>
                                 <th v-show="role=='admin'" scope="col" class="col-1">Status</th>
-                                <th v-show="role!='admin'" scope="col" class="col-2">Status</th>
-                                <th v-show="role!='admin'" scope="col" class="col-2 text-center">Detail</th>
+                                <th v-show="role!='admin'" scope="col" class="col-1">Status</th>
+                                <th v-show="role!='admin'" scope="col" class="col-1 text-center">Detail</th>
                                 <th v-show="role=='admin'" scope="col" class="col-1 text-center">Detail</th>
                             </tr>
                         </thead>
@@ -77,42 +79,72 @@
                                     <CFormCheck disabled/>
                                   </div>
                                 </td>
-                                <td v-show="role=='admin'" class="col-2">{{ new Date(item.createdAt).toLocaleDateString() }}</td>
+                                <td v-show="role=='admin'" class="col-1">{{ new Date(item.createdAt).toLocaleDateString() }}</td>
+                                <td v-show="role!='admin'" class="col-1">{{ new Date(item.createdAt).toLocaleDateString() }}</td>
                                 <td v-show="role=='admin'" class="col-2">{{ item.taskAssigne }}</td>
-                                <td v-show="role=='admin'" class="col-3 overflow-auto">
-                                  <div class="overflow-auto">{{ item.taskTittle.substring(0,23) }}
-                                  <CTooltip content="Copy Account Number And Amount!" placement="right">
+                                <td v-show="role=='admin'" class="col-2 overflow-auto">
+                                  <div class="overflow-auto">{{ item.taskData.account_number }}
+                                  <CTooltip content="Copy Account Number" placement="right">
                                     <template #toggler="{ on }">
 
-                                    <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copyRek(item.taskData.account_number,item.taskData.amount)">
+                                    <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.account_number)">
                                       <CIcon name="cil-copy"/>
                                     </CButton>
                                       </template>
                                     </CTooltip>
                                   </div>
                                 </td>
-                                <td v-show="role!='admin'" class="col-2">
-                                  <div>
-                                     {{ new Date(item.createdAt).toLocaleDateString() }}
-                                     <!--  + ':' + new Date(item.createdAt).toLocaleTimeString('en-GB') -->
-                                  </div>
-                                </td>
-                                <td v-show="role!='admin'" class="col-4 overflow-auto">
-                                  <div class="overflow-auto">
-                                    {{ item.taskTittle.substring(0,35) }}
-                                    <CTooltip content="Copy Account Number And Amount!" placement="right">
+                                <td v-show="role!='admin'" class="col-3 overflow-auto">
+                                  <div class="overflow-auto">{{ item.taskData.account_number }}
+                                  <CTooltip content="Copy Account Number" placement="right">
                                     <template #toggler="{ on }">
-                                    <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copyRek(item.taskData.account_number,item.taskData.amount)">
+
+                                    <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.account_number)">
                                       <CIcon name="cil-copy"/>
                                     </CButton>
                                       </template>
                                     </CTooltip>
                                   </div>
                                 </td>
-                                <td class="col-2">{{ rupiah(item.taskData.amount) }}</td>
+                                <td v-show="role=='admin'" class="col-2 overflow-auto">
+                                  <div class="overflow-auto">{{ item.taskData.anRekening }}
+                                  <CTooltip content="Copy Account Name" placement="right">
+                                    <template #toggler="{ on }">
+
+                                    <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.anRekening)">
+                                      <CIcon name="cil-copy"/>
+                                    </CButton>
+                                      </template>
+                                    </CTooltip>
+                                  </div>
+                                </td>
+                                <td v-show="role!='admin'" class="col-3 overflow-auto">
+                                  <div class="overflow-auto">{{ item.taskData.anRekening }}
+                                  <CTooltip content="Copy Account Name" placement="right">
+                                    <template #toggler="{ on }">
+
+                                    <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.anRekening)">
+                                      <CIcon name="cil-copy"/>
+                                    </CButton>
+                                      </template>
+                                    </CTooltip>
+                                  </div>
+                                </td>
+                                <td class="col-2">
+                                  <div class="overflow-auto">
+                                    {{ rupiah(item.taskData.amount) }}
+                                    <CTooltip content="Copy Account Amount!" placement="right">
+                                    <template #toggler="{ on }">
+                                    <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.amount)">
+                                      <CIcon name="cil-copy"/>
+                                    </CButton>
+                                      </template>
+                                    </CTooltip>
+                                  </div>
+                                </td>
                                 <td v-show="role=='admin'" class="col-1">{{ item.taskStatus }}</td>
-                                <td v-show="role!='admin'" class="col-2">{{ item.taskStatus }}</td>
-                                <td v-show="role!='admin'" class="col-2 text-center">
+                                <td v-show="role!='admin'" class="col-1">{{ item.taskStatus }}</td>
+                                <td v-show="role!='admin'" class="col-1 text-center">
                                   <div v-if="item.taskStatus!='processed'">
                                     <!-- <CButton size="sm" class="rounded-full d-inline-block p-0" color="dark" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
                                       <CIcon class="text-white" name="cil-aperture"/>
@@ -477,15 +509,9 @@ export default {
       currency: "IDR"
     }).format(number);
     },
-    copyRek(norek,amount){
+    copy(text){
        let { toClipboard }=useClipboard();
-       toClipboard(`Account Number : ${norek}; Amount : ${amount}`);
-       console.log('copied');
-    },
-    copyAmt(amount) {
-      let { toClipboard }=useClipboard();
-       toClipboard(`Amount : ${amount}`);
-       console.log('copied');
+       toClipboard(text);
     },
     updateWorker(){
       this.checkedItems.forEach(element =>{
