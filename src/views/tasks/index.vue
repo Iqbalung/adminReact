@@ -9,8 +9,8 @@
     <CDropdown color="secondary">
       <CDropdownToggle color="dark"> <CIcon class="text-white" name="cil-touch-app"/> Assignment</CDropdownToggle>
       <CDropdownMenu>
-        <CDropdownItem component="button" @click="() => { modalAssign=true}"><CIcon class="text-dark" name="cil-touch-app"/> Assign Task</CDropdownItem>
-        <CDropdownItem component="button" @click="clearAssign()"><CIcon class="text-dark" name="cil-trash"/> Unnasign</CDropdownItem>
+        <CDropdownItem component="button" @click="() => { modalAssign=true}" :disabled="filterListActive.value == 'done' || filterListActive.value == 'processed'"><CIcon class="text-dark" name="cil-touch-app"/> Assign Task</CDropdownItem>
+        <CDropdownItem component="button" @click="clearAssign()" :disabled="filterListActive.value == 'done'"><CIcon class="text-dark" name="cil-trash"/> Unnasign</CDropdownItem>
       </CDropdownMenu>
     </CDropdown>
     </div>
@@ -53,7 +53,9 @@
                     <table class="table table-fixed">
                         <thead>
                             <tr>
-                                <th v-show="role=='admin'" scope="col" class="col-1 px-1"><CIcon name="cil-people" /></th>
+                                <th v-show="role=='admin'" scope="col" class="col-1 px-1">
+                                  <input type="checkbox" @change="e => shiftAll(e.target.checked)" v-model="shift" :disabled="filterListActive.value === 'done'" />
+                                </th>
                                 <th v-show="role=='admin'" scope="col" class="col-1 px-0">Created</th>
                                 <th v-show="role=='admin'" scope="col" class="col-2 px-0">Assigned</th>
                                 <th v-show="role=='admin'" scope="col" class="col-2 px-0">No Rekening</th>
@@ -71,11 +73,11 @@
                         <tbody>
                             <tr v-for="(item,index) in tasks.data" :key="index" :class="'table-responsive '+'table-'+cek(item.taskStatus)">
                                 <td v-show="role=='admin'" class="col-1 p-2">
-                                  <div v-if="item.taskStatus!='processed'">
+                                  <div v-if="item.taskStatus!='processed' && item.taskStatus!='done'">
                                     <input type="checkbox" v-model="checkedItems" :value="item._id">
                                   <!-- <CFormCheck  id="item._id" v-model="checkedItems" value="item.id"/> -->
                                   </div>
-                                  <div v-if="item.taskStatus=='processed'">
+                                  <div v-if="item.taskStatus=='processed' || item.taskStatus=='done'">
                                     <CFormCheck disabled/>
                                   </div>
                                 </td>
@@ -667,6 +669,9 @@ export default {
       this.$swal('Saved','','success');
         }
       })
+    },
+    shiftAll(check) {
+      this.checkedItems = check ? this.tasks.data.map(task => task._id) : []
     }
   },
   setup() {
@@ -700,6 +705,7 @@ export default {
       taskExpiredTime:'',
       taskStatus:'Unassigned',
     });
+    let shift = ref(true)
 
     watch(date, value => {
       loadTask(filterListActive.value.value, '', 1, value[0], value[1])
@@ -830,7 +836,7 @@ export default {
       }
     }
     function cekCheck(assign){
-      if(assign != 'unassigne') {
+      if(assign != 'unassigned') {
         return 'true';
       }
     }
@@ -864,6 +870,8 @@ export default {
       .then((result) => {
         tasks.value = result.data;
         countData.value = result.data.data;
+        
+        shift.value = false
       }).catch((err) =>{
         console.log(err.response);
       });
@@ -966,7 +974,8 @@ export default {
       playSound,
       sTs,
       tscob,
-      filterLists
+      filterLists,
+      shift
     }
   }
 }
