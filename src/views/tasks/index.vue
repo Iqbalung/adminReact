@@ -672,7 +672,19 @@ export default {
     },
     shiftAll(check) {
       this.checkedItems = check ? this.tasks.data.map(task => task._id) : []
+    },
+    setShiftClick() {
+      document.addEventListener('keydown', e => {
+        if (e.shiftKey) {
+          const count = this.checkedItems.length
+          
+          this.checkedItems = !count ? this.tasks.data.map(task => task._id) : []
+        }
+      })
     }
+  },
+  mounted() {
+    this.setShiftClick()
   },
   setup() {
     let urlMusic = require('./pristine.mp3');

@@ -33,6 +33,11 @@
               <div v-if="validation.banks" class="text-danger">{{ validation.banks.message }}</div>
             </div>
             <div class="mb-3">
+              <CFormLabel for="ip">IP Address</CFormLabel>
+              <MultiSelect :options="ipOptions"  mode="tags" placeholder="IP Address" createOption tagPlaceholder="Press enter to create a tag" searchable @option="addIp" v-model="user.ip" />
+              <div v-if="validation.ip" class="text-danger">{{ validation.ip.message }}</div>
+            </div>
+            <div class="mb-3">
               <CFormLabel for="password">Password</CFormLabel>
               <CFormInput
                 type="password"
@@ -68,12 +73,19 @@ export default {
       password:'',
       role:'worker',
       mistake:'',
-      banks: []
+      banks: [],
+      ip: []
     });
     const bankOptions = ref([]);
+    const ipOptions = ref([])
     const validation = ref([]);
     let valid = ref([]);
     const router = routers
+
+    function addIp(ip) {
+      ipOptions.value.push(ip)
+    }
+
     function store() {
       axios.post(`${process.env.VUE_APP_URL_API}/users`, user,{
          headers: {
@@ -108,10 +120,12 @@ export default {
     return {
       user,
       bankOptions,
+      ipOptions,
       validation,
       valid,
       router,
-      store
+      store,
+      addIp
     }
   }
 }

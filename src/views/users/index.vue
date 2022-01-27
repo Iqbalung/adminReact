@@ -24,6 +24,7 @@
                   <CTableHeaderCell class="text-center">Email</CTableHeaderCell>
                   <CTableHeaderCell class="text-center">Role</CTableHeaderCell>
                   <CTableHeaderCell class="text-center">Rekening</CTableHeaderCell>
+                  <CTableHeaderCell class="text-center">IP Address</CTableHeaderCell>
                   <CTableHeaderCell class="text-center">Action</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
@@ -47,6 +48,14 @@
                   <CTableDataCell class="text-center">
                     <ul class="list-unstyled" v-if="item.banks?.length">
                       <li v-for="(bank, key) in item.banks" :key="key"><CBadge color="primary">{{ bank.username }}</CBadge></li>
+                    </ul>
+                    <span v-else>
+                      -
+                    </span>
+                  </CTableDataCell>
+                  <CTableDataCell class="text-center">
+                    <ul class="list-unstyled" v-if="item.ip?.length">
+                      <li v-for="(ip, key) in item.ip" :key="key"><CBadge color="primary">{{ ip }}</CBadge></li>
                     </ul>
                     <span v-else>
                       -

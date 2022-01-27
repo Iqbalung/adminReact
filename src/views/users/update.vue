@@ -27,6 +27,12 @@
               <div v-if="validation.username" class="text-danger">{{ validation.username.message }}</div>
             </div>
             <div class="mb-3">
+              <CFormLabel for="ip">IP Address</CFormLabel>
+              <MultiSelect :options="ipOptions"  mode="tags" placeholder="IP Address" createOption tagPlaceholder="Press enter to create a tag" searchable @option="addIp" v-model="user.ip" />
+              <div v-if="validation.ip" class="text-danger">{{ validation.ip.message }}</div>
+            </div>
+
+            <div class="mb-3">
               <CButton color="primary" class="rounded">Save</CButton>
             </div>
           </CForm>
@@ -40,8 +46,10 @@ import { reactive, ref,onMounted } from 'vue'
 import routers from '../../router'
 import {useRoute} from 'vue-router'
 import axios from 'axios'
+import MultiSelect from '@vueform/multiselect'
 export default {
   name: 'Update User',
+  components: { MultiSelect },
   setup() {
     // data binding
     let user = reactive({
@@ -49,10 +57,17 @@ export default {
       username:'',
       name:'',
       role:'worker',
+      ip: []
     });
     const validation = ref([]);
     const router = routers;
     const route = useRoute();
+
+    const ipOptions = ref([])
+
+    function addIp(ip) {
+      ipOptions.value.push(ip)
+    }
 
     onMounted(()=>{
       // console.log(route.params.id);
@@ -64,6 +79,8 @@ export default {
         user.email = result.data.email;
         user.username = result.data.username;
         user.name = result.data.name;
+        ipOptions.value = result.data.ip ?? [];
+        user.ip = result.data.ip
       }).catch((err)=>{
         console.log(err.response.data)
       })
@@ -87,8 +104,12 @@ export default {
       user,
       validation,
       router,
-      update
+      update,
+      addIp,
+      ipOptions
     }
   }
 }
 </script>
+
+<style src="@vueform/multiselect/themes/default.css"></style>

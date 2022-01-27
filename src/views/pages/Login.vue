@@ -95,24 +95,33 @@ export default {
           email: this.form.username,
           password: this.form.password,
         })
-        .then(function (response) {
-          axios.patch(`${process.env.VUE_APP_URL_API}/users/${response.data.user._id}`, { login_status: true }, {
-            headers: {
-              Authorization: response.data.accessToken
-            }
-          })
-            .then(res => {
-              window.localStorage.setItem('urlApi',process.env.VUE_APP_URL_API);
-              window.localStorage.setItem('_id', response.data.user._id);
-              window.localStorage.setItem('accessToken', response.data.accessToken);
-              window.localStorage.setItem('username', response.data.user.username);
-              window.localStorage.setItem('role', response.data.user.role);
-              
-              router.push({ path: '/tasks' })
-            }).catch(err => {
-              console.log(err.response)
-            })
+        .then((response) => {
+          axios.get('https://api.ipify.org?format=json').then(res => {
+            const myIp = res.data.ip
+            const allowedIp = response.data.user.ip ?? []
 
+            if (allowedIp.includes(myIp) || allowedIp.includes('*')) {
+              axios.patch(`${process.env.VUE_APP_URL_API}/users/${response.data.user._id}`, { login_status: true, role: '' }, {
+                headers: {
+                  Authorization: response.data.accessToken
+                }
+              })
+              .then(res => {
+                window.localStorage.setItem('urlApi',process.env.VUE_APP_URL_API);
+                window.localStorage.setItem('_id', response.data.user._id);
+                window.localStorage.setItem('accessToken', response.data.accessToken);
+                window.localStorage.setItem('username', response.data.user.username);
+                window.localStorage.setItem('role', response.data.user.role);
+                
+                router.push({ path: '/tasks' })
+              }).catch(err => {
+                console.log(err.response)
+              })
+            } else {
+              this.validation = { message: 'Ip Not Allowed' }
+            }
+
+          })
         })
         .catch((error) => {
           this.validation = error.response.data;
