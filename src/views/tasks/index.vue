@@ -678,7 +678,7 @@ export default {
         if (e.shiftKey) {
           const count = this.checkedItems.length
           
-          this.checkedItems = !count ? this.tasks.data.map(task => task._id) : []
+          this.checkedItems = !count ? this.tasks.data?.map(task => task._id) : []
         }
       })
     }
@@ -857,15 +857,15 @@ export default {
       let taskAssigne =`${window.localStorage.getItem('username')}`;
       let skip = (pages > 1) ? (pages-1) * 100 : 0;
       let param_admin = {
-        'createdAt[$gte]' : from,
-        'createdAt[$lte]' :to,
+        'createdAt[$gte]' : from.valueOf(),
+        'createdAt[$lte]' :to.valueOf(),
         taskStatus:status,
         $skip:skip,
         $search: searchTit
       }
       let param_users = {
-          'createdAt[$gte]' : from,
-          'createdAt[$lte]' :to,
+          'createdAt[$gte]' : from.valueOf(),
+          'createdAt[$lte]' :to.valueOf(),
           taskStatus:status,
           $skip:skip,
           taskAssigne:taskAssigne,
