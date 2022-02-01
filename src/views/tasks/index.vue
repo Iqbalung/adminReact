@@ -1,203 +1,141 @@
 <template>
   <div>
-    <CCard class="mb-4 overflow-auto">
-        <CCardHeader class="bg-white">Task List</CCardHeader>
+
+    <CCard class="mb-4">
       <CCardBody>
-      <div class="d-flex justify-content-between align-items-center">
-      <div class="d-flex">
-    <div class="me-2" v-show="role=='admin'">
-    <CDropdown color="secondary">
-      <CDropdownToggle color="dark"> <CIcon class="text-white" name="cil-touch-app"/> Assignment</CDropdownToggle>
-      <CDropdownMenu>
-        <CDropdownItem component="button" @click="() => { modalAssign=true}" :disabled="filterListActive.value == 'done' || filterListActive.value == 'processed'"><CIcon class="text-dark" name="cil-touch-app"/> Assign Task</CDropdownItem>
-        <CDropdownItem component="button" @click="clearAssign()" :disabled="filterListActive.value == 'done'"><CIcon class="text-dark" name="cil-trash"/> Unnasign</CDropdownItem>
-      </CDropdownMenu>
-    </CDropdown>
-    </div>
-      <!-- <CButton v-show="role=='admin'" color="danger" class="text-white me-2" @click="clearAssign()">
-          <CIcon class="text-white" name="cil-trash"/> Unnasigned
-      </CButton>
-
-      <CButton v-show="role=='admin'" color="dark" class="me-2" @click="() => { modalAssign=true}">
-          <CIcon class="text-white" name="cil-touch-app"/> Assign Task
-      </CButton> -->
-        <div class="w-full">
-          <Datepicker v-model="date" range @closed="pickDate" style="width:250px;" :enableTimePicker="false"></Datepicker>
+        <CInputGroup class="mb-2">
+          <Datepicker v-model="dateFilter" range @closed="pickDate" :enableTimePicker="false"></Datepicker>
+          <CFormInput type="text" id="search" v-model="searchFilter" placeholder="Worker"/>
+          <b-dropdown class="filter-status" variant="light" text="Status" auto-close="outside">
+            <b-dropdown-item-button v-for="(option, key) in statusFilterOptions" :key="key">
+              <CFormCheck :id="option.value" :value="option.value" :label="option.label" :checked="option.checked" @change="selectStatusFilter"></CFormCheck>
+            </b-dropdown-item-button>
+          </b-dropdown>
+          <div class="d-grid">
+            <CButton color="primary" class="filter-button">Search</CButton>
+          </div>
+        </CInputGroup>
+        <div class="d-flex justify-content-end">
+          <CButton color="secondary" size="sm" @click="collapseFilter = !collapseFilter">
+            <CIcon :icon="cilXCircle" v-if="collapseFilter" />
+            <CIcon :icon="cilChevronCircleDownAlt" v-else />
+          </CButton>
         </div>
-      </div>
-    <div class="d-flex align-items-center">
-      <!-- <div class="me-1">
-          Total
-          <CBadge class="d-inline-block rounded-circle" color="dark">{{ countData.length }}</CBadge>
-        </div> -->
-        <div class="me-2">
-          <button class="btn btn-primary" type="button" disabled>
-            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" style="margin-right:30px;"></span>
-            <span class="sr-only">  {{ tasks.total }}</span>
-        </button>
+        <CCollapse :visible="collapseFilter" :class="{ 'mt-2': collapseFilter }">
+          <CInputGroup>
+            <CFormInput type="text" id="search" v-model="userIdFilter" placeholder="User ID" />
+            <CFormInput type="text" id="search" v-model="accountNumberFilter" placeholder="Bank" />
+            <CFormInput type="text" id="search" v-model="amountFilter" placeholder="Nominal" />
+            <CFormInput type="text" id="search" v-model="bankTypeFilter" placeholder="Account Bank" />
+          </CInputGroup>
+        </CCollapse>
+      </CCardBody>
+    </CCard>
+
+    <CCard class="mb-4">
+      <CCardHeader class="bg-white d-flex align-items-center justify-content-between">
+        <span>
+          Data Found
+          <CBadge color="primary">{{ tasks.total ? tasks.total : 0 }}</CBadge>
+        </span>
+        <div v-if="role === 'admin'">
+          <CButton size="sm" color="success" class="me-1" @click="() => { modalAssign = true }">Assign Task</CButton>
+          <CButton size="sm" color="secondary" class="me-1" @click="clearAssign()">Unassign</CButton>
+          <CButton size="sm" color="danger" class="me-1">Process Reject</CButton>
+          <CButton size="sm" color="warning" @click="requestRejectBatch()">Request Reject</CButton>
         </div>
-      <div class="me-1">
-      <CFormInput type="text" id="search" @keyup="searchTitle" placeholder="search"/>
-      </div>
-    <div class="me-1">
-      <CDropdown color="light">
-        <CDropdownToggle color="dark">{{ filterListActive.label }}</CDropdownToggle>
-        <CDropdownMenu>
-          <CDropdownItem component="button" v-for="(filter, key) in filterLists" @click="filterSelect(filter)">{{ filter.label }}</CDropdownItem>
-        </CDropdownMenu>
-      </CDropdown>
-    </div>
-    </div>
-      </div>
-            <div class="table-responsive mt-3">
-                    <table class="table table-fixed">
-                        <thead>
-                            <tr>
-                                <th v-show="role=='admin'" scope="col" class="col-1 px-1">
-                                  <input type="checkbox" @change="e => shiftAll(e.target.checked)" v-model="shift" :disabled="filterListActive.value === 'done'" />
-                                </th>
-                                <th v-show="role=='admin'" scope="col" class="col-1 px-0">Created</th>
-                                <th v-show="role=='admin'" scope="col" class="col-2 px-0">Assigned</th>
-                                <th v-show="role=='admin'" scope="col" class="col-2 px-0">No Rekening</th>
-                                <th v-show="role=='admin'" scope="col" class="col-2 px-0">Nama</th>
-                                <th v-show="role!='admin'" scope="col" class="col-2">Created</th>
-                                <th v-show="role!='admin'" scope="col" class="col-3">No Rekening</th>
-                                <th v-show="role!='admin'" scope="col" class="col-3">Nama</th>
-                                <th scope="col" class="col-2">Jumlah</th>
-                                <th v-show="role=='admin'" scope="col" class="col-1">Status</th>
-                                <th v-show="role!='admin'" scope="col" class="col-1">Status</th>
-                                <th v-show="role!='admin'" scope="col" class="col-1 text-center">Detail</th>
-                                <th v-show="role=='admin'" scope="col" class="col-1 text-center">Detail</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(item,index) in tasks.data" :key="index" :class="'table-responsive '+'table-'+cek(item.taskStatus)">
-                                <td v-show="role=='admin'" class="col-1 p-2">
-                                  <div v-if="item.taskStatus!='processed' && item.taskStatus!='done'">
-                                    <input type="checkbox" v-model="checkedItems" :value="item._id">
-                                  <!-- <CFormCheck  id="item._id" v-model="checkedItems" value="item.id"/> -->
-                                  </div>
-                                  <div v-if="item.taskStatus=='processed' || item.taskStatus=='done'">
-                                    <CFormCheck disabled/>
-                                  </div>
-                                </td>
-                                <td v-show="role=='admin'" class="col-1">{{ new Date(item.createdAt).toLocaleDateString() }}</td>
-                                <td v-show="role!='admin'" class="col-1">{{ new Date(item.createdAt).toLocaleDateString() }}</td>
-                                <td v-show="role=='admin'" class="col-2">{{ item.taskAssigne }}</td>
-                                <td v-show="role=='admin'" class="col-2 overflow-auto">
-                                  <div class="overflow-auto">{{ item.taskData.account_number }}
-                                  <CTooltip content="Copy Account Number" placement="right">
-                                    <template #toggler="{ on }">
+        <!-- <CDropdown color="light">
+          <CDropdownToggle color="dark">{{ filterListActive.label }}</CDropdownToggle>
+          <CDropdownMenu>
+            <CDropdownItem component="button" v-for="(filter, key) in filterLists" @click="filterSelect(filter)">{{ filter.label }}</CDropdownItem>
+          </CDropdownMenu>
+        </CDropdown> -->
+      </CCardHeader>
+      <CCardBody class="p-0">
 
-                                    <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.account_number)">
-                                      <CIcon name="cil-copy"/>
-                                    </CButton>
-                                      </template>
-                                    </CTooltip>
-                                  </div>
-                                </td>
-                                <td v-show="role!='admin'" class="col-3 overflow-auto">
-                                  <div class="overflow-auto">{{ item.taskData.account_number }}
-                                  <CTooltip content="Copy Account Number" placement="right">
-                                    <template #toggler="{ on }">
+        <CTable responsive>
+          <CTableHead>
+            <CTableRow>
+              <CTableHeaderCell scope="col" v-if="role === 'admin'">
+                  <input type="checkbox" @change="e => shiftAll(e.target.checked)" v-model="shift" :disabled="filterListActive.value === 'done'" />
+              </CTableHeaderCell>
+              <CTableHeaderCell scope="col">Created</CTableHeaderCell>
+              <CTableHeaderCell scope="col" v-show="role=='admin'">Assigned</CTableHeaderCell>
+              <CTableHeaderCell scope="col">Account Number</CTableHeaderCell>
+              <CTableHeaderCell scope="col">Name</CTableHeaderCell>
+              <CTableHeaderCell scope="col">Amount</CTableHeaderCell>
+              <CTableHeaderCell scope="col">Status</CTableHeaderCell>
+              <CTableHeaderCell scope="col">Action</CTableHeaderCell>
+            </CTableRow>
+          </CTableHead>
+          <CTableBody>
+            <CTableRow v-for="(item,index) in tasks.data" :key="index">
+              <CTableDataCell v-show="role=='admin'">
+                  <div v-if="item.taskStatus!='processed' && item.taskStatus!='done'">
+                  <input type="checkbox" v-model="checkedItems" :value="item._id">
+                  <!-- <CFormCheck  id="item._id" v-model="checkedItems" value="item.id"/> -->
+                  </div>
+                  <div v-if="item.taskStatus=='processed' || item.taskStatus=='done'">
+                  <CFormCheck disabled/>
+                  </div>
+              </CTableDataCell>
+              <CTableDataCell>{{ new Date(item.createdAt).toLocaleDateString() }}</CTableDataCell>
+              <CTableDataCell v-show="role=='admin'">{{ item.taskAssigne }}</CTableDataCell>
+              <CTableDataCell>
+                  <div class="overflow-auto">{{ item.taskData.account_number }}
+                  <CTooltip content="Copy Account Number" placement="right">
+                      <template #toggler="{ on }">
 
-                                    <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.account_number)">
-                                      <CIcon name="cil-copy"/>
-                                    </CButton>
-                                      </template>
-                                    </CTooltip>
-                                  </div>
-                                </td>
-                                <td v-show="role=='admin'" class="col-2 overflow-auto">
-                                  <div class="overflow-auto">{{ item.taskData.anRekening }}
-                                  <CTooltip content="Copy Account Name" placement="right">
-                                    <template #toggler="{ on }">
+                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.account_number)">
+                          <CIcon name="cil-copy"/>
+                      </CButton>
+                      </template>
+                  </CTooltip>
+                  </div>
+              </CTableDataCell>
+              <CTableDataCell v-show="role=='admin'">
+                  <div class="overflow-auto">{{ item.taskData.anRekening }}
+                  <CTooltip content="Copy Account Name" placement="right">
+                      <template #toggler="{ on }">
 
-                                    <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.anRekening)">
-                                      <CIcon name="cil-copy"/>
-                                    </CButton>
-                                      </template>
-                                    </CTooltip>
-                                  </div>
-                                </td>
-                                <td v-show="role!='admin'" class="col-3 overflow-auto">
-                                  <div class="overflow-auto">{{ item.taskData.anRekening }}
-                                  <CTooltip content="Copy Account Name" placement="right">
-                                    <template #toggler="{ on }">
-
-                                    <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.anRekening)">
-                                      <CIcon name="cil-copy"/>
-                                    </CButton>
-                                      </template>
-                                    </CTooltip>
-                                  </div>
-                                </td>
-                                <td class="col-2">
-                                  <div class="overflow-auto">
-                                    {{ rupiah(item.taskData.amount) }}
-                                    <CTooltip content="Copy Account Amount!" placement="right">
-                                    <template #toggler="{ on }">
-                                    <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.amount)">
-                                      <CIcon name="cil-copy"/>
-                                    </CButton>
-                                      </template>
-                                    </CTooltip>
-                                  </div>
-                                </td>
-                                <td v-show="role=='admin'" class="col-1">{{ item.taskStatus }}</td>
-                                <td v-show="role!='admin'" class="col-1">{{ item.taskStatus }}</td>
-                                <td v-show="role!='admin'" class="col-1 text-center">
-                                  <div v-if="item.taskStatus!='processed'">
-                                    <!-- <CButton size="sm" class="rounded-full d-inline-block p-0" color="dark" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
-                                      <CIcon class="text-white" name="cil-aperture"/>
-                                    </CButton> -->
-                                    <CButton size="sm" class="text-primary" variant="ghost" color="light" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
-                                      <!-- <CIcon class="text-white" name="cil-library"/> -->
-                                      detail
-                                    </CButton>
-                                    </div>
-                                    <div v-if="item.taskStatus=='processed'">
-                                      <!-- <CIcon class="text-dark" name="cil-aperture"/> -->
-                                      detail
-                                  </div>
-                              </td>
-                                <td v-show="role=='admin'" class="col-1 p-1">
-                                  <div v-if="item.taskStatus!='processed'">
-                                    <CButton size="sm" class="text-primary" variant="ghost" color="light" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
-                                      <!-- <CIcon class="text-white" name="cil-library"/> -->
-                                      detail
-                                    </CButton>
-                                    </div>
-                                    <div v-if="item.taskStatus=='processed'">
-                                      <!-- <CIcon class="text-dark" name="cil-library"/> -->
-                                      detail
-                                  </div>
-                              </td>
-                            </tr>
-                            <tr v-show="tasks.total==0" class="border-0">
-                              <td class="col-12 py-3">No records found</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                </div><!-- End -->
-      <!-- </div> -->
-          <!-- <CPagination size="sm" aria-label="Page navigation example">
-              <CPaginationItem @click="previousPage">Previous</CPaginationItem>
-              <CPaginationItem :active="checkPagination(item)" v-for="(item,index) in getPaginate" :key="index" @click="getPage">
-              {{ item }}
-              </CPaginationItem>
-              <CPaginationItem @click="nextPage">Next</CPaginationItem>
-          </CPagination>
-          <br> -->
-      <b-pagination
-      size="sm"
-      v-model="currentPages"
-      :total-rows="tasks.total"
-      :per-page="perPage"
-      aria-controls=""
-      @click="changePg"
-    ></b-pagination>
+                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.anRekening)">
+                          <CIcon name="cil-copy"/>
+                      </CButton>
+                      </template>
+                  </CTooltip>
+                  </div>
+              </CTableDataCell>
+              <CTableDataCell>
+                  <div class="overflow-auto">
+                  {{ rupiah(item.taskData.amount) }}
+                  <CTooltip content="Copy Account Amount!" placement="right">
+                      <template #toggler="{ on }">
+                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.amount)">
+                          <CIcon name="cil-copy"/>
+                      </CButton>
+                      </template>
+                  </CTooltip>
+                  </div>
+              </CTableDataCell>
+              <CTableDataCell :color="getCellColor(item.taskStatus)">{{ item.taskStatus }}</CTableDataCell>
+              <CTableDataCell>
+                  <CButton size="sm" class="text-primary" variant="ghost" color="light" :disabled="item.taskStatus === 'processed'" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
+                    Detail
+                  </CButton>
+                  <CButton size="sm" class="text-danger" variant="ghost" color="light" @click="requestReject(item)" v-if="role !== 'admin' && item.taskStatus !== 'request_reject'">
+                    Request Reject
+                  </CButton>
+              </CTableDataCell>
+            </CTableRow>
+            <CTableRow>
+              <CTableDataCell v-show="tasks.total < 1" class="text-center" :colspan="role === 'admin' ? 8 : 6">No records found</CTableDataCell>
+            </CTableRow>
+          </CTableBody>
+        </CTable>
+        
+        <div class="d-flex justify-content-center">
+          <b-pagination v-model="currentPages" :total-rows="tasks.total" :per-page="perPage" @click="changePg" />
+        </div>
       </CCardBody>
     </CCard>
 
@@ -238,31 +176,31 @@
     <!-- Toast Confirm -->
 
     <!-- Modal Assigment -->
-    <CModal  :visible="modalAssign" @close="() => { modalAssign = false }">
-    <CModalHeader>
-      <CModalTitle>Modal Assignment</CModalTitle>
-    </CModalHeader>
-    <CModalBody>
-      <CForm @submit.prevent="updateWorker()">
-      <div class="mb-3">
-      <MultiSelect :options="users" placeholder="Users" v-model="work" searchable @open="getUser">
-        <template #option="props">
-          <div class="d-flex justify-content-between align-items-center w-100">
-            <span>{{ props.option.label }}</span>            
-            <div v-if="props.option.status">
-              <div style="width: 16px; height: 16px;" class="rounded-circle bg-success"></div>
-            </div>
-            <div v-else>
-              <div style="width: 16px; height: 16px; background-color: #eee;" class="rounded-circle"></div>
-            </div>
+    <CModal :visible="modalAssign" @close="() => { modalAssign = false }">
+      <CModalHeader>
+        <CModalTitle>Modal Assignment</CModalTitle>
+      </CModalHeader>
+      <CModalBody>
+        <CForm @submit.prevent="updateWorker()">
+          <div class="mb-3">
+            <MultiSelect :options="users" placeholder="Users" v-model="work" searchable @open="getUser">
+              <template #option="props">
+                <div class="d-flex justify-content-between align-items-center w-100">
+                  <span>{{ props.option.label }}</span>            
+                  <div v-if="props.option.status">
+                    <div style="width: 16px; height: 16px;" class="rounded-circle bg-success"></div>
+                  </div>
+                  <div v-else>
+                    <div style="width: 16px; height: 16px; background-color: #eee;" class="rounded-circle"></div>
+                  </div>
+                </div>
+              </template>
+            </MultiSelect>
           </div>
-        </template>
-      </MultiSelect>
-      </div>
-      <CButton color="primary">Save changes</CButton>
-    </CForm>
-    </CModalBody>
-  </CModal>
+          <CButton color="primary">Save changes</CButton>
+        </CForm>
+      </CModalBody>
+    </CModal>
     <!-- Modal Assigment -->
 
     <!-- Modal History -->
@@ -375,73 +313,38 @@
 </template>
 
 <style>
-.table-wrapper {
-  max-height: 350px;
-  overflow: auto;
+.table > :not(caption) > * > * {
+	padding: .5rem 1rem;
 }
-.status {
-  max-width: 130px;
+
+.filter-status {
+  flex: 1 1 auto;
+  text-align: left;
+  border: 1px solid #ced4da;
 }
-.table-fixed tbody {
-    height: 300px;
-    overflow-y: auto;
-    overflow: auto;
+.filter-status .dropdown-toggle {
+  color: #212529;
+  background-color: #fff;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-.table-fixed thead {
+.filter-status .dropdown-menu {
   width: 100%;
-  overflow: auto;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
-
-.table-fixed thead,
-.table-fixed tbody,
-.table-fixed tr,
-.table-fixed td,
-.table-fixed th {
-    display: block;
+.dp__input {
+  padding: .45rem .75rem;
+  padding-left: 35px;
+  border-radius: 0;
 }
-.table-fixed td {
-  height: 60px;
-  /* overflow: hidden; */
-  padding: 0px;
-  /* align-items: center; */
+.multiselect {
+  border-radius: 0 !important;
 }
-.table-fixed td div {
-  /* margin: auto; */
-}
-.table-fixed th {
-  padding: 0;
-  /* margin:0; */
-}
-
-.table-fixed tbody td,
-.table-fixed tbody th,
-.table-fixed thead > tr > th {
-    float: left;
-    position: relative;
-}
-.table-fixed thead > tr > th ::after {
-   content: '';
-        clear: both;
-        display: block;
-}
-
-.table-fixed tbody::-webkit-scrollbar {
-  width: 8px;
-  /* width of the entire scrollbar */
-}
-
-.table-fixed tbody::-webkit-scrollbar-track {
-  background: white;
-  /* color of the tracking area */
-}
-
-.table-fixed tbody::-webkit-scrollbar-thumb {
-  background-color: black;
-  /* color of the scroll thumb */
-  border-radius: 20px;
-  /* roundness of the scroll thumb */
-  border: 1px solid white;
-  /* creates padding around scroll thumb */
+.filter-button {
+  border-radius: 0;
 }
 
 
@@ -450,9 +353,11 @@
 <script>
 import router from '../../router'
 import axios from 'axios'
-import {reactive,onMounted,watch,ref} from 'vue'
+import { reactive, onMounted, watch, ref } from 'vue'
+import { cilChevronCircleDownAlt, cilXCircle } from '@coreui/icons';
 import useClipboard from 'vue-clipboard3'
 import MultiSelect from '@vueform/multiselect'
+
 export default {
   name: 'TaskList',
   components: { MultiSelect },
@@ -461,7 +366,7 @@ export default {
       tasks: [],
         visibleLiveDemo: false,
         modalAdd: false,
-        modalAssign:false,
+        modalAssign: false,
         modalDetail:false,
         account_number: '',
         anRekening: '',
@@ -517,102 +422,138 @@ export default {
     },
     updateWorker(){
       this.checkedItems.forEach(element =>{
-      axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
-        headers: {
-          Authorization:window.localStorage.getItem('accessToken')
-        }
-      })
-      .then((result)=> {
-      let date = new Date();
-        let taskh = result.data.taskHistory;
-        taskh.push({status: `task assigned by lina ${window.localStorage.getItem('username')}`, updatedAt:date.toISOString()})
-        console.log(taskh);
-    // Axios update
-      axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:this.work,taskHistory:taskh},{
-        headers: {
-          Authorization:window.localStorage.getItem('accessToken')
-        }
-      })
-      .then(()=> {
-        //
-      }).catch((err)=>{
-        console.log(err);
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`, {
+          headers: {
+            Authorization:window.localStorage.getItem('accessToken')
+          }
+        }).then((result)=> {
+          let date = new Date();
+          let taskh = result.data.taskHistory;
+          
+          taskh.push({
+            status: `task assigned by lina ${window.localStorage.getItem('username')}`,
+            updatedAt:date.toISOString()
+          })
+  
+          // Axios update
+          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`, { taskAssigne:this.work, taskHistory:taskh },{
+            headers: {
+              Authorization:window.localStorage.getItem('accessToken')
+            }
+          }).then(()=> {
+          }).catch((err)=>{
+            console.log(err);
+          })
+
+        // Axios update
+        }).catch((err)=>{
+          console.log(err);
+        })
       })
 
-    // Axios update
-      }).catch((err)=>{
-        console.log(err);
-      })
-
-      })
-        console.log('success update');
-        this.checkedItems = [];
-        this.modalAssign = false;
-        this.$swal('Saved','','success');
-        // loadTask(filterListActive.value.value)
+      this.checkedItems = [];
+      this.modalAssign = false;
+      this.$swal('Saved','','success');
     },
      clearAssign() {
-      this.$swal({title:'Are Sure ?',icon:'info',showCancelButton:true,focusConfirm:false,confirmButtonText:'Yes, Sure',cancelButtonText:'Cancel'})
-      .then((result)=> {
+      this.$swal({
+        title: 'Are Sure ?',
+        icon: 'info',
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText: 'Yes, Sure',
+        cancelButtonText: 'Cancel'
+      }).then((result)=> {
         if(result.isConfirmed) {
-        this.checkedItems.forEach(element => {
-
-        axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
-        headers: {
-          Authorization:window.localStorage.getItem('accessToken')
-        }
-      })
-      .then((results)=> {
-        console.log('datane ',results.data);
-        let taskh = results.data.taskHistory[0];
-        // taskh.push({status: `assigned by lina ${window.localStorage.getItem('username')}}`, updatedAt:Date.now})
-        console.log(taskh);
-    // Axios update
-      axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigned',taskHistory:taskh},{
-        headers: {
-          Authorization:window.localStorage.getItem('accessToken')
-        }
-      })
-      .then(()=> {
-        //
-      }).catch((err)=>{
-        console.log(err);
-      })
-
-    // Axios update
-      }).catch((err)=>{
-        console.log(err);
-      })
-
-
-      });
-        console.log('success update');
-        this.checkedItems = [];
-        this.$swal('Saved','','success');
+          this.checkedItems.forEach(element => {
+            axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
+              headers: {
+                Authorization:window.localStorage.getItem('accessToken')
+              }
+            }).then((results)=> {
+              let taskh = results.data.taskHistory[0];
+          
+              // Axios update
+              axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigned',taskHistory:taskh},{
+                headers: {
+                  Authorization:window.localStorage.getItem('accessToken')
+                }
+              }).then(()=> {
+              }).catch((err)=>{
+                console.log(err);
+              })
+            // Axios update
+            }).catch((err)=>{
+              console.log(err);
+            })
+          });
+          
+          console.log('success update');
+          this.checkedItems = [];
+          this.$swal('Saved','','success');
         }
       })
     },
-    clearAssigns() {
-      this.$swal({title:'Are Sure ?',icon:'info',showCancelButton:true,focusConfirm:false,confirmButtonText:'Yes, Sure',cancelButtonText:'Cancel'})
-      .then((result)=> {
+     requestReject(task) {
+      this.$swal({
+        title: 'Are Sure ?',
+        icon: 'info',
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText: 'Yes, Sure',
+        cancelButtonText: 'Cancel'
+      }).then((result)=> {
         if(result.isConfirmed) {
-        this.sel.forEach(element => {
-        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigned',taskStatus:'unprocess'},{
-        headers: {
-          Authorization:window.localStorage.getItem('accessToken')
+          // Axios update
+          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${task._id}`,{taskStatus: 'request_reject'},{
+            headers: {
+              Authorization:window.localStorage.getItem('accessToken')
+            }
+          }).then(()=> {
+          }).catch((err)=>{
+            console.log(err);
+          })
+          
+          console.log('success update');
+          this.checkedItems = [];
+          this.$swal('Saved','','success');
         }
       })
-      .then(()=> {
-       //
-      }).catch((err)=>{
-        console.log(err);
-      })
-      });
+    },
+     requestRejectBatch() {
+      this.$swal({
+        title: 'Are Sure ?',
+        icon: 'info',
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText: 'Yes, Sure',
+        cancelButtonText: 'Cancel'
+      }).then((result)=> {
+        if(result.isConfirmed) {
+          this.checkedItems.forEach(element => {
+            axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
+              headers: {
+                Authorization:window.localStorage.getItem('accessToken')
+              }
+            }).then((results)=> {          
+              // Axios update
+              axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskStatus: 'request_reject'},{
+                headers: {
+                  Authorization:window.localStorage.getItem('accessToken')
+                }
+              }).then(()=> {
+              }).catch((err)=>{
+                console.log(err);
+              })
+            // Axios update
+            }).catch((err)=>{
+              console.log(err);
+            })
+          });
+          
+          console.log('success update');
+          this.checkedItems = [];
           this.$swal('Saved','','success');
-          router.go()
-            document.querySelectorAll('input[type="checkbox]').forEach((item)=>{
-              item.checked = false;
-            });
         }
       })
     },
@@ -676,9 +617,9 @@ export default {
     setShiftClick() {
       document.addEventListener('keydown', e => {
         if (e.shiftKey) {
-          const count = this.checkedItems.length
+          const count = this.checkedItems?.length
           
-          this.checkedItems = !count ? this.tasks.data.map(task => task._id) : []
+          this.checkedItems = !count ? this.tasks.data?.map(task => task._id) : []
         }
       })
     }
@@ -689,8 +630,23 @@ export default {
   setup() {
     let urlMusic = require('./pristine.mp3');
     let player =  new Audio();
-    let date = ref();
-    let searchTitt = ref([]);
+
+    const dateFilter = ref();
+    const searchFilter = ref('');
+    const userIdFilter = ref('');
+    const accountNumberFilter = ref('');
+    const amountFilter = ref('');
+    const bankTypeFilter = ref('');
+    const statusFilterOptions = ref([
+        { label: 'Unprocess', value: 'unprocess', checked: true },
+        { label: 'Unassigned', value: 'unassigned', checked: false },
+        { label: 'Processed', value: 'processed', checked: false },
+        { label: 'Done', value: 'done', checked: false },
+        { label: 'Request Reject', value: 'request_reject', checked: false },
+    ])
+    const statusFilter = ref(['unprocess'])
+    const collapseFilter = ref(false)
+
     let currentPages= ref(1);
     let toasts = ref([]);
     let tscob = ref([]);
@@ -719,93 +675,146 @@ export default {
     });
     let shift = ref(true)
 
-    watch(date, value => {
-      loadTask(filterListActive.value.value, '', 1, value[0], value[1])
+    watch(dateFilter, value => {
+      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, 1, value[0], value[1])
+    })
+
+    watch(searchFilter, value => {
+      loadTask(filterListActive.value.value, value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value[0], dateFilter.value[1]);
+    })
+
+    watch(userIdFilter, value => {
+      loadTask(filterListActive.value.value, searchFilter.value, value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value[0], dateFilter.value[1]);
+    })
+
+    watch(accountNumberFilter, value => {
+      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value[0], dateFilter.value[1]);
+    })
+
+    watch(amountFilter, value => {
+      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, value, bankTypeFilter.value, 1, dateFilter.value[0], dateFilter.value[1]);
+    })
+
+    watch(bankTypeFilter, value => {
+      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, value, 1, dateFilter.value[0], dateFilter.value[1]);
     })
 
     onMounted(()=> {
-
       // date
-      const startDate = new Date().setDate(new Date().getDate() - 1);
+      const startDate = new Date(new Date().setDate(new Date().getDate() - 1));
       const endDate = new Date();
-      date.value = [startDate, endDate];
+
+      dateFilter.value = [startDate, endDate];
 
       // socket
-    var acknowledgedcreate = [];
+      var acknowledgedcreate = [];
 
-        socket.on('tasks created', (message) => {
-         if(!~acknowledgedcreate.indexOf(message._id)){
+      socket.on('tasks created', (message) => {
+        if (!~acknowledgedcreate.indexOf(message._id)){
+          // add to array of acknowledged events
+          acknowledgedcreate.unshift(message._id);
 
-            // add to array of acknowledged events
-            acknowledgedcreate.unshift(message._id);
+          // prevent array from growing to large
+          if(acknowledgedcreate.length > 20){
+            acknowledgedcreate.length = 20;
+          }
 
-            // prevent array from growing to large
-            if(acknowledgedcreate.length > 20){
-                acknowledgedcreate.length = 20;
+          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value[0], dateFilter.value[1]);
+
+          if (message.taskAssigne == window.localStorage.getItem('username')) {
+            if(message.taskStatus=='done'){
+              showToast('Transfer Berhasil ', message.taskTittle, message.createdAt);
+            } else{
+              showToast('Task Baru ', message.taskTittle, message.createdAt);
             }
+          }
+        }
+      })
+      
+      socket.on('tasks updated', (message) => {
+        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value[0], dateFilter.value[1])
+      })
 
-            // console.log('acknowledged',acknowledgedcreate);
-            // console.log('tasksbro',message);
-            // console.log('title',message.taskTittle);
-            // alert('oke');
-            loadTask(filterListActive.value.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
-            // console.log('role user',message.taskAssigne)
-          if(message.taskAssigne == window.localStorage.getItem('username'))
-            {
-              if(message.taskStatus=='done'){
-                showToast('Transfer Berhasil ',message.taskTittle,message.createdAt);
-            // loadTask(filterListActive.value.value,searchTitt.value,page.value);
+      var acknowledged = [];
+      
+      socket.on('tasks patched', (message) => {
+        if (!~acknowledged.indexOf(message._id)){
+          // add to array of acknowledged events
+          acknowledged.unshift(message._id);
 
-            }else{
-              showToast('Task Baru ',message.taskTittle,message.createdAt);
-            // loadTask(filterListActive.value.value,searchTitt.value,page.value);
+          // prevent array from growing to large
+          if (acknowledged.length > 20){
+            acknowledged.length = 20;
+          }
 
+          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1]);
+          
+          if (message.taskAssigne == window.localStorage.getItem('username')) {
+            if (message.taskStatus=='done'){
+              showToast('Transfer Berhasil ', message.taskTittle, message.updatedAt);
+            } else {
+              showToast('Task Baru ', message.taskTittle, message.updatedAt);
             }
-            }
+          }
         }
       });
-        socket.on('tasks updated', (message) => {
-             loadTask(filterListActive.value.value,searchTitt.value,currentPages.value,date.value[0],date.value[1])
-      });
 
-    var acknowledged = [];
-    socket.on('tasks patched', (message) => {
-
-
-        if(!~acknowledged.indexOf(message._id)){
-
-            // add to array of acknowledged events
-            acknowledged.unshift(message._id);
-
-            // prevent array from growing to large
-            if(acknowledged.length > 20){
-                acknowledged.length = 20;
-            }
-
-            // console.log('acknowledged',acknowledged);
-            // console.log('tasksbro',message);
-            // console.log('title',message.taskTittle);
-            // alert('oke');
-              loadTask(filterListActive.value.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
-            if(message.taskAssigne == window.localStorage.getItem('username'))
-            {
-              console.log('task statusnya',message.taskStatus);
-              if(message.taskStatus=='done'){
-                console.log('donge dadi');
-                showToast('Transfer Berhasil ',message.taskTittle,message.updatedAt);
-            }else{
-              showToast('Task Baru ',message.taskTittle,message.updatedAt);
-            }
-            }
-        }
-      });
       // get data
-      loadTask(filterListActive.value.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
+      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1]);
       // get worker
       
       getUser()
-
     });
+
+    function loadTask(taskStatus, searchTitle, userId, accountNumber, amount, bankType, pages, from, to) {
+      // let status = (taskStatus != '') ? taskStatus : 'unprocess';
+      const taskAssigne =`${window.localStorage.getItem('username')}`;
+      const skip = (pages > 1) ? (pages-1) * 100 : 0;
+
+      const param_admin = {
+        'createdAt[$gte]': from.toISOString(),
+        'createdAt[$lte]':to.toISOString(),
+        // taskStatus: status,
+        'taskStatus[$in]': statusFilter.value, 
+        userId: userId,
+        'taskData.account_number': accountNumber,
+        'taskData.amount': amount,
+        'taskData.bank_type': bankType,
+        $skip: skip,
+        $search: searchTitle
+      }
+      const param_users = {
+        'createdAt[$gte]': from.toISOString(),
+        'createdAt[$lte]': to.toISOString(),
+        // taskStatus: status,
+        'taskStatus[$in]': statusFilter.value,
+        userId: userId,
+        'taskData.account_number': accountNumber,
+        'taskData.amount': amount,
+        'taskData.bank_type': bankType,
+        $skip: skip,
+        taskAssigne: taskAssigne,
+        $search: searchTitle
+      }
+
+      const params = (window.localStorage.getItem('role') === 'admin') ? param_admin : param_users;
+
+      console.log(params)
+        
+      axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        },
+        params
+      }).then((result) => {
+        tasks.value = result.data;
+        countData.value = result.data.data;
+        
+        shift.value = false
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+    }
 
     // Get User
     function getUser() {
@@ -852,54 +861,12 @@ export default {
         return 'true';
       }
     }
-    function loadTask(taskStat,searchTit,pages,from, to) {
-      let status = (taskStat != '') ? taskStat : 'unprocess';
-      let taskAssigne =`${window.localStorage.getItem('username')}`;
-      let skip = (pages > 1) ? (pages-1) * 100 : 0;
-      let param_admin = {
-        'createdAt[$gte]' : from,
-        'createdAt[$lte]' :to,
-        taskStatus:status,
-        $skip:skip,
-        $search: searchTit
-      }
-      let param_users = {
-          'createdAt[$gte]' : from,
-          'createdAt[$lte]' :to,
-          taskStatus:status,
-          $skip:skip,
-          taskAssigne:taskAssigne,
-          $search: searchTit
-
-      }
-      let params = (window.localStorage.getItem('role')=='admin') ? param_admin : param_users;
-        axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
-        headers: {
-          Authorization:window.localStorage.getItem('accessToken')
-        },
-        params: params
-      })
-      .then((result) => {
-        tasks.value = result.data;
-        countData.value = result.data.data;
-        
-        shift.value = false
-      }).catch((err) =>{
-        console.log(err.response);
-      });
-    }
 
     function filterSelect(status){
-      console.log(searchTitt.value)
-     loadTask(status.value, searchTitt.value, 1, date.value[0], date.value[1])
+     loadTask(status.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value[0], dateFilter.value[1])
      filterListActive.value = status
     }
-    function searchTitle(e) {
-      searchTitt.value = e.target.value
-      console.log(searchTitt.value);
-      loadTask(filterListActive.value.value,searchTitt.value,currentPages.value,date.value[0],date.value[1]);
 
-    }
      function showToast(title,content,time){
       let last = new Date(time).getTime();
       let now = new Date().getTime();
@@ -917,11 +884,11 @@ export default {
        console.log(dt);
     }
     function changePg() {
-    loadTask(filterListActive.value.value,searchTitt.value,currentPages.value,date.value[0],date.value[1])
+    loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1])
     }
     function pickDate() {
-    console.log(date.value);
-    loadTask(filterListActive.value.value,searchTitt.value,currentPages.value,date.value[0],date.value[1])
+
+    loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1])
       // let from = date.value[0];
       // let to = date.value[1];
       // axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
@@ -962,8 +929,43 @@ export default {
        playSound();
     }
 
+    function selectStatusFilter(e) {
+      const { value, checked } = e.target
+      const index = statusFilterOptions.value.findIndex(options => options.value === value)
+
+      statusFilterOptions.value[index].checked = checked
+      statusFilter.value = statusFilterOptions.value.filter(option => option.checked).map(option => option.value)
+
+      loadTask(value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value[0], dateFilter.value[1])
+    }
+
+    function getCellColor(status) {
+      const colors = {
+        unprocess: 'secondary',
+        unassigned: 'dark',
+        done: 'success',
+        processed: 'info',
+        request_reject: 'warning',
+        process_reject: 'danger'
+      }
+
+      return colors[status]
+    }
+
     return {
-      date,
+      dateFilter,
+      searchFilter,
+      userIdFilter,
+      accountNumberFilter,
+      amountFilter,
+      bankTypeFilter,
+      statusFilterOptions,
+      statusFilter,
+      selectStatusFilter,
+      collapseFilter,
+      getCellColor,
+      cilChevronCircleDownAlt,
+      cilXCircle,
       tasks,
       currentPages,
       destroy,
@@ -978,7 +980,6 @@ export default {
       taskStats,
       filterSelect,
       filterListActive,
-      searchTitle,
       countData,
       toasts,
       changePg,

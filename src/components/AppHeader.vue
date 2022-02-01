@@ -8,6 +8,7 @@
         <CIcon :icon="logo" height="48" alt="Logo" />
       </CHeaderBrand>
       <CHeaderNav class="d-none d-md-flex me-auto">
+        <AppBreadcrumb />
         <!-- <CNavItem>
           <CNavLink href="/dashboard"> Dashboard </CNavLink>
         </CNavItem>
@@ -36,10 +37,6 @@
         </CNavItem> -->
         <AppHeaderDropdownAccnt />
       </CHeaderNav>
-    </CContainer>
-    <CHeaderDivider />
-    <CContainer fluid>
-      <AppBreadcrumb />
     </CContainer>
   </CHeader>
 </template>

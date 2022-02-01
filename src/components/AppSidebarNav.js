@@ -72,7 +72,7 @@ const AppSidebarNav = defineComponent({
                 customClassName: 'nav-icon',
                 name: item.icon,
               }),
-              item.name,
+              h('span', { class: 'nav-name' }, item.name),
             ],
             default: () => item.items.map((child) => renderItem(child)),
           },
@@ -97,7 +97,7 @@ const AppSidebarNav = defineComponent({
                   customClassName: 'nav-icon',
                   name: item.icon,
                 }),
-              item.name,
+              h('span', { class: 'nav-name' }, item.name),
               item.badge &&
                 h(
                   CBadge,
@@ -137,7 +137,7 @@ const AppSidebarNav = defineComponent({
                           customClassName: 'nav-icon',
                           name: item.icon,
                         }),
-                      item.name,
+                      h('span', { class: 'nav-name' }, item.name),
                       item.badge &&
                         h(
                           CBadge,
@@ -158,7 +158,7 @@ const AppSidebarNav = defineComponent({
             resolveComponent(item.component),
             {},
             {
-              default: () => item.name,
+              default: () => h('span', { class: 'nav-name' }, item.name),
             },
           )
     }

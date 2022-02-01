@@ -101,7 +101,7 @@ export default {
             const allowedIp = response.data.user.ip ?? []
 
             if (allowedIp.includes(myIp) || allowedIp.includes('*')) {
-              axios.patch(`${process.env.VUE_APP_URL_API}/users/${response.data.user._id}`, { login_status: true, role: '' }, {
+              axios.patch(`${process.env.VUE_APP_URL_API}/users/${response.data.user._id}`, { login_status: true }, {
                 headers: {
                   Authorization: response.data.accessToken
                 }
