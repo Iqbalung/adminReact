@@ -15,7 +15,7 @@
         :icon="logoNegative"
         :height="35"
       /> -->
-      <span>
+      <span class="sidebar-logo">
         Admin Withdraw
       </span>
       <CIcon
@@ -54,3 +54,23 @@ export default {
   },
 }
 </script>
+
+<style>
+html:not([dir="rtl"]) .sidebar.hide:not(.sidebar-end) {
+  --cui-sidebar-width: 5rem;
+  margin-left: 0;
+}
+.sidebar.hide:not(.sidebar-end) ~ * {
+  --cui-sidebar-occupy-start: 5rem;
+}
+.sidebar.hide:not(.sidebar-end) .nav-link {
+  justify-content: center;
+  text-align: center;
+}
+.sidebar.hide:not(.sidebar-end) .nav-icon {
+  margin: 0 !important;
+}
+.sidebar.hide:not(.sidebar-end) .sidebar-logo, .sidebar.hide:not(.sidebar-end) .nav-name {
+  display: none;
+}
+</style>
