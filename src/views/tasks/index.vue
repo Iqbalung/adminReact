@@ -24,9 +24,9 @@
         <CCollapse :visible="collapseFilter" :class="{ 'mt-2': collapseFilter }">
           <CInputGroup>
             <CFormInput type="text" id="search" v-model="userIdFilter" placeholder="User ID" />
-            <CFormInput type="text" id="search" v-model="accountNumberFilter" placeholder="Bank" />
+            <CFormInput type="text" id="search" v-model="bankTypeFilter" placeholder="Bank" />
             <CFormInput type="text" id="search" v-model="amountFilter" placeholder="Nominal" />
-            <CFormInput type="text" id="search" v-model="bankTypeFilter" placeholder="Account Bank" />
+            <CFormInput type="text" id="search" v-model="accountNumberFilter" placeholder="Account Bank" />
           </CInputGroup>
         </CCollapse>
       </CCardBody>
@@ -40,9 +40,9 @@
         </span>
         <div v-if="role === 'admin'">
           <CButton size="sm" color="success" class="me-1" @click="() => { modalAssign = true }">Assign Task</CButton>
-          <CButton size="sm" color="secondary" class="me-1" @click="clearAssign()">Unassign</CButton>
+          <CButton size="sm" color="secondary" class="me-1" @click="showClearAssign(clearAssign)">Unassign</CButton>
           <CButton size="sm" color="danger" class="me-1">Process Reject</CButton>
-          <CButton size="sm" color="warning" @click="requestRejectBatch()">Request Reject</CButton>
+          <CButton size="sm" color="warning" @click="showRequestReject(requestRejectBatch)">Request Reject</CButton>
         </div>
         <!-- <CDropdown color="light">
           <CDropdownToggle color="dark">{{ filterListActive.label }}</CDropdownToggle>
@@ -71,12 +71,12 @@
           <CTableBody>
             <CTableRow v-for="(item,index) in tasks.data" :key="index">
               <CTableDataCell v-show="role=='admin'">
-                  <div v-if="item.taskStatus!='processed' && item.taskStatus!='done'">
+                  <div v-if="item.taskStatus!='processed' && item.taskStatus!='done' && item.taskAssigne === 'unassigned'">
                   <input type="checkbox" v-model="checkedItems" :value="item._id">
-                  <!-- <CFormCheck  id="item._id" v-model="checkedItems" value="item.id"/> -->
+                  <!-- <CFormCheck  id="item._id" v-model="checkedItems" :value="item.id"/> -->
                   </div>
-                  <div v-if="item.taskStatus=='processed' || item.taskStatus=='done'">
-                  <CFormCheck disabled/>
+                  <div v-if="item.taskAssigne !== 'unassigned' || item.taskStatus=='processed' || item.taskStatus=='done'">
+                  <input type="checkbox" disabled/>
                   </div>
               </CTableDataCell>
               <CTableDataCell>{{ new Date(item.createdAt).toLocaleDateString() }}</CTableDataCell>
@@ -119,10 +119,10 @@
               </CTableDataCell>
               <CTableDataCell :color="getCellColor(item.taskStatus)">{{ item.taskStatus }}</CTableDataCell>
               <CTableDataCell>
-                  <CButton size="sm" class="text-primary" variant="ghost" color="light" :disabled="item.taskStatus === 'processed'" @click="process(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
+                  <CButton size="sm" class="text-primary" variant="ghost" color="light" :disabled="item.taskStatus === 'processed'" @click="processTask(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
                     Detail
                   </CButton>
-                  <CButton size="sm" class="text-danger" variant="ghost" color="light" @click="requestReject(item)" v-if="role !== 'admin' && item.taskStatus !== 'request_reject'">
+                  <CButton size="sm" class="text-danger" variant="ghost" color="light" @click="showRequestReject(requestReject, item)" v-if="role !== 'admin' && item.taskStatus !== 'request_reject'">
                     Request Reject
                   </CButton>
               </CTableDataCell>
@@ -145,7 +145,7 @@
       <CModalTitle>Add Task</CModalTitle>
     </CModalHeader>
     <CModalBody>
-     <CForm @submit.prevent="store()">
+      <CForm @submit.prevent="store()">
             <div class="mb-3">
               <CFormLabel for="taskTittle">Task Title</CFormLabel>
               <CFormInput type="text" v-model="tsk.taskTittle" id="taskTittle" placeholder="Task title"/>
@@ -181,7 +181,7 @@
         <CModalTitle>Modal Assignment</CModalTitle>
       </CModalHeader>
       <CModalBody>
-        <CForm @submit.prevent="updateWorker()">
+        <CForm @submit.prevent="updateWorker($swal('Saved','','success'))">
           <div class="mb-3">
             <MultiSelect :options="users" placeholder="Users" v-model="work" searchable @open="getUser">
               <template #option="props">
@@ -278,12 +278,12 @@
       <CButton color="secondary" @click="() => { modalDetail = false }">
         Cancel
       </CButton>
-      <CButton color="primary" @click="proc()">Process</CButton>
+      <CButton color="primary" @click="showProc(proc)">Process</CButton>
     </CModalFooter>
   </CModal>
   <!-- Modal Detail Task -->
-   <!-- Toast Task -->
-   <CToaster placement="top-end">
+    <!-- Toast Task -->
+    <CToaster placement="top-end">
     <CToast v-for="(toast, index) in toasts" :key="index">
       <CToastHeader closeButton>
       <span class="me-auto fw-bold">{{toast.title}}</span>
@@ -357,105 +357,13 @@ import { reactive, onMounted, watch, ref } from 'vue'
 import { cilChevronCircleDownAlt, cilXCircle } from '@coreui/icons';
 import useClipboard from 'vue-clipboard3'
 import MultiSelect from '@vueform/multiselect'
+import VueSweetalert2 from 'vue-sweetalert2';
 
 export default {
   name: 'TaskList',
   components: { MultiSelect },
-  data() {
-    return {
-      tasks: [],
-        visibleLiveDemo: false,
-        modalAdd: false,
-        modalAssign: false,
-        modalDetail:false,
-        account_number: '',
-        anRekening: '',
-        amount: '',
-        mutation_id: '',
-        bank_type: '',
-        _id:'',
-        taskTitle:'',
-        taskRefNumber:'',
-        taskAssigne:'',
-        taskSlaTime:'',
-        taskExpiredTime:'',
-        taskStatus:'',
-        taskCreatedBy:'',
-        taskHistory : [],
-        sel: [],
-        work:'',
-        taskStat:'',
-        statFilter:'all',
-        checkedItems: [],
-        tskHistory: {},
-        perPage: 100,
-        role : window.localStorage.getItem('role'),
-        currentPage:1,
-
-    }
-  },
-  computed: {
-    getPaginate(){
-      return Math.ceil(this.tasks.total/this.perPage)
-    },
-    calculDate(before){
-      let last = new Date(before).getTime();
-      let now = new Date().getTime();
-      let date = now - last;
-      return new Date(date).getMinutes();
-    }
-  },
   methods: {
-    // calculateDate(){
-
-
-    // },
-    rupiah(number) {
-      return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR"
-    }).format(number);
-    },
-    copy(text){
-       let { toClipboard }=useClipboard();
-       toClipboard(text);
-    },
-    updateWorker(){
-      this.checkedItems.forEach(element =>{
-        axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`, {
-          headers: {
-            Authorization:window.localStorage.getItem('accessToken')
-          }
-        }).then((result)=> {
-          let date = new Date();
-          let taskh = result.data.taskHistory;
-          
-          taskh.push({
-            status: `task assigned by lina ${window.localStorage.getItem('username')}`,
-            updatedAt:date.toISOString()
-          })
-  
-          // Axios update
-          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`, { taskAssigne:this.work, taskHistory:taskh },{
-            headers: {
-              Authorization:window.localStorage.getItem('accessToken')
-            }
-          }).then(()=> {
-          }).catch((err)=>{
-            console.log(err);
-          })
-
-        // Axios update
-        }).catch((err)=>{
-          console.log(err);
-        })
-      })
-
-      this.checkedItems = [];
-      this.modalAssign = false;
-      this.$swal('Saved','','success');
-    },
-     clearAssign() {
+    showClearAssign(cb) {
       this.$swal({
         title: 'Are Sure ?',
         icon: 'info',
@@ -465,36 +373,13 @@ export default {
         cancelButtonText: 'Cancel'
       }).then((result)=> {
         if(result.isConfirmed) {
-          this.checkedItems.forEach(element => {
-            axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
-              headers: {
-                Authorization:window.localStorage.getItem('accessToken')
-              }
-            }).then((results)=> {
-              let taskh = results.data.taskHistory[0];
-          
-              // Axios update
-              axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigned',taskHistory:taskh},{
-                headers: {
-                  Authorization:window.localStorage.getItem('accessToken')
-                }
-              }).then(()=> {
-              }).catch((err)=>{
-                console.log(err);
-              })
-            // Axios update
-            }).catch((err)=>{
-              console.log(err);
-            })
-          });
-          
-          console.log('success update');
-          this.checkedItems = [];
+          cb()
+
           this.$swal('Saved','','success');
         }
       })
     },
-     requestReject(task) {
+    showRequestReject(cb, task) {
       this.$swal({
         title: 'Are Sure ?',
         icon: 'info',
@@ -504,128 +389,28 @@ export default {
         cancelButtonText: 'Cancel'
       }).then((result)=> {
         if(result.isConfirmed) {
-          // Axios update
-          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${task._id}`,{taskStatus: 'request_reject'},{
-            headers: {
-              Authorization:window.localStorage.getItem('accessToken')
-            }
-          }).then(()=> {
-          }).catch((err)=>{
-            console.log(err);
-          })
-          
-          console.log('success update');
-          this.checkedItems = [];
+          cb(task)
+
           this.$swal('Saved','','success');
         }
       })
     },
-     requestRejectBatch() {
+    showProc(cb) {
       this.$swal({
-        title: 'Are Sure ?',
-        icon: 'info',
-        showCancelButton: true,
-        focusConfirm: false,
-        confirmButtonText: 'Yes, Sure',
-        cancelButtonText: 'Cancel'
-      }).then((result)=> {
-        if(result.isConfirmed) {
-          this.checkedItems.forEach(element => {
-            axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
-              headers: {
-                Authorization:window.localStorage.getItem('accessToken')
-              }
-            }).then((results)=> {          
-              // Axios update
-              axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskStatus: 'request_reject'},{
-                headers: {
-                  Authorization:window.localStorage.getItem('accessToken')
-                }
-              }).then(()=> {
-              }).catch((err)=>{
-                console.log(err);
-              })
-            // Axios update
-            }).catch((err)=>{
-              console.log(err);
-            })
-          });
-          
-          console.log('success update');
-          this.checkedItems = [];
-          this.$swal('Saved','','success');
-        }
-      })
-    },
-    process(account_number,anRekening,amount,mutation_id,bank_type,_id,taskAssigne,taskTittle,taskRefNumber,taskExpiredTime,taskCreatedBy,taskStatus,taskHistory)
-    {
-      this.modalDetail = true;
-      this.account_number = account_number;
-      this.anRekening = anRekening;
-      this.amount = amount;
-      this.mutation_id = mutation_id;
-      this.bank_type = bank_type;
-      this._id = _id;
-      this.taskAssigne=taskAssigne;
-      this.taskTittle=taskTittle;
-      this.taskRefNumber=taskRefNumber;
-      this.taskExpiredTime=taskExpiredTime;
-      this.taskCreatedBy=taskCreatedBy;
-      this.taskStatus = taskStatus;
-      this.taskHistory = taskHistory;
-      console.log(this.taskHistory);
-      console.log(this.mutation_id);
-    },
-    proc(){
-      this.$swal({title:'Are you sure ?',icon:'info',showCancelButton:true,focusConfirm:false,confirmButtonText:'Process',cancelButtonText:'Cancel'})
+        title:'Are you sure ?',
+        icon:'info',
+        showCancelButton:true,
+        focusConfirm:false,
+        confirmButtonText:'Process',
+        cancelButtonText:'Cancel'})
       .then((result)=>{
         if(result.isConfirmed) {
-
-        axios.get(`${process.env.VUE_APP_URL_API}/tasks/${this._id}`,{
-        headers: {
-          Authorization:window.localStorage.getItem('accessToken')
-        }
-      })
-      .then((results)=> {
-        let date = new Date();
-        let taskh = results.data.data.taskHistory;
-        taskh.push({status: `task processed by ${window.localStorage.getItem('username')}`, updatedAt:date.toISOString()})
-        console.log(taskh);
-    // Axios update
-      axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${this._id}`,{taskStatus:'processed',taskTimeProcess:date.toISOString(),taskHistory:taskh},{
-        headers: {
-          Authorization:window.localStorage.getItem('accessToken')
-        }
-      })
-      .then(()=> {
-        //
-      }).catch((err)=>{
-        console.log(err);
-      })
-    // Axios update
-      }).catch((err)=>{
-        console.log(err);
-      })
-
-      this.$swal('Saved','','success');
-        }
-      })
-    },
-    shiftAll(check) {
-      this.checkedItems = check ? this.tasks.data.map(task => task._id) : []
-    },
-    setShiftClick() {
-      document.addEventListener('keydown', e => {
-        if (e.shiftKey) {
-          const count = this.checkedItems?.length
+          cb()
           
-          this.checkedItems = !count ? this.tasks.data?.map(task => task._id) : []
+          this.$swal('Saved','','success');
         }
       })
     }
-  },
-  mounted() {
-    this.setShiftClick()
   },
   setup() {
     let urlMusic = require('./pristine.mp3');
@@ -647,11 +432,39 @@ export default {
     const statusFilter = ref(['unprocess'])
     const collapseFilter = ref(false)
 
+    const tasks = ref([]);
+
+    const visibleLiveDemo = ref(false)
+    const modalAdd = ref(false)
+    const modalAssign = ref(false)
+    const modalDetail = ref(false)
+
+    const account_number = ref('')
+    const anRekening = ref('')
+    const amount = ref('')
+    const mutation_id = ref('')
+    const bank_type = ref('')
+    const task_id = ref('')
+    const taskTittle = ref('')
+    const taskRefNumber = ref('')
+    const taskAssigne = ref('')
+    const taskSlaTime = ref('')
+    const taskExpiredTime = ref('')
+    const taskStatus = ref('')
+    const taskCreatedBy = ref('')
+    const taskHistory = ref()
+
+    const work = ref('')
+
+    const checkedItems = ref([])
+    const perPage = ref(100)
+    const role = ref(window.localStorage.getItem('role'))
+
     let currentPages= ref(1);
     let toasts = ref([]);
     let tscob = ref([]);
     let taskStats = ref([]);
-    let tasks = ref([]);
+    
     let selected = ref([]);
     let users = ref({});
     let countData = ref([]);
@@ -700,6 +513,8 @@ export default {
     })
 
     onMounted(()=> {
+      setShiftClick()
+
       // date
       const startDate = new Date(new Date().setDate(new Date().getDate() - 1));
       const endDate = new Date();
@@ -707,7 +522,37 @@ export default {
       dateFilter.value = [startDate, endDate];
 
       // socket
-      var acknowledgedcreate = [];
+      var acknowledgedcreate = [] ;
+
+      socket.on('incidents connected', (message) => {
+        console.log(message)
+      })
+
+      socket.on('incidents created', (message) => {
+        console.log(message)
+      })
+
+      socket.on('tasks created', (message) => {
+        if (!~acknowledgedcreate.indexOf(message._id)){
+          // add to array of acknowledged events
+          acknowledgedcreate.unshift(message._id);
+
+          // prevent array from growing to large
+          if(acknowledgedcreate.length > 20){
+            acknowledgedcreate.length = 20;
+          }
+
+          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value[0], dateFilter.value[1]);
+
+          if (message.taskAssigne == window.localStorage.getItem('username')) {
+            if(message.taskStatus=='done'){
+              showToast('Transfer Berhasil ', message.taskTittle, message.createdAt);
+            } else{
+              showToast('Task Baru ', message.taskTittle, message.createdAt);
+            }
+          }
+        }
+      })
 
       socket.on('tasks created', (message) => {
         if (!~acknowledgedcreate.indexOf(message._id)){
@@ -848,6 +693,176 @@ export default {
         console.log(err.response);
       })
     }
+    
+    function updateWorker(cb){
+      checkedItems.value.forEach(element =>{
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`, {
+          headers: {
+            Authorization:window.localStorage.getItem('accessToken')
+          }
+        }).then((result)=> {
+          let date = new Date();
+          let taskh = result.data.taskHistory;
+          
+          taskh.push({
+            status: `task assigned by lina ${window.localStorage.getItem('username')}`,
+            updatedAt:date.toISOString()
+          })
+  
+          // Axios update
+          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`, { taskAssigne:work.value, taskHistory:taskh },{
+            headers: {
+              Authorization:window.localStorage.getItem('accessToken')
+            }
+          }).then(()=> {
+            loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1]);
+          }).catch((err)=>{
+            console.log(err);
+          })
+
+        // Axios update
+        }).catch((err)=>{
+          console.log(err);
+        })
+      })
+
+      checkedItems.value = [];
+      modalAssign.value = false;
+      
+      cb()
+    }
+
+    function clearAssign() {
+      checkedItems.value.forEach(element => {
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
+          headers: {
+            Authorization:window.localStorage.getItem('accessToken')
+          }
+        }).then((results)=> {
+          let taskh = results.data.taskHistory[0];
+      
+          // Axios update
+          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigned',taskHistory:taskh},{
+            headers: {
+              Authorization:window.localStorage.getItem('accessToken')
+            }
+          }).then(()=> {
+            loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1]);
+          }).catch((err)=>{
+            console.log(err);
+          })
+        // Axios update
+        }).catch((err)=>{
+          console.log(err);
+        })
+      });
+      
+      console.log('success update');
+      checkedItems.value = [];
+    }
+
+    function requestReject(task) {
+      axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${task._id}`,{taskStatus: 'request_reject'},{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      }).then(()=> {
+        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1]);
+      }).catch((err)=>{
+        console.log(err);
+      })
+      
+      console.log('success update');
+      checkedItems.value = [];
+    }
+
+    function requestRejectBatch() {
+      checkedItems.value.forEach(element => {
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
+          headers: {
+            Authorization:window.localStorage.getItem('accessToken')
+          }
+        }).then((results)=> {          
+          // Axios update
+          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskStatus: 'request_reject'},{
+            headers: {
+              Authorization:window.localStorage.getItem('accessToken')
+            }
+          }).then(()=> {
+            loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1]);
+          }).catch((err)=>{
+            console.log(err);
+          })
+        // Axios update
+        }).catch((err)=>{
+          console.log(err);
+        })
+      });
+      
+      console.log('success update');
+      checkedItems.value = [];
+    }
+
+    function processTask(account_numberParam, anRekeningParam, amountParam, mutation_idParam, bank_typeParam, _idParam, taskAssigneParam, taskTittleParam, taskRefNumberParam, taskExpiredTimeParam, taskCreatedByParam, taskStatusParam, taskHistoryParam)
+    {
+      modalDetail.value  = true;
+      account_number.value  = account_numberParam;
+      anRekening.value  = anRekeningParam;
+      amount.value  = amountParam;
+      mutation_id.value  = mutation_idParam;
+      bank_type.value  = bank_typeParam;
+      task_id.value  = _idParam;
+      taskAssigne.value =taskAssigneParam;
+      taskTittle.value =taskTittleParam;
+      taskRefNumber.value =taskRefNumberParam;
+      taskExpiredTime.value =taskExpiredTimeParam;
+      taskCreatedBy.value =taskCreatedByParam;
+      taskStatus.value  = taskStatusParam;
+      taskHistory.value  = taskHistoryParam;
+    }
+
+    function proc(){
+      axios.get(`${process.env.VUE_APP_URL_API}/tasks/${task_id.value}`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then((results)=> {
+        let date = new Date();
+        let taskh = results.data.taskHistory;
+        taskh.push({status: `task processed by ${window.localStorage.getItem('username')}`, updatedAt:date.toISOString()})
+      
+        // Axios update
+        axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${task_id.value}`,{taskStatus:'processed',taskTimeProcess:date.toISOString(),taskHistory:taskh},{
+          headers: {
+            Authorization:window.localStorage.getItem('accessToken')
+          }
+        })
+        .then(()=> {
+          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1]);
+        }).catch((err)=>{
+          console.log(err);
+        })
+
+      }).catch((err)=>{
+        console.log(err);
+      })
+    }
+    
+    function shiftAll(check) {
+      checkedItems.value = check ? tasks.value.data.map(task => task._id) : []
+    }
+
+    function setShiftClick() {
+      document.addEventListener('keydown', e => {
+        if (e.shiftKey) {
+          const count = checkedItems.value?.length
+          
+          checkedItems.value = !count ? tasks.value.data?.map(task => task._id) : []
+        }
+      })
+    }
+
     function cek(status) {
       if(status == 'processed')
       {
@@ -856,18 +871,14 @@ export default {
         return 'light';
       }
     }
+    
     function cekCheck(assign){
       if(assign != 'unassigned') {
         return 'true';
       }
     }
 
-    function filterSelect(status){
-     loadTask(status.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value[0], dateFilter.value[1])
-     filterListActive.value = status
-    }
-
-     function showToast(title,content,time){
+    function showToast(title,content,time){
       let last = new Date(time).getTime();
       let now = new Date().getTime();
       let date = now - last;
@@ -883,43 +894,20 @@ export default {
        console.log(toasts.value);
        console.log(dt);
     }
+
     function changePg() {
-    loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1])
+      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1])
     }
+
     function pickDate() {
-
-    loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1])
-      // let from = date.value[0];
-      // let to = date.value[1];
-      // axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
-      //   headers: {
-      //     Authorization:window.localStorage.getItem('accessToken')
-      //   },
-      //   params: {
-      //       'createdAt[$gte]' : from,
-      //       'createdAt[$lte]' :to
-
-      //   }
-      //   // query: {
-      //   //   createdAt : {
-      //   //     $gte:date.value[0],
-      //   //     $lte:date.value[1]
-      //   //   }
-      //   // }
-      // })
-      // .then((result) => {
-      //   console.log("hasil cari tanggal",result)
-      //   // tasks.value = result.data;
-      //   // countData.value = result.data.data;
-      // }).catch((err) =>{
-      //   console.log(err.response);
-      // });
-
+      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1])
     }
+
     function playSound(){
       player.src = urlMusic;
       player.play();
     }
+
     function sTs(){
        tscob.value.push({
          title:"tesbro",
@@ -952,6 +940,18 @@ export default {
       return colors[status]
     }
 
+    function rupiah(number) {
+      return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR"
+        }).format(number);
+    }
+
+    function copy(text){
+       let { toClipboard }=useClipboard();
+       toClipboard(text);
+    }
+
     return {
       dateFilter,
       searchFilter,
@@ -963,32 +963,76 @@ export default {
       statusFilter,
       selectStatusFilter,
       collapseFilter,
+      filterListActive,
+      filterLists,
+
       getCellColor,
+      
       cilChevronCircleDownAlt,
       cilXCircle,
+      
       tasks,
       currentPages,
-      destroy,
+
+      visibleLiveDemo,
+      modalAdd,
+      modalAssign,
+      modalDetail,
+
+      account_number, 
+      anRekening, 
+      amount, 
+      mutation_id, 
+      bank_type, 
+      task_id, 
+      taskTittle, 
+      taskRefNumber, 
+      taskAssigne, 
+      taskSlaTime, 
+      taskExpiredTime, 
+      taskStatus, 
+      taskCreatedBy, 
+      taskHistory, 
+      work, 
+
+      checkedItems, 
+      perPage,
+      role,
+
       selected,
       users,
       worker,
       tsk,
-      cek,
-      loadTask,
-      getUser,
       cekCheck,
       taskStats,
-      filterSelect,
-      filterListActive,
-      countData,
       toasts,
+    
+      countData,
+
+      cek,
+
+      destroy,
+      loadTask,
+      getUser,
       changePg,
+
+      updateWorker,
+      clearAssign,
+      requestReject,
+      requestRejectBatch,
+      processTask,
+      proc,
+      shiftAll,
+      setShiftClick,
+
       pickDate,
       playSound,
+      
       sTs,
       tscob,
-      filterLists,
-      shift
+      shift,
+      rupiah,
+      copy
     }
   }
 }
