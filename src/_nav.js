@@ -44,12 +44,12 @@ export default [
     to: '/users',
     icon: 'cil-people',
   },
-  // {
-  //   component: 'CNavItem',
-  //   name: 'Users',
-  //   to: '/users',
-  //   icon: 'cil-user',
-  // },
+  {
+    component: 'CNavItem',
+    name: 'Incidents',
+    to: '/incidents',
+    icon: 'cil-bell',
+  },
   // {
   //   component: 'CNavTitle',
   //   name: 'Theme',

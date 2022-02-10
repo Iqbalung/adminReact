@@ -83,11 +83,10 @@ export default {
     onMounted(() => {
       socket.on('incidents created', (message) => {
         showToast('Incident Created ', message, message.createdAt);
-        console.log(message, 'incident created')
       })
     })
 
-    function showToast(title, content, time, color) {
+    function showToast(title, content, time) {
       let last = new Date(time).getTime()
       let now = new Date().getTime()
       let date = now - last
@@ -98,11 +97,8 @@ export default {
         title: title,
         content: content,
         time: dt,
-        color: color,
       })
       // playSound()
-      console.log(toasts.value)
-      console.log(dt)
     }
 
     return {

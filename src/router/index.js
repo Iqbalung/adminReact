@@ -171,6 +171,19 @@ const routes = [
         return next();
         }
       },
+      {
+        path: '/incidents',
+        name: 'Incidents',
+        component: () => import('@/views/incidents/index.vue'),
+        beforeEnter: (to, from, next) => {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name: 'Login',
+            })
+          }
+          return next()
+        },
+      },
     ],
   },
 
