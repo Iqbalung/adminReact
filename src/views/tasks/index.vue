@@ -132,7 +132,7 @@
             </CTableRow>
           </CTableBody>
         </CTable>
-        
+
         <div class="d-flex justify-content-center">
           <b-pagination v-model="currentPages" :total-rows="tasks.total" :per-page="perPage" @click="changePg" />
         </div>
@@ -186,7 +186,7 @@
             <MultiSelect :options="users" placeholder="Users" v-model="work" searchable @open="getUser">
               <template #option="props">
                 <div class="d-flex justify-content-between align-items-center w-100">
-                  <span>{{ props.option.label }}</span>            
+                  <span>{{ props.option.label }}</span>
                   <div v-if="props.option.status">
                     <div style="width: 16px; height: 16px;" class="rounded-circle bg-success"></div>
                   </div>
@@ -406,7 +406,7 @@ export default {
       .then((result)=>{
         if(result.isConfirmed) {
           cb()
-          
+
           this.$swal('Saved','','success');
         }
       })
@@ -464,7 +464,7 @@ export default {
     let toasts = ref([]);
     let tscob = ref([]);
     let taskStats = ref([]);
-    
+
     let selected = ref([]);
     let users = ref({});
     let countData = ref([]);
@@ -524,12 +524,34 @@ export default {
       // socket
       var acknowledgedcreate = [] ;
 
-      socket.on('incidents connected', (message) => {
-        console.log(message)
-      })
+      // socket.on('incidents connected', (message) => {
+      //   console.log(message, 'iconnected')
+      // })
 
-      socket.on('incidents created', (message) => {
-        console.log(message)
+      // socket.on('incidents created', (message) => {
+      //   console.log(message, 'icreated')
+      // })
+
+      socket.on('tasks created', (message) => {
+        if (!~acknowledgedcreate.indexOf(message._id)){
+          // add to array of acknowledged events
+          acknowledgedcreate.unshift(message._id);
+
+          // prevent array from growing to large
+          if(acknowledgedcreate.length > 20){
+            acknowledgedcreate.length = 20;
+          }
+
+          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value[0], dateFilter.value[1]);
+
+          if (message.taskAssigne == window.localStorage.getItem('username')) {
+            if(message.taskStatus=='done'){
+              showToast('Transfer Berhasil ', message.taskTittle, message.createdAt);
+            } else{
+              showToast('Task Baru ', message.taskTittle, message.createdAt);
+            }
+          }
+        }
       })
 
       socket.on('tasks created', (message) => {
@@ -554,34 +576,12 @@ export default {
         }
       })
 
-      socket.on('tasks created', (message) => {
-        if (!~acknowledgedcreate.indexOf(message._id)){
-          // add to array of acknowledged events
-          acknowledgedcreate.unshift(message._id);
-
-          // prevent array from growing to large
-          if(acknowledgedcreate.length > 20){
-            acknowledgedcreate.length = 20;
-          }
-
-          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value[0], dateFilter.value[1]);
-
-          if (message.taskAssigne == window.localStorage.getItem('username')) {
-            if(message.taskStatus=='done'){
-              showToast('Transfer Berhasil ', message.taskTittle, message.createdAt);
-            } else{
-              showToast('Task Baru ', message.taskTittle, message.createdAt);
-            }
-          }
-        }
-      })
-      
       socket.on('tasks updated', (message) => {
         loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value[0], dateFilter.value[1])
       })
 
       var acknowledged = [];
-      
+
       socket.on('tasks patched', (message) => {
         if (!~acknowledged.indexOf(message._id)){
           // add to array of acknowledged events
@@ -593,7 +593,7 @@ export default {
           }
 
           loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1]);
-          
+
           if (message.taskAssigne == window.localStorage.getItem('username')) {
             if (message.taskStatus=='done'){
               showToast('Transfer Berhasil ', message.taskTittle, message.updatedAt);
@@ -607,7 +607,7 @@ export default {
       // get data
       loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1]);
       // get worker
-      
+
       getUser()
     });
 
@@ -620,7 +620,7 @@ export default {
         'createdAt[$gte]': from.toISOString(),
         'createdAt[$lte]':to.toISOString(),
         // taskStatus: status,
-        'taskStatus[$in]': statusFilter.value, 
+        'taskStatus[$in]': statusFilter.value,
         userId: userId,
         'taskData.account_number': accountNumber,
         'taskData.amount': amount,
@@ -645,7 +645,7 @@ export default {
       const params = (window.localStorage.getItem('role') === 'admin') ? param_admin : param_users;
 
       console.log(params)
-        
+
       axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
@@ -654,7 +654,7 @@ export default {
       }).then((result) => {
         tasks.value = result.data;
         countData.value = result.data.data;
-        
+
         shift.value = false
       }).catch((err) =>{
         console.log(err.response);
@@ -693,7 +693,7 @@ export default {
         console.log(err.response);
       })
     }
-    
+
     function updateWorker(cb){
       checkedItems.value.forEach(element =>{
         axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`, {
@@ -703,12 +703,12 @@ export default {
         }).then((result)=> {
           let date = new Date();
           let taskh = result.data.taskHistory;
-          
+
           taskh.push({
             status: `task assigned by lina ${window.localStorage.getItem('username')}`,
             updatedAt:date.toISOString()
           })
-  
+
           // Axios update
           axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`, { taskAssigne:work.value, taskHistory:taskh },{
             headers: {
@@ -728,7 +728,7 @@ export default {
 
       checkedItems.value = [];
       modalAssign.value = false;
-      
+
       cb()
     }
 
@@ -740,7 +740,7 @@ export default {
           }
         }).then((results)=> {
           let taskh = results.data.taskHistory[0];
-      
+
           // Axios update
           axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigned',taskHistory:taskh},{
             headers: {
@@ -756,7 +756,7 @@ export default {
           console.log(err);
         })
       });
-      
+
       console.log('success update');
       checkedItems.value = [];
     }
@@ -771,7 +771,7 @@ export default {
       }).catch((err)=>{
         console.log(err);
       })
-      
+
       console.log('success update');
       checkedItems.value = [];
     }
@@ -782,7 +782,7 @@ export default {
           headers: {
             Authorization:window.localStorage.getItem('accessToken')
           }
-        }).then((results)=> {          
+        }).then((results)=> {
           // Axios update
           axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskStatus: 'request_reject'},{
             headers: {
@@ -798,7 +798,7 @@ export default {
           console.log(err);
         })
       });
-      
+
       console.log('success update');
       checkedItems.value = [];
     }
@@ -831,7 +831,7 @@ export default {
         let date = new Date();
         let taskh = results.data.taskHistory;
         taskh.push({status: `task processed by ${window.localStorage.getItem('username')}`, updatedAt:date.toISOString()})
-      
+
         // Axios update
         axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${task_id.value}`,{taskStatus:'processed',taskTimeProcess:date.toISOString(),taskHistory:taskh},{
           headers: {
@@ -848,7 +848,7 @@ export default {
         console.log(err);
       })
     }
-    
+
     function shiftAll(check) {
       checkedItems.value = check ? tasks.value.data.map(task => task._id) : []
     }
@@ -857,7 +857,7 @@ export default {
       document.addEventListener('keydown', e => {
         if (e.shiftKey) {
           const count = checkedItems.value?.length
-          
+
           checkedItems.value = !count ? tasks.value.data?.map(task => task._id) : []
         }
       })
@@ -871,7 +871,7 @@ export default {
         return 'light';
       }
     }
-    
+
     function cekCheck(assign){
       if(assign != 'unassigned') {
         return 'true';
@@ -967,10 +967,10 @@ export default {
       filterLists,
 
       getCellColor,
-      
+
       cilChevronCircleDownAlt,
       cilXCircle,
-      
+
       tasks,
       currentPages,
 
@@ -979,23 +979,23 @@ export default {
       modalAssign,
       modalDetail,
 
-      account_number, 
-      anRekening, 
-      amount, 
-      mutation_id, 
-      bank_type, 
-      task_id, 
-      taskTittle, 
-      taskRefNumber, 
-      taskAssigne, 
-      taskSlaTime, 
-      taskExpiredTime, 
-      taskStatus, 
-      taskCreatedBy, 
-      taskHistory, 
-      work, 
+      account_number,
+      anRekening,
+      amount,
+      mutation_id,
+      bank_type,
+      task_id,
+      taskTittle,
+      taskRefNumber,
+      taskAssigne,
+      taskSlaTime,
+      taskExpiredTime,
+      taskStatus,
+      taskCreatedBy,
+      taskHistory,
+      work,
 
-      checkedItems, 
+      checkedItems,
       perPage,
       role,
 
@@ -1006,7 +1006,7 @@ export default {
       cekCheck,
       taskStats,
       toasts,
-    
+
       countData,
 
       cek,
@@ -1027,7 +1027,7 @@ export default {
 
       pickDate,
       playSound,
-      
+
       sTs,
       tscob,
       shift,

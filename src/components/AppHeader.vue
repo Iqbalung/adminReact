@@ -21,9 +21,7 @@
       </CHeaderNav>
       <CHeaderNav>
         <CNavItem>
-          <CNavLink href="#">
-            <CIcon class="mx-2" icon="cil-bell" size="lg" />
-          </CNavLink>
+          <AppHeaderDropdownNotification />
         </CNavItem>
         <!-- <CNavItem>
           <CNavLink href="#">
@@ -44,12 +42,14 @@
 <script>
 import AppBreadcrumb from './AppBreadcrumb'
 import AppHeaderDropdownAccnt from './AppHeaderDropdownAccnt'
+import AppHeaderDropdownNotification from './AppHeaderDropdownNotification.vue'
 import { logo } from '@/assets/brand/logo'
 export default {
   name: 'AppHeader',
   components: {
     AppBreadcrumb,
     AppHeaderDropdownAccnt,
+    AppHeaderDropdownNotification,
   },
   setup() {
     return {
