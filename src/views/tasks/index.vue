@@ -71,11 +71,11 @@
           <CTableBody>
             <CTableRow v-for="(item,index) in tasks.data" :key="index">
               <CTableDataCell v-show="role=='admin'">
-                  <div v-if="item.taskStatus!='processed' && item.taskStatus!='done' && item.taskAssigne === 'unassigned'">
+                  <div v-if="item.taskStatus!='processed' && item.taskStatus!='done' && (item.taskAssigne === 'unassigned' || item.taskAssigne === '')">
                   <input type="checkbox" v-model="checkedItems" :value="item._id">
                   <!-- <CFormCheck  id="item._id" v-model="checkedItems" :value="item.id"/> -->
                   </div>
-                  <div v-if="item.taskAssigne !== 'unassigned' || item.taskStatus=='processed' || item.taskStatus=='done'">
+                  <div v-if="(item.taskAssigne !== '' && item.taskAssigne !== 'unassigned') || item.taskStatus=='processed' || item.taskStatus=='done'">
                   <input type="checkbox" disabled/>
                   </div>
               </CTableDataCell>
