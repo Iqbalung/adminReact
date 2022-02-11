@@ -10,6 +10,12 @@
         }}</CBadge>
       </span>
       <div v-if="role === 'admin'">
+        <CFormInput
+          type="text"
+          id="search"
+          v-model="searchFilter"
+          placeholder="refNumber"
+        />
         <!-- <CButton
           size="sm"
           color="success"
@@ -67,7 +73,7 @@
             <!-- <CTableHeaderCell scope="col" v-show="role == 'admin'"
               >Assigned</CTableHeaderCell
             > -->
-            <CTableHeaderCell scope="col">Mutation Id</CTableHeaderCell>
+            <CTableHeaderCell scope="col">RefNumber</CTableHeaderCell>
             <CTableHeaderCell scope="col">Date Crawl</CTableHeaderCell>
             <CTableHeaderCell scope="col">From</CTableHeaderCell>
             <CTableHeaderCell scope="col">To</CTableHeaderCell>
@@ -176,6 +182,7 @@ import { reactive, onMounted, watch, ref } from 'vue'
 export default {
   name: 'IncidentsList',
   setup() {
+    let searchFilter = ref('')
     const incidents = ref([])
     const perPage = ref(100)
     let currentPages= ref(1)
@@ -202,16 +209,24 @@ export default {
     })
 
     function loadIncidents() {
-      const params =
-        window.localStorage.getItem('role') === 'admin' ? 'admin' : 'worker'
+      let pages = 1
+      let searchTitle = ''
+      const skip = pages > 1 ? (pages - 1) * 100 : 0
 
-      // console.log(params)
+      const params = {
+        '$sort[id]': -1,
+        $skip: skip,
+        $search: searchTitle,
+      }
+
+      console.log(params)
 
       axios
         .get(`${process.env.VUE_APP_URL_API}/incidents`, {
           headers: {
             Authorization: window.localStorage.getItem('accessToken'),
           },
+          params,
         })
         .then((result) => {
           incidents.value = result.data
@@ -227,6 +242,7 @@ export default {
     }
 
     return {
+      searchFilter,
       incidents,
       perPage,
       currentPages,
