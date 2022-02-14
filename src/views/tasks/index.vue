@@ -62,6 +62,7 @@
                 <CTableHeaderCell scope="col">Account Number</CTableHeaderCell>
                 <CTableHeaderCell scope="col">Name</CTableHeaderCell>
                 <CTableHeaderCell scope="col">Amount</CTableHeaderCell>
+                <CTableHeaderCell scope="col">UserId</CTableHeaderCell>
                 <CTableHeaderCell scope="col">Status</CTableHeaderCell>
                 <CTableHeaderCell scope="col">Action</CTableHeaderCell>
               </CTableRow>
@@ -109,6 +110,18 @@
                     <CTooltip content="Copy Account Amount!" placement="right">
                         <template #toggler="{ on }">
                         <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.amount)">
+                            <CIcon name="cil-copy"/>
+                        </CButton>
+                        </template>
+                    </CTooltip>
+                    </div>
+                </CTableDataCell>
+                <CTableDataCell>
+                    <div class="overflow-auto">
+                    {{ item.taskData.userId }}
+                    <CTooltip content="Copy Account Amount!" placement="right">
+                        <template #toggler="{ on }">
+                        <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.userId)">
                             <CIcon name="cil-copy"/>
                         </CButton>
                         </template>
