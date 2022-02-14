@@ -84,7 +84,7 @@
         <CTableBody>
           <CTableRow v-for="(item, index) in incidents.data" :key="index">
             <CTableDataCell>
-              {{ index + 1 }}
+              {{ index + 1 + (currentPages - 1) * perPage }}
             </CTableDataCell>
             <CTableDataCell v-show="role == 'admin'">
               {{ item.createdAt }}
@@ -185,7 +185,7 @@ export default {
     let searchFilter = ref('')
     const incidents = ref([])
     const perPage = ref(100)
-    let currentPages= ref(1)
+    let currentPages = ref(1)
     const role = ref(window.localStorage.getItem('role'))
 
     watch(searchFilter, value => {
