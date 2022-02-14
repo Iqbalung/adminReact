@@ -44,94 +44,93 @@
           <CButton size="sm" color="danger" class="me-1">Process Reject</CButton>
           <CButton size="sm" color="warning" @click="showRequestReject(requestRejectBatch)">Request Reject</CButton>
         </div>
-        <!-- <CDropdown color="light">
-          <CDropdownToggle color="dark">{{ filterListActive.label }}</CDropdownToggle>
-          <CDropdownMenu>
-            <CDropdownItem component="button" v-for="(filter, key) in filterLists" @click="filterSelect(filter)">{{ filter.label }}</CDropdownItem>
-          </CDropdownMenu>
-        </CDropdown> -->
       </CCardHeader>
       <CCardBody class="p-0">
 
-        <CTable responsive>
-          <CTableHead>
-            <CTableRow>
-              <CTableHeaderCell scope="col" v-if="role === 'admin'">
-                  <input type="checkbox" @change="e => shiftAll(e.target.checked)" v-model="shift" :disabled="filterListActive.value === 'done'" />
-              </CTableHeaderCell>
-              <CTableHeaderCell scope="col">Created</CTableHeaderCell>
-              <CTableHeaderCell scope="col" v-show="role=='admin'">Assigned</CTableHeaderCell>
-              <CTableHeaderCell scope="col">Account Number</CTableHeaderCell>
-              <CTableHeaderCell scope="col">Name</CTableHeaderCell>
-              <CTableHeaderCell scope="col">Amount</CTableHeaderCell>
-              <CTableHeaderCell scope="col">Status</CTableHeaderCell>
-              <CTableHeaderCell scope="col">Action</CTableHeaderCell>
-            </CTableRow>
-          </CTableHead>
-          <CTableBody>
-            <CTableRow v-for="(item,index) in tasks.data" :key="index">
-              <CTableDataCell v-show="role=='admin'">
-                  <div v-if="item.taskStatus!='processed' && item.taskStatus!='done' && (item.taskAssigne === 'unassigned' || item.taskAssigne === '')">
-                  <input type="checkbox" v-model="checkedItems" :value="item._id">
-                  <!-- <CFormCheck  id="item._id" v-model="checkedItems" :value="item.id"/> -->
-                  </div>
-                  <div v-if="(item.taskAssigne !== '' && item.taskAssigne !== 'unassigned') || item.taskStatus=='processed' || item.taskStatus=='done'">
-                  <input type="checkbox" disabled/>
-                  </div>
-              </CTableDataCell>
-              <CTableDataCell>{{ new Date(item.createdAt).toLocaleDateString() }}</CTableDataCell>
-              <CTableDataCell v-show="role=='admin'">{{ item.taskAssigne }}</CTableDataCell>
-              <CTableDataCell>
-                  <div class="overflow-auto">{{ item.taskData.account_number }}
-                  <CTooltip content="Copy Account Number" placement="right">
-                      <template #toggler="{ on }">
+        <selection-area class="selection"
+          :options="{selectables: '.selectable'}"
+          :on-move="onMove"
+          :on-start="onStart">
+          <CTable responsive>
+            <CTableHead>
+              <CTableRow>
+                <CTableHeaderCell scope="col" v-if="role === 'admin'">
+                    <input type="checkbox" @change="e => shiftAll(e.target.checked)" v-model="shift" :disabled="filterListActive.value === 'done'" />
+                </CTableHeaderCell>
+                <CTableHeaderCell scope="col">Created</CTableHeaderCell>
+                <CTableHeaderCell scope="col" v-show="role=='admin'">Assigned</CTableHeaderCell>
+                <CTableHeaderCell scope="col">Account Number</CTableHeaderCell>
+                <CTableHeaderCell scope="col">Name</CTableHeaderCell>
+                <CTableHeaderCell scope="col">Amount</CTableHeaderCell>
+                <CTableHeaderCell scope="col">Status</CTableHeaderCell>
+                <CTableHeaderCell scope="col">Action</CTableHeaderCell>
+              </CTableRow>
+            </CTableHead>
+            <CTableBody>
+              <CTableRow v-for="(item,index) in tasks.data" :key="index" :data-key="item._id" class="selectable">
+                <CTableDataCell v-show="role=='admin'">
+                    <div v-if="item.taskStatus!='processed' && item.taskStatus!='done' && (item.taskAssigne === 'unassigned' || item.taskAssigne === '')">
+                    <input type="checkbox" v-model="checkedItems" :value="item._id">
+                    <!-- <CFormCheck  id="item._id" v-model="checkedItems" :value="item.id"/> -->
+                    </div>
+                    <div v-if="(item.taskAssigne !== '' && item.taskAssigne !== 'unassigned') || item.taskStatus=='processed' || item.taskStatus=='done'">
+                    <input type="checkbox" disabled/>
+                    </div>
+                </CTableDataCell>
+                <CTableDataCell>{{ new Date(item.createdAt).toLocaleDateString() }}</CTableDataCell>
+                <CTableDataCell v-show="role=='admin'">{{ item.taskAssigne }}</CTableDataCell>
+                <CTableDataCell>
+                    <div class="overflow-auto">{{ item.taskData.account_number }}
+                    <CTooltip content="Copy Account Number" placement="right">
+                        <template #toggler="{ on }">
 
-                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.account_number)">
-                          <CIcon name="cil-copy"/>
-                      </CButton>
-                      </template>
-                  </CTooltip>
-                  </div>
-              </CTableDataCell>
-              <CTableDataCell v-show="role=='admin'">
-                  <div class="overflow-auto">{{ item.taskData.anRekening }}
-                  <CTooltip content="Copy Account Name" placement="right">
-                      <template #toggler="{ on }">
+                        <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.account_number)">
+                            <CIcon name="cil-copy"/>
+                        </CButton>
+                        </template>
+                    </CTooltip>
+                    </div>
+                </CTableDataCell>
+                <CTableDataCell v-show="role=='admin'">
+                    <div class="overflow-auto">{{ item.taskData.anRekening }}
+                    <CTooltip content="Copy Account Name" placement="right">
+                        <template #toggler="{ on }">
 
-                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.anRekening)">
-                          <CIcon name="cil-copy"/>
-                      </CButton>
-                      </template>
-                  </CTooltip>
-                  </div>
-              </CTableDataCell>
-              <CTableDataCell>
-                  <div class="overflow-auto">
-                  {{ rupiah(item.taskData.amount) }}
-                  <CTooltip content="Copy Account Amount!" placement="right">
-                      <template #toggler="{ on }">
-                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.amount)">
-                          <CIcon name="cil-copy"/>
-                      </CButton>
-                      </template>
-                  </CTooltip>
-                  </div>
-              </CTableDataCell>
-              <CTableDataCell :color="getCellColor(item.taskStatus)">{{ item.taskStatus }}</CTableDataCell>
-              <CTableDataCell>
-                  <CButton size="sm" class="text-primary" variant="ghost" color="light" :disabled="item.taskStatus === 'processed'" @click="processTask(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
-                    Detail
-                  </CButton>
-                  <CButton size="sm" class="text-danger" variant="ghost" color="light" @click="showRequestReject(requestReject, item)" v-if="role !== 'admin' && item.taskStatus !== 'request_reject'">
-                    Request Reject
-                  </CButton>
-              </CTableDataCell>
-            </CTableRow>
-            <CTableRow>
-              <CTableDataCell v-show="tasks.total < 1" class="text-center" :colspan="role === 'admin' ? 8 : 6">No records found</CTableDataCell>
-            </CTableRow>
-          </CTableBody>
-        </CTable>
+                        <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.anRekening)">
+                            <CIcon name="cil-copy"/>
+                        </CButton>
+                        </template>
+                    </CTooltip>
+                    </div>
+                </CTableDataCell>
+                <CTableDataCell>
+                    <div class="overflow-auto">
+                    {{ rupiah(item.taskData.amount) }}
+                    <CTooltip content="Copy Account Amount!" placement="right">
+                        <template #toggler="{ on }">
+                        <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.amount)">
+                            <CIcon name="cil-copy"/>
+                        </CButton>
+                        </template>
+                    </CTooltip>
+                    </div>
+                </CTableDataCell>
+                <CTableDataCell :color="getCellColor(item.taskStatus)">{{ item.taskStatus }}</CTableDataCell>
+                <CTableDataCell>
+                    <CButton size="sm" class="text-primary" variant="ghost" color="light" :disabled="item.taskStatus === 'processed'" @click="processTask(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
+                      Detail
+                    </CButton>
+                    <CButton size="sm" class="text-danger" variant="ghost" color="light" @click="showRequestReject(requestReject, item)" v-if="role !== 'admin' && item.taskStatus !== 'request_reject'">
+                      Request Reject
+                    </CButton>
+                </CTableDataCell>
+              </CTableRow>
+              <CTableRow>
+                <CTableDataCell v-show="tasks.total < 1" class="text-center" :colspan="role === 'admin' ? 8 : 6">No records found</CTableDataCell>
+              </CTableRow>
+            </CTableBody>
+          </CTable>
+        </selection-area>
 
         <div class="d-flex justify-content-center">
           <b-pagination v-model="currentPages" :total-rows="tasks.total" :per-page="perPage" @click="changePg" />
@@ -308,7 +307,6 @@
       </CToastBody>
     </CToast>
   </CToaster> -->
-
   </div>
 </template>
 
@@ -346,8 +344,13 @@
 .filter-button {
   border-radius: 0;
 }
-
-
+.selection > .selected {
+  background: #5f9efc;
+}
+.selection-area {
+  background: #4f90f22d;
+  border: 1px solid #4f90f2;
+}
 </style>
 
 <script>
@@ -358,10 +361,11 @@ import { cilChevronCircleDownAlt, cilXCircle } from '@coreui/icons';
 import useClipboard from 'vue-clipboard3'
 import MultiSelect from '@vueform/multiselect'
 import VueSweetalert2 from 'vue-sweetalert2';
+import SelectionArea, {SelectionEvent} from '@viselect/vue';
 
 export default {
   name: 'TaskList',
-  components: { MultiSelect },
+  components: { MultiSelect, SelectionArea },
   methods: {
     showClearAssign(cb) {
       this.$swal({
@@ -456,7 +460,7 @@ export default {
 
     const work = ref('')
 
-    const checkedItems = ref([])
+    const checkedItems = ref(new Set)
     const perPage = ref(100)
     const role = ref(window.localStorage.getItem('role'))
 
@@ -513,8 +517,6 @@ export default {
     })
 
     onMounted(()=> {
-      setShiftClick()
-
       // date
       const startDate = new Date(new Date().setDate(new Date().getDate() - 1));
       const endDate = new Date();
@@ -726,7 +728,7 @@ export default {
         })
       })
 
-      checkedItems.value = [];
+      checkedItems.value.clear();
       modalAssign.value = false;
 
       cb()
@@ -758,7 +760,7 @@ export default {
       });
 
       console.log('success update');
-      checkedItems.value = [];
+      checkedItems.value.clear();
     }
 
     function requestReject(task) {
@@ -773,7 +775,7 @@ export default {
       })
 
       console.log('success update');
-      checkedItems.value = [];
+      checkedItems.value.clear();
     }
 
     function requestRejectBatch() {
@@ -800,7 +802,7 @@ export default {
       });
 
       console.log('success update');
-      checkedItems.value = [];
+      checkedItems.value.clear();
     }
 
     function processTask(account_numberParam, anRekeningParam, amountParam, mutation_idParam, bank_typeParam, _idParam, taskAssigneParam, taskTittleParam, taskRefNumberParam, taskExpiredTimeParam, taskCreatedByParam, taskStatusParam, taskHistoryParam)
@@ -850,17 +852,11 @@ export default {
     }
 
     function shiftAll(check) {
-      checkedItems.value = check ? tasks.value.data.map(task => task._id) : []
-    }
-
-    function setShiftClick() {
-      document.addEventListener('keydown', e => {
-        if (e.shiftKey) {
-          const count = checkedItems.value?.length
-
-          checkedItems.value = !count ? tasks.value.data?.map(task => task._id) : []
-        }
-      })
+      if (check) {
+        tasks.value.data.forEach(task => checkedItems.value.add(task._id))
+      } else {
+        checkedItems.value.clear()
+      }
     }
 
     function cek(status) {
@@ -952,6 +948,22 @@ export default {
        toClipboard(text);
     }
 
+    function extractIds(els) {
+        return els.map(v => v.getAttribute('data-key'))
+    }
+
+    function onStart({event, selection}) {
+        if (!event?.ctrlKey && !event?.metaKey) {
+            selection.clearSelection();
+            checkedItems.value.clear();
+        }
+    }
+
+    function onMove({store: { changed: { added, removed } }, selection}) {
+        extractIds(added).forEach(id => checkedItems.value.add(id));
+        extractIds(removed).forEach(id => checkedItems.value.delete(id));
+    }
+
     return {
       dateFilter,
       searchFilter,
@@ -1023,7 +1035,6 @@ export default {
       processTask,
       proc,
       shiftAll,
-      setShiftClick,
 
       pickDate,
       playSound,
@@ -1032,7 +1043,11 @@ export default {
       tscob,
       shift,
       rupiah,
-      copy
+      copy,
+
+      extractIds,
+      onStart,
+      onMove
     }
   }
 }
