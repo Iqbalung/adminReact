@@ -14,7 +14,7 @@
           type="text"
           id="search"
           v-model="searchFilter"
-          placeholder="refNumber"
+          placeholder="Sender"
         />
         <!-- <CButton
           size="sm"
@@ -188,6 +188,10 @@ export default {
     let currentPages= ref(1)
     const role = ref(window.localStorage.getItem('role'))
 
+    watch(searchFilter, value => {
+      loadIncidents(currentPages.value, searchFilter.value)
+    })
+
     onMounted(() => {
       var acknowledgedcreate = []
 
@@ -201,22 +205,20 @@ export default {
             acknowledgedcreate.length = 20
           }
 
-          loadIncidents()
+          loadIncidents(currentPages.value, searchFilter.value)
         }
       })
 
-      loadIncidents()
+      loadIncidents(currentPages.value, searchFilter.value)
     })
 
-    function loadIncidents() {
-      let pages = 1
-      let searchTitle = ''
+    function loadIncidents(pages, searchTitle) {
       const skip = pages > 1 ? (pages - 1) * 100 : 0
 
       const params = {
         '$sort[id]': -1,
         $skip: skip,
-        $search: searchTitle,
+        'detailData.account_receiver': searchTitle,
       }
 
       console.log(params)
@@ -238,11 +240,13 @@ export default {
     }
 
     function changePg() {
-      loadIncidents()
+      loadIncidents(currentPages.value, searchFilter.value)
     }
 
     return {
       searchFilter,
+      changePg,
+      loadIncidents,
       incidents,
       perPage,
       currentPages,
