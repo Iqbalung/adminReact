@@ -12,7 +12,7 @@
           <CCardBody>
             <CCardText
               ><CIcon icon="cil-bell" />
-              <span>{{ incident.refNumber }}</span>
+              <span>{{ incident.detailData.payload.description.join(" ") }}</span>
             </CCardText></CCardBody
           >
         </CCard>
