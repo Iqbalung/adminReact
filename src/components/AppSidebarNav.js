@@ -1,4 +1,4 @@
-import { defineComponent, h, onMounted, ref, resolveComponent } from 'vue'
+import { defineComponent, h, onMounted, ref, resolveComponent, resolveDirective, withDirectives } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
 import {
@@ -80,7 +80,7 @@ const AppSidebarNav = defineComponent({
       }
 
       if (item.type === 'external-link') {
-        return h(
+        return withDirectives(h(
           resolveComponent(item.component),
           {
             href: item.to,
@@ -111,49 +111,53 @@ const AppSidebarNav = defineComponent({
                 ),
             ],
           },
-        )
+        ), [
+          [resolveDirective('c-tooltip'), 'Dashboard']
+        ])
       }
 
       return item.to
         ? h(
-            RouterLink,
-            {
-              to: item.to,
-              custom: true,
-            },
-            {
-              default: (props) =>
-                h(
-                  resolveComponent(item.component),
-                  {
-                    active: props.isActive,
-                    href: props.href,
-                    onClick: () => props.navigate(),
-                  },
-                  {
-                    default: () => [
-                      item.icon &&
-                        h(resolveComponent('CIcon'), {
-                          customClassName: 'nav-icon',
-                          name: item.icon,
-                        }),
-                      h('span', { class: 'nav-name' }, item.name),
-                      item.badge &&
-                        h(
-                          CBadge,
-                          {
-                            class: 'ms-auto',
-                            color: item.badge.color,
-                          },
-                          {
-                            default: () => item.badge.text,
-                          },
-                        ),
-                    ],
-                  },
-                ),
-            },
-          )
+          RouterLink,
+          {
+            to: item.to,
+            custom: true,
+          },
+          {
+            default: (props) =>
+              withDirectives(h(
+                resolveComponent(item.component),
+                {
+                  active: props.isActive,
+                  href: props.href,
+                  onClick: () => props.navigate(),
+                },
+                {
+                  default: () => [
+                    item.icon &&
+                      h(resolveComponent('CIcon'), {
+                        customClassName: 'nav-icon',
+                        name: item.icon,
+                      }),
+                    h('span', { class: 'nav-name' }, item.name),
+                    item.badge &&
+                      h(
+                        CBadge,
+                        {
+                          class: 'ms-auto',
+                          color: item.badge.color,
+                        },
+                        {
+                          default: () => item.badge.text,
+                        },
+                      ),
+                  ],
+                },
+              ), [
+                [resolveDirective('c-tooltip'), item.name]
+              ]),
+          },
+        )
         : h(
             resolveComponent(item.component),
             {},

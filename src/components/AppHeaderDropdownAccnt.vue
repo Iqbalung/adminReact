@@ -7,39 +7,11 @@
       <CDropdownHeader component="h6" class="bg-light fw-semibold py-2">
         Account
       </CDropdownHeader>
-      <!-- <CDropdownItem>
-        <CIcon icon="cil-bell" /> Updates
-        <CBadge color="info" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem> -->
-      <!-- <CDropdownItem>
-        <CIcon icon="cil-envelope-open" /> Messages
-        <CBadge color="success" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem> -->
       <CDropdownItem>
         <CIcon icon="cil-task" /> Tasks
-        <CBadge color="danger" class="ms-auto">{{ itemsCount }}</CBadge>
+        <CBadge color="danger" class="ms-auto">{{ taskCount }}</CBadge>
       </CDropdownItem>
-      <!-- <CDropdownItem>
-        <CIcon icon="cil-comment-square" /> Comments
-        <CBadge color="warning" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem> -->
-      <!-- <CDropdownHeader component="h6" class="bg-light fw-semibold py-2">
-        Settings
-      </CDropdownHeader> -->
       <CDropdownItem> <CIcon icon="cil-user" /> Profile </CDropdownItem>
-      <!-- <CDropdownItem> <CIcon icon="cil-settings" /> Settings </CDropdownItem> -->
-      <!-- <CDropdownItem>
-        <CIcon icon="cil-dollar" /> Payments
-        <CBadge color="secondary" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem> -->
-      <!-- <CDropdownItem>
-        <CIcon icon="cil-file" /> Projects
-        <CBadge color="primary" class="ms-auto">{{ itemsCount }}</CBadge>
-      </CDropdownItem> -->
-      <!-- <CDropdownDivider /> -->
-      <!-- <CDropdownItem>
-        <CIcon icon="cil-shield-alt" /> Lock Account
-      </CDropdownItem> -->
       <CDropdownItem @click="handleClick">
         <CIcon icon="cil-lock-locked" /> Logout
       </CDropdownItem>
@@ -48,6 +20,7 @@
 </template>
 
 <script>
+import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import avatar from '@/assets/images/avatars/8.jpg'
 import avat from '@/assets/images/avatars/pic.jpg'
@@ -74,9 +47,44 @@ export default {
     },
   },
   setup() {
+    const taskCount = ref(0)
+
+    onMounted(()=> {
+      socket.on('tasks created', (message) => {
+        getTaskCount()
+      })
+
+      getTaskCount()
+    })
+
+    function getTaskCount() {
+      const param_admin = {
+        'createdAt[$gte]': new Date(new Date().setDate(new Date().getDate() - 1)),
+        'createdAt[$lte]':new Date(),
+      }
+      const param_users = {
+        'createdAt[$gte]': new Date(new Date().setDate(new Date().getDate() - 1)),
+        'createdAt[$lte]': new Date(),
+        taskAssigne: `${window.localStorage.getItem('username')}`,
+      }
+
+      const params = (window.localStorage.getItem('role') === 'admin') ? param_admin : param_users;
+
+      axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        },
+        params
+      }).then((result) => {
+        taskCount.value = result.data.total
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+    }
+
     return {
       avatar: avat,
-      itemsCount: 42,
+      taskCount,
     }
   },
 }
