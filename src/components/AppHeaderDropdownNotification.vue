@@ -1,5 +1,5 @@
 <template>
-  <CDropdown variant="nav-item">
+  <CDropdown variant="nav-item" alignment="end" class="notif-incident">
     <CDropdownToggle placement="bottom-end" :caret="false">
       <CIcon class="mx-2" icon="cil-bell" size="lg" />
     </CDropdownToggle>
@@ -7,20 +7,12 @@
       <CDropdownHeader component="h6" class="bg-light fw-semibold py-2">
         Notification Incidents
       </CDropdownHeader>
-      <CDropdownItem>
+      <CDropdownItem v-for="(incident, key) in incidents" :key="key">
         <CCard style="width: 18rem">
           <CCardBody>
             <CCardText
-              ><CIcon icon="cil-bell" /> mutation number
-            </CCardText></CCardBody
-          >
-        </CCard>
-      </CDropdownItem>
-      <CDropdownItem>
-        <CCard style="width: 18rem">
-          <CCardBody>
-            <CCardText
-              ><CIcon icon="cil-bell" /> mutation number
+              ><CIcon icon="cil-bell" />
+              <span>{{ incident.refNumber }}</span>
             </CCardText></CCardBody
           >
         </CCard>
@@ -42,6 +34,15 @@
     </CToast>
   </CToaster>
 </template>
+
+<style>
+.notif-incident .dropdown-menu {
+  min-width: 24rem;
+}
+.notif-incident .card {
+  width: 100% !important;
+}
+</style>
 
 <script>
 import axios from 'axios'
@@ -79,12 +80,50 @@ export default {
   },
   setup() {
     let toasts = ref([])
+    const incidents = ref([])
 
     onMounted(() => {
+      var acknowledgedcreate = []
+
       socket.on('incidents created', (message) => {
         showToast('Incident Created ', message, message.createdAt);
+
+        if (!~acknowledgedcreate.indexOf(message._id)) {
+          // add to array of acknowledged events
+          acknowledgedcreate.unshift(message._id)
+
+          // prevent array from growing to large
+          if (acknowledgedcreate.length > 5) {
+            acknowledgedcreate.length = 5
+          }
+
+          loadIncidents()
+        }
       })
+
+      loadIncidents()
     })
+
+    function loadIncidents() {
+      const params = {
+        '$sort[id]': -1,
+        '$limit': 5
+      }
+
+      axios
+        .get(`${process.env.VUE_APP_URL_API}/incidents`, {
+          headers: {
+            Authorization: window.localStorage.getItem('accessToken'),
+          },
+          params,
+        })
+        .then((result) => {
+          incidents.value = result.data.data
+        })
+        .catch((err) => {
+          console.log(err.response)
+        })
+    }
 
     function showToast(title, content, time) {
       let last = new Date(time).getTime()
@@ -103,6 +142,7 @@ export default {
 
     return {
       toasts,
+      incidents,
       avatar: avat,
       itemsCount: 42,
     }
