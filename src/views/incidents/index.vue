@@ -78,7 +78,7 @@
             <CTableHeaderCell scope="col">From</CTableHeaderCell>
             <CTableHeaderCell scope="col">To</CTableHeaderCell>
             <CTableHeaderCell scope="col">Status</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Action</CTableHeaderCell>
+            <!-- <CTableHeaderCell scope="col">Action</CTableHeaderCell> -->
           </CTableRow>
         </CTableHead>
         <CTableBody>
@@ -95,12 +95,12 @@
             }}</CTableDataCell>
             <CTableDataCell>
               <div class="overflow-auto">
-                {{ item.detailData.account_receiver }}
+                {{ item.detailData.ib.name }}
               </div>
             </CTableDataCell>
             <CTableDataCell v-show="role == 'admin'">
               <div class="overflow-auto">
-                {{ item.detailData.ib.name }}
+                {{ item.detailData.account_receiver }}
               </div>
             </CTableDataCell>
             <CTableDataCell>
@@ -108,11 +108,11 @@
                 {{ item.status }}
               </div>
             </CTableDataCell>
-            <CTableDataCell
+            <!-- <CTableDataCell
               ><CButton size="sm" class="text-light" color="warning"
                 >Action</CButton
               >
-            </CTableDataCell>
+            </CTableDataCell> -->
             <!-- <CTableDataCell>
               <CButton
                 size="sm"

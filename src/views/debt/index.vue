@@ -77,7 +77,7 @@
             <CTableHeaderCell scope="col">To</CTableHeaderCell>
             <CTableHeaderCell scope="col">Status</CTableHeaderCell>
             <CTableHeaderCell scope="col">Updated At</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Action</CTableHeaderCell>
+            <!-- <CTableHeaderCell scope="col">Action</CTableHeaderCell> -->
           </CTableRow>
         </CTableHead>
         <CTableBody>
@@ -90,12 +90,12 @@
             }}</CTableDataCell>
             <CTableDataCell>
               <div class="overflow-auto">
-                {{ item.account_receiver }}
+                {{ item.ib.name }}
               </div>
             </CTableDataCell>
             <CTableDataCell v-show="role == 'admin'">
               <div class="overflow-auto">
-                {{ item.ib.name }}
+                {{ item.account_receiver }}
               </div>
             </CTableDataCell>
             <CTableDataCell>
@@ -108,11 +108,11 @@
                 {{ item.updatedAt ? item.updatedAt : '-' }}
               </div>
             </CTableDataCell>
-            <CTableDataCell
+            <!-- <CTableDataCell
               ><CButton size="sm" class="text-light" color="warning"
                 >Action</CButton
               >
-            </CTableDataCell>
+            </CTableDataCell> -->
             <!-- <CTableDataCell>
               <CButton
                 size="sm"
