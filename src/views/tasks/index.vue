@@ -42,7 +42,7 @@
         <div v-if="role === 'admin'">
           <CButton size="sm" color="success" class="me-1" @click="() => { modalAssign = true }">Assign Task</CButton>
           <CButton size="sm" color="secondary" class="me-1" @click="showClearAssign(clearAssign)">Unassign</CButton>
-          <CButton size="sm" color="danger" class="me-1">Process Reject</CButton>
+          <CButton size="sm" color="danger" class="me-1" @click="showRequestReject(processRejectBatch)">Process Reject</CButton>
           <CButton size="sm" color="warning" @click="showRequestReject(requestRejectBatch)">Request Reject</CButton>
         </div>
       </CCardHeader>
@@ -828,6 +828,33 @@ export default {
       checkedItems.value.clear();
     }
 
+    function processRejectBatch() {
+      checkedItems.value.forEach(element => {
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
+          headers: {
+            Authorization:window.localStorage.getItem('accessToken')
+          }
+        }).then((results)=> {
+          // Axios update
+          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskStatus: 'reject'},{
+            headers: {
+              Authorization:window.localStorage.getItem('accessToken')
+            }
+          }).then(()=> {
+            loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value[0] ,dateFilter.value[1]);
+          }).catch((err)=>{
+            console.log(err);
+          })
+        // Axios update
+        }).catch((err)=>{
+          console.log(err);
+        })
+      });
+
+      console.log('success update');
+      checkedItems.value.clear();
+    }
+
     function processTask(account_numberParam, anRekeningParam, amountParam, mutation_idParam, bank_typeParam, _idParam, taskAssigneParam, taskTittleParam, taskRefNumberParam, taskExpiredTimeParam, taskCreatedByParam, taskStatusParam, taskHistoryParam)
     {
       modalDetail.value  = true;
@@ -1097,6 +1124,7 @@ export default {
       clearAssign,
       requestReject,
       requestRejectBatch,
+      processRejectBatch,
       processTask,
       proc,
       shiftAll,
