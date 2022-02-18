@@ -218,7 +218,7 @@ export default {
       const params = {
         '$sort[_id]': -1,
         $skip: skip,
-        'account_receiver': searchTitle,
+        account_receiver: searchTitle,
       }
 
       console.log(params)
