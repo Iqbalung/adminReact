@@ -14,7 +14,7 @@
           type="text"
           id="search"
           v-model="searchFilter"
-          placeholder="Sender"
+          placeholder="Receiver"
         />
         <!-- <CButton
           size="sm"
