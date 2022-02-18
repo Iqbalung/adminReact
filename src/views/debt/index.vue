@@ -6,7 +6,7 @@
       <span>
         Data Found
         <CBadge color="primary">{{
-          incidents.total ? incidents.total : 0
+          debt.total ? debt.total : 0
         }}</CBadge>
       </span>
       <div v-if="role === 'admin'">
@@ -69,43 +69,43 @@
               />
             </CTableHeaderCell> -->
             <CTableHeaderCell scope="col">No</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Created</CTableHeaderCell>
             <!-- <CTableHeaderCell scope="col" v-show="role == 'admin'"
               >Assigned</CTableHeaderCell
             > -->
-            <CTableHeaderCell scope="col">RefNumber</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Date Crawl</CTableHeaderCell>
+            <CTableHeaderCell scope="col">Amount</CTableHeaderCell>
             <CTableHeaderCell scope="col">From</CTableHeaderCell>
             <CTableHeaderCell scope="col">To</CTableHeaderCell>
             <CTableHeaderCell scope="col">Status</CTableHeaderCell>
+            <CTableHeaderCell scope="col">Updated At</CTableHeaderCell>
             <CTableHeaderCell scope="col">Action</CTableHeaderCell>
           </CTableRow>
         </CTableHead>
         <CTableBody>
-          <CTableRow v-for="(item, index) in incidents.data" :key="index">
+          <CTableRow v-for="(item, index) in debt.data" :key="index">
             <CTableDataCell>
               {{ index + 1 + (currentPages - 1) * perPage }}
             </CTableDataCell>
-            <CTableDataCell v-show="role == 'admin'">
-              {{ item.createdAt }}
-            </CTableDataCell>
-            <CTableDataCell>{{ item.refNumber }}</CTableDataCell>
             <CTableDataCell v-show="role == 'admin'">{{
-              item.dateCrawl
+              item.amount
             }}</CTableDataCell>
             <CTableDataCell>
               <div class="overflow-auto">
-                {{ item.detailData.account_receiver }}
+                {{ item.account_receiver }}
               </div>
             </CTableDataCell>
             <CTableDataCell v-show="role == 'admin'">
               <div class="overflow-auto">
-                {{ item.detailData.ib.name }}
+                {{ item.ib.name }}
               </div>
             </CTableDataCell>
             <CTableDataCell>
               <div class="overflow-auto">
-                {{ item.status }}
+                {{ item.status ? item.status : '-' }}
+              </div>
+            </CTableDataCell>
+            <CTableDataCell>
+              <div class="overflow-auto">
+                {{ item.updatedAt ? item.updatedAt : '-' }}
               </div>
             </CTableDataCell>
             <CTableDataCell
@@ -154,7 +154,7 @@
           </CTableRow>
           <CTableRow>
             <CTableDataCell
-              v-show="incidents.total < 1"
+              v-show="debt.total < 1"
               class="text-center"
               :colspan="role === 'admin' ? 8 : 6"
               >No records found</CTableDataCell
@@ -166,7 +166,7 @@
       <div class="d-flex justify-content-center">
         <b-pagination
           v-model="currentPages"
-          :total-rows="incidents.total"
+          :total-rows="debt.total"
           :per-page="perPage"
           @click="changePg"
         />
@@ -180,22 +180,22 @@ import axios from 'axios'
 import { reactive, onMounted, watch, ref } from 'vue'
 
 export default {
-  name: 'IncidentsList',
+  name: 'DebtList',
   setup() {
     let searchFilter = ref('')
-    const incidents = ref([])
+    const debt = ref([])
     const perPage = ref(100)
     let currentPages = ref(1)
     const role = ref(window.localStorage.getItem('role'))
 
     watch(searchFilter, value => {
-      loadIncidents(currentPages.value, searchFilter.value)
+      loadDebt(currentPages.value, searchFilter.value)
     })
 
     onMounted(() => {
       var acknowledgedcreate = []
 
-      socket.on('incidents created', (message) => {
+      socket.on('debt created', (message) => {
         if (!~acknowledgedcreate.indexOf(message._id)) {
           // add to array of acknowledged events
           acknowledgedcreate.unshift(message._id)
@@ -205,33 +205,33 @@ export default {
             acknowledgedcreate.length = 20
           }
 
-          loadIncidents(currentPages.value, searchFilter.value)
+          loadDebt(currentPages.value, searchFilter.value)
         }
       })
 
-      loadIncidents(currentPages.value, searchFilter.value)
+      loadDebt(currentPages.value, searchFilter.value)
     })
 
-    function loadIncidents(pages, searchTitle) {
+    function loadDebt(pages, searchTitle) {
       const skip = pages > 1 ? (pages - 1) * 100 : 0
 
       const params = {
         '$sort[_id]': -1,
         $skip: skip,
-        'detailData.account_receiver': searchTitle,
+        'account_receiver': searchTitle,
       }
 
       console.log(params)
 
       axios
-        .get(`${process.env.VUE_APP_URL_API}/incidents`, {
+        .get(`${process.env.VUE_APP_URL_API}/debt`, {
           headers: {
             Authorization: window.localStorage.getItem('accessToken'),
           },
           params,
         })
         .then((result) => {
-          incidents.value = result.data
+          debt.value = result.data
           // totalData.value = result.data.total
         })
         .catch((err) => {
@@ -240,14 +240,14 @@ export default {
     }
 
     function changePg() {
-      loadIncidents(currentPages.value, searchFilter.value)
+      loadDebt(currentPages.value, searchFilter.value)
     }
 
     return {
       searchFilter,
       changePg,
-      loadIncidents,
-      incidents,
+      loadDebt,
+      debt,
       perPage,
       currentPages,
       role,

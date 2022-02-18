@@ -184,6 +184,19 @@ const routes = [
           return next()
         },
       },
+      {
+        path: '/debt',
+        name: 'Debt',
+        component: () => import('@/views/debt/index.vue'),
+        beforeEnter: (to, from, next) => {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name: 'Login',
+            })
+          }
+          return next()
+        },
+      },
     ],
   },
 

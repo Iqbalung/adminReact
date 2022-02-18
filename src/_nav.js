@@ -50,6 +50,12 @@ export default [
     to: '/incidents',
     icon: 'cil-bell',
   },
+  {
+    component: 'CNavItem',
+    name: 'Debt',
+    to: '/debt',
+    icon: 'cil-dollar',
+  },
   // {
   //   component: 'CNavTitle',
   //   name: 'Theme',
