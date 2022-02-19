@@ -447,6 +447,7 @@ export default {
         { label: 'Processed', value: 'processed', checked: false },
         { label: 'Done', value: 'done', checked: false },
         { label: 'Request Reject', value: 'request_reject', checked: false },
+        { label: 'Reject', value: 'reject', checked: false },
     ])
     const statusFilter = ref(['unprocess'])
     const collapseFilter = ref(false)
@@ -787,7 +788,7 @@ export default {
     }
 
     function requestReject(task) {
-      axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${task._id}`,{taskStatus: 'request_reject'},{
+      axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${task._id}`,{_id:task._id,taskStatus: 'request_reject'},{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -836,7 +837,7 @@ export default {
           }
         }).then((results)=> {
           // Axios update
-          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskStatus: 'reject'},{
+          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{_id:`${element}`,taskStatus: 'reject'},{
             headers: {
               Authorization:window.localStorage.getItem('accessToken')
             }
