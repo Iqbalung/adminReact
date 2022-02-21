@@ -664,13 +664,12 @@ export default {
         'taskData.amount': amount,
         'taskData.bank_type': bankType,
         $skip: skip,
-        taskAssigne: taskAssigne,
-        taskAssigne: searchTitle
+        taskAssigne: taskAssigne
       }
 
       const params = (window.localStorage.getItem('role') === 'admin') ? param_admin : param_users;
 
-      console.log(params)
+      console.log("where",params,taskAssigne)
 
       axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
         headers: {
