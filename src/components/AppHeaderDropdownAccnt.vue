@@ -58,13 +58,16 @@ export default {
     })
 
     function getTaskCount() {
+      const from = new Date(new Date().setDate(new Date().getDate() - 1))
+      const to = new Date()
+
       const param_admin = {
-        'createdAt[$gte]': new Date(new Date().setDate(new Date().getDate() - 1)),
-        'createdAt[$lte]':new Date(),
+        'createdAt[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00').toISOString(),
+        'createdAt[$lte]':new Date(to.toISOString().substring(0, 10) + 'T23:59:59').toISOString(),
       }
       const param_users = {
-        'createdAt[$gte]': new Date(new Date().setDate(new Date().getDate() - 1)),
-        'createdAt[$lte]': new Date(),
+        'createdAt[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00').toISOString(),
+        'createdAt[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59').toISOString(),
         taskAssigne: `${window.localStorage.getItem('username')}`,
       }
 
