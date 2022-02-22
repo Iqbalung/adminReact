@@ -578,28 +578,6 @@ export default {
         }
       })
 
-      socket.on('tasks created', (message) => {
-        if (!~acknowledgedcreate.indexOf(message._id)){
-          // add to array of acknowledged events
-          acknowledgedcreate.unshift(message._id);
-
-          // prevent array from growing to large
-          if(acknowledgedcreate.length > 20){
-            acknowledgedcreate.length = 20;
-          }
-
-          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
-
-          if (message.taskAssigne == window.localStorage.getItem('username')) {
-            if(message.taskStatus=='done'){
-              showToast('Transfer Berhasil ', message.taskTittle, message.createdAt);
-            } else{
-              showToast('Task Baru ', message.taskTittle, message.createdAt);
-            }
-          }
-        }
-      })
-
       socket.on('tasks updated', (message) => {
         loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '')
       })
@@ -653,6 +631,7 @@ export default {
         $skip: skip,
         'taskAssigne': searchTitle
       }
+
       const param_users = {
         ...(from ? { 'createdAt[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00').toISOString() } : {}),
         ...(to ? { 'createdAt[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59').toISOString() } : {}),
