@@ -1,46 +1,55 @@
 <template>
   <CCard class="mb-4">
     <CCardHeader
-      class="bg-white d-flex align-items-center justify-content-between"
+      class="bg-white row gx-0 align-items-center justify-content-between"
     >
-      <span>
-        Data Found
-        <CBadge color="primary">{{
-          debt.total ? debt.total : 0
-        }}</CBadge>
-      </span>
-      <div v-if="role === 'admin'">
-        <CFormInput
-          type="text"
-          id="search"
-          v-model="searchFilter"
-          placeholder="Receiver"
-        />
-        <!-- <CButton
-          size="sm"
-          color="success"
-          class="me-1"
-          @click="
-            () => {
-              modalAssign = true
-            }
-          "
-          >Assign Task</CButton
-        >
-        <CButton
-          size="sm"
-          color="secondary"
-          class="me-1"
-          @click="showClearAssign(clearAssign)"
-          >Unassign</CButton
-        >
-        <CButton size="sm" color="danger" class="me-1">Process Reject</CButton>
-        <CButton
-          size="sm"
-          color="warning"
-          @click="showRequestReject(requestRejectBatch)"
-          >Request Reject</CButton
-        > -->
+      <div class="col">
+        <span>
+          Data Found
+          <CBadge color="primary">{{
+            debt.total ? debt.total : 0
+          }}</CBadge>
+        </span>
+      </div>
+      <div class="col">
+        <div class="row gx-2" v-if="role === 'admin'">
+          <div class="col">
+            <MultiSelect :options="bankOptions" placeholder="Bank" v-model="bankFilter" searchable @open="getBanks" />
+          </div>
+          <div class="col">
+            <CFormInput
+              type="text"
+              id="search"
+              v-model="searchFilter"
+              placeholder="Receiver"
+            />
+          </div>
+          <!-- <CButton
+            size="sm"
+            color="success"
+            class="me-1"
+            @click="
+              () => {
+                modalAssign = true
+              }
+            "
+            >Assign Task</CButton
+          >
+          <CButton
+            size="sm"
+            color="secondary"
+            class="me-1"
+            @click="showClearAssign(clearAssign)"
+            >Unassign</CButton
+          >
+          <CButton size="sm" color="danger" class="me-1">Process Reject</CButton>
+          <CButton
+            size="sm"
+            color="warning"
+            @click="showRequestReject(requestRejectBatch)"
+            >Request Reject</CButton
+          > -->
+        </div>
       </div>
       <!-- <CDropdown color="light">
         <CDropdownToggle color="dark">{{
@@ -95,7 +104,7 @@
             </CTableDataCell>
             <CTableDataCell v-show="role == 'admin'">
               <div class="overflow-auto">
-                {{ item.account_receiver }}
+                {{ item.account_receiver ? item.account_receiver : '-' }}
               </div>
             </CTableDataCell>
             <CTableDataCell>
@@ -178,19 +187,25 @@
 <script>
 import axios from 'axios'
 import { reactive, onMounted, watch, ref } from 'vue'
+import MultiSelect from '@vueform/multiselect'
 
 export default {
   name: 'DebtList',
+  components: { MultiSelect },
   setup() {
     let searchFilter = ref('')
     const debt = ref([])
     const perPage = ref(100)
     let currentPages = ref(1)
     const role = ref(window.localStorage.getItem('role'))
+    const bankOptions = ref([]);
+    const bankFilter = ref('')
 
     watch(searchFilter, value => {
       loadDebt(currentPages.value, searchFilter.value)
     })
+
+    watch(bankFilter, value => loadDebt(currentPages.value, searchFilter.value))
 
     onMounted(() => {
       var acknowledgedcreate = []
@@ -219,6 +234,7 @@ export default {
         '$sort[_id]': -1,
         $skip: skip,
         account_receiver: searchTitle,
+        ...(bankFilter.value ? { 'ib.username': bankFilter.value } : {})
       }
 
       console.log(params)
@@ -243,6 +259,18 @@ export default {
       loadDebt(currentPages.value, searchFilter.value)
     }
 
+    function getBanks() {
+      axios.get(`${process.env.VUE_APP_URL_API}/bank`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      }).then(results => results.data.data.map(result => result.username)).then(results => {
+        bankOptions.value = results
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+    }
+
     return {
       searchFilter,
       changePg,
@@ -251,9 +279,12 @@ export default {
       perPage,
       currentPages,
       role,
+      bankOptions,
+      bankFilter,
+      getBanks
     }
   },
 }
 </script>
 
-<style></style>
+<style src="@vueform/multiselect/themes/default.css"></style>
