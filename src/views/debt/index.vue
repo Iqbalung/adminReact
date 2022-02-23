@@ -1,56 +1,36 @@
 <template>
   <CCard class="mb-4">
-    <CCardHeader
-      class="bg-white row gx-0 align-items-center justify-content-between"
-    >
-      <div class="col">
-        <span>
-          Data Found
-          <CBadge color="primary">{{
-            debt.total ? debt.total : 0
-          }}</CBadge>
-        </span>
-      </div>
-      <div class="col">
-        <div class="row gx-2" v-if="role === 'admin'">
-          <div class="col">
-            <MultiSelect :options="bankOptions" placeholder="Bank" v-model="bankFilter" searchable @open="getBanks" />
-          </div>
-          <div class="col">
-            <CFormInput
-              type="text"
-              id="search"
-              v-model="searchFilter"
-              placeholder="Receiver"
-            />
-          </div>
-          <!-- <CButton
-            size="sm"
-            color="success"
-            class="me-1"
-            @click="
-              () => {
-                modalAssign = true
-              }
-            "
-            >Assign Task</CButton
-          >
-          <CButton
-            size="sm"
-            color="secondary"
-            class="me-1"
-            @click="showClearAssign(clearAssign)"
-            >Unassign</CButton
-          >
-          <CButton size="sm" color="danger" class="me-1">Process Reject</CButton>
-          <CButton
-            size="sm"
-            color="warning"
-            @click="showRequestReject(requestRejectBatch)"
-            >Request Reject</CButton
-          > -->
+    <CCardBody>
+      <div class="row gx-2" v-if="role === 'admin'">
+        <div class="col">
+          <Datepicker v-model="dateFilter" range @closed="pickDate" :enableTimePicker="false"></Datepicker>
+        </div>
+        <div class="col">
+          <MultiSelect :options="bankOptions" placeholder="Bank" v-model="bankFilter" searchable @open="getBanks" />
+        </div>
+        <div class="col">
+          <CFormInput
+            type="text"
+            id="search"
+            v-model="searchFilter"
+            placeholder="Receiver"
+          />
         </div>
       </div>
+    </CCardBody>
+  </CCard>
+
+  <CCard class="mb-4">
+    <CCardHeader
+      class="bg-white d-flex align-items-center justify-content-between"
+    >
+      <span>
+        Data Found
+        <CBadge color="primary">{{
+          debt.total ? debt.total : 0
+        }}</CBadge>
+      </span>
+      <CButton size="sm" color="primary" @click="exportDebt(exportDebtFeedback)">Export Debt</CButton>
       <!-- <CDropdown color="light">
         <CDropdownToggle color="dark">{{
           filterListActive.label
@@ -188,10 +168,20 @@
 import axios from 'axios'
 import { reactive, onMounted, watch, ref } from 'vue'
 import MultiSelect from '@vueform/multiselect'
+import VueSweetalert2 from 'vue-sweetalert2'
+import XLSX from 'xlsx'
 
 export default {
   name: 'DebtList',
   components: { MultiSelect },
+  methods: {
+    exportDebtFeedback() {
+      this.$swal({
+        title:'Debt Exported',
+        icon:'success'
+      })
+    }
+  },
   setup() {
     let searchFilter = ref('')
     const debt = ref([])
@@ -200,14 +190,23 @@ export default {
     const role = ref(window.localStorage.getItem('role'))
     const bankOptions = ref([]);
     const bankFilter = ref('')
+    const dateFilter = ref()
 
     watch(searchFilter, value => {
       loadDebt(currentPages.value, searchFilter.value)
     })
 
+    watch(dateFilter, value => loadDebt(currentPages.value, searchFilter.value))
+
     watch(bankFilter, value => loadDebt(currentPages.value, searchFilter.value))
 
     onMounted(() => {
+      // date
+      const startDate = new Date(new Date().setDate(new Date().getDate() - 1));
+      const endDate = new Date();
+
+      dateFilter.value = [startDate, endDate];
+
       var acknowledgedcreate = []
 
       socket.on('debt created', (message) => {
@@ -234,6 +233,8 @@ export default {
         '$sort[_id]': -1,
         $skip: skip,
         account_receiver: searchTitle,
+        ...(dateFilter.value ? { 'date[$gte]': new Date(dateFilter.value[0].toISOString().substring(0, 10) + 'T00:00:00').toISOString() } : {}),
+        ...(dateFilter.value ? { 'date[$lte]': new Date(dateFilter.value[1].toISOString().substring(0, 10) + 'T23:59:59').toISOString() } : {}),
         ...(bankFilter.value ? { 'ib.username': bankFilter.value } : {})
       }
 
@@ -271,6 +272,17 @@ export default {
       });
     }
 
+    function exportDebt(cb) {
+      const worksheet = XLSX.utils.json_to_sheet(debt.value.data)
+      const workbook = XLSX.utils.book_new()
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Debt");
+
+      XLSX.writeFile(workbook, "debt.xlsx");
+
+      cb()
+    }
+
     return {
       searchFilter,
       changePg,
@@ -281,7 +293,9 @@ export default {
       role,
       bankOptions,
       bankFilter,
-      getBanks
+      getBanks,
+      dateFilter,
+      exportDebt
     }
   },
 }
