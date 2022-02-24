@@ -197,6 +197,19 @@ const routes = [
           return next()
         },
       },
+      {
+        path: '/log',
+        name: 'Log Activity',
+        component: () => import('@/views/logactivity/index.vue'),
+        beforeEnter: (to, from, next) => {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name: 'Login',
+            })
+          }
+          return next()
+        },
+      },
     ],
   },
 
