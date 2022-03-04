@@ -31,21 +31,21 @@
                       autocomplete="current-password"
                     />
                   </CInputGroup>
-                  <CRow>
-                    <CCol :xs="6">
-                      <CButton
-                        color="primary"
-                        class="px-4"
-                      >
-                        Login
-                      </CButton>
-                    </CCol>
-                    <CCol :xs="6" class="text-right">
-                      <CButton color="link" class="px-0">
-                        Forgot password?
-                      </CButton>
-                    </CCol>
-                  </CRow>
+                  <CButton
+                    color="primary"
+                    class="px-4 me-2"
+                  >
+                    Login
+                  </CButton>
+                  <router-link :to="{ name: 'Register' }">
+                    <CButton
+                      color="secondary"
+                      variant="outline"
+                      class="px-4"
+                    >
+                      Register
+                    </CButton>
+                  </router-link>
                 </CForm>
               </CCardBody>
             </CCard>
@@ -89,6 +89,8 @@ export default {
   },
   methods: {
     login() {
+      this.validation = []
+
       axios
         .post(`${process.env.VUE_APP_URL_API}/authentication`, {
           strategy: 'local',
@@ -96,32 +98,39 @@ export default {
           password: this.form.password,
         })
         .then((response) => {
-          axios.get('https://api.ipify.org?format=json').then(res => {
-            const myIp = res.data.ip
-            const allowedIp = response.data.user.ip ?? []
+          const { isVerified } = response.data.user
 
-            if (allowedIp.includes(myIp) || allowedIp.includes('*')) {
-              axios.patch(`${process.env.VUE_APP_URL_API}/users/${response.data.user._id}`, { login_status: true }, {
-                headers: {
-                  Authorization: response.data.accessToken
-                }
-              })
-              .then(res => {
-                window.localStorage.setItem('urlApi',process.env.VUE_APP_URL_API);
-                window.localStorage.setItem('_id', response.data.user._id);
-                window.localStorage.setItem('accessToken', response.data.accessToken);
-                window.localStorage.setItem('username', response.data.user.username);
-                window.localStorage.setItem('role', response.data.user.role);
-                
-                router.push({ path: '/tasks' })
-              }).catch(err => {
-                console.log(err.response)
-              })
-            } else {
-              this.validation = { message: 'Ip Not Allowed' }
-            }
+          if (isVerified) {
+            axios.get('https://api.ipify.org?format=json').then(res => {
+              const myIp = res.data.ip
+              const allowedIp = response.data.user.ip ?? []
 
-          })
+              if (allowedIp.includes(myIp) || allowedIp.includes('*')) {
+                axios.patch(`${process.env.VUE_APP_URL_API}/users/${response.data.user._id}`, { login_status: true }, {
+                  headers: {
+                    Authorization: response.data.accessToken
+                  }
+                })
+                .then(res => {
+                  window.localStorage.setItem('urlApi',process.env.VUE_APP_URL_API);
+                  window.localStorage.setItem('_id', response.data.user._id);
+                  window.localStorage.setItem('accessToken', response.data.accessToken);
+                  window.localStorage.setItem('username', response.data.user.username);
+                  window.localStorage.setItem('role', response.data.user.role);
+                  
+                  router.push({ path: '/tasks' })
+                }).catch(err => {
+                  console.log(err.response)
+                })
+              } else {
+                this.validation = { message: 'Ip Not Allowed' }
+              }
+
+            })
+          } else {
+            this.validation = { message: 'User is not verified' }
+          }
+          
         })
         .catch((error) => {
           this.validation = error.response.data;
