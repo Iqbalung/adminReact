@@ -251,6 +251,11 @@ const routes = [
         name: 'Register',
         component: () => import('@/views/pages/Register'),
       },
+      {
+        path: '/verify',
+        name: 'Verify',
+        component: () => import('@/views/pages/Verify'),
+      },
     ],
   },
 ]
