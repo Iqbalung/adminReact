@@ -43,18 +43,19 @@
           <CButton size="sm" color="success" class="me-1" @click="() => { modalAssign = true }">Assign Task</CButton>
           <CButton size="sm" color="secondary" class="me-1" @click="showClearAssign(clearAssign)">Unassign</CButton>
           <CButton size="sm" color="danger" class="me-1" @click="showRequestReject(processRejectBatch)">Process Reject</CButton>
-          <CButton size="sm" color="warning" @click="showRequestReject(requestRejectBatch)">Request Reject</CButton>
+          <CButton size="sm" color="warning" class="me-1" @click="showRequestReject(requestRejectBatch)">Request Reject</CButton>
+          <CButton size="sm" color="primary" @click="exportTasks(exportTasksFeedback)">Export Tasks</CButton>
         </div>
       </CCardHeader>
       <CCardBody class="p-0">
-
         <CTable responsive>
           <CTableHead>
             <CTableRow>
               <CTableHeaderCell scope="col" v-if="role === 'admin'">
-                  <input type="checkbox" @change="e => shiftAll(e.target.checked)" v-model="shift" :disabled="filterListActive.value === 'done'" />
+                  <input type="checkbox" @change="e => shiftAll(e.target.checked)" v-model="shift" :disabled="checkStatusFilterActive('done')" />
               </CTableHeaderCell>
               <CTableHeaderCell scope="col">Created</CTableHeaderCell>
+              <CTableHeaderCell scope="col" v-show="role=='admin' && checkStatusFilterActive('reject')">Updated At</CTableHeaderCell>
               <CTableHeaderCell scope="col" v-show="role=='admin'">Assigned</CTableHeaderCell>
               <CTableHeaderCell scope="col">Account Number</CTableHeaderCell>
               <CTableHeaderCell scope="col">Name</CTableHeaderCell>
@@ -76,6 +77,8 @@
                   </div>
               </CTableDataCell>
               <CTableDataCell>{{ new Date(item.createdAt).toLocaleDateString() }}</CTableDataCell>
+              <CTableDataCell v-show="role=='admin' && checkStatusFilterActive('reject')">
+                {{ item.updatedAt ? item.updatedAt : '-' }}</CTableDataCell>
               <CTableDataCell v-show="role=='admin'">{{ item.taskAssigne }}</CTableDataCell>
               <CTableDataCell>
                   <div class="overflow-auto">{{ item.taskData.account_number }}
@@ -115,7 +118,7 @@
               </CTableDataCell>
               <CTableDataCell>
                   <div class="overflow-auto">
-                  {{ item.taskData.userId }}
+                  {{ item.taskData.userId.substring(0, item.taskData.userId.indexOf('\n')) }}
                   <CTooltip content="Copy Account Amount!" placement="right">
                       <template #toggler="{ on }">
                       <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.userId)">
@@ -136,7 +139,7 @@
               </CTableDataCell>
             </CTableRow>
             <CTableRow>
-              <CTableDataCell v-show="tasks.total < 1" class="text-center" :colspan="role === 'admin' ? 8 : 7">No records found</CTableDataCell>
+              <CTableDataCell v-show="tasks.total < 1" class="text-center" :colspan="role === 'admin' ? (checkStatusFilterActive('reject') ? 10 : 9) : 7">No records found</CTableDataCell>
             </CTableRow>
           </CTableBody>
         </CTable>
@@ -375,7 +378,8 @@ import { reactive, onMounted, watch, ref } from 'vue'
 import { cilChevronCircleDownAlt, cilXCircle } from '@coreui/icons';
 import useClipboard from 'vue-clipboard3'
 import MultiSelect from '@vueform/multiselect'
-import VueSweetalert2 from 'vue-sweetalert2';
+import VueSweetalert2 from 'vue-sweetalert2'
+import XLSX from 'xlsx'
 
 export default {
   name: 'TaskList',
@@ -427,6 +431,12 @@ export default {
 
           this.$swal('Saved','','success');
         }
+      })
+    },
+    exportTasksFeedback() {
+      this.$swal({
+        title:'Tasks Exported',
+        icon:'success'
       })
     }
   },
@@ -629,6 +639,7 @@ export default {
         'taskData.amount': amount,
         'taskData.bank_type': bankType,
         $skip: skip,
+        '$sort[_id]': -1, 
         'taskAssigne': searchTitle
       }
 
@@ -1036,6 +1047,21 @@ export default {
       })
     }
 
+    function exportTasks(cb) {
+      const worksheet = XLSX.utils.json_to_sheet(tasks.value.data)
+      const workbook = XLSX.utils.book_new()
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Tasks");
+
+      XLSX.writeFile(workbook, "tasks.xlsx");
+
+      cb()
+    }
+
+    function checkStatusFilterActive(status) {
+      return statusFilter.value.length ? statusFilter.value.every(filter => filter === status) : false
+    }
+
     return {
       dateFilter,
       searchFilter,
@@ -1050,6 +1076,7 @@ export default {
       collapseFilter,
       filterListActive,
       filterLists,
+      checkStatusFilterActive,
 
       getCellColor,
 
@@ -1121,7 +1148,9 @@ export default {
 
       extractIds,
       onStart,
-      onMove
+      onMove,
+
+      exportTasks
     }
   }
 }
