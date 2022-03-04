@@ -56,6 +56,12 @@ export default [
     to: '/debt',
     icon: 'cil-dollar',
   },
+  {
+    component: 'CNavItem',
+    name: 'Log Activity',
+    to: '/log',
+    icon: 'cil-settings',
+  },
   // {
   //   component: 'CNavTitle',
   //   name: 'Theme',
