@@ -40,10 +40,10 @@
           <CBadge color="primary">{{ tasks.total ? tasks.total : 0 }}</CBadge>
         </span>
         <div v-if="role === 'admin'">
-          <CButton size="sm" color="success" class="me-1" @click="() => { modalAssign = true }">Assign Task</CButton>
-          <CButton size="sm" color="secondary" class="me-1" @click="showClearAssign(clearAssign)">Unassign</CButton>
-          <CButton size="sm" color="danger" class="me-1" @click="showRequestReject(processRejectBatch)">Process Reject</CButton>
-          <CButton size="sm" color="warning" @click="showRequestReject(requestRejectBatch)">Request Reject</CButton>
+          <CButton size="sm" color="success" class="me-1" @click="openModalAssign(checkedItems)" :disabled="checkedItems.size < 1">Assign Task</CButton>
+          <CButton size="sm" color="secondary" class="me-1" @click="showClearAssign(clearAssign, [...checkedItems])" :disabled="checkedItems.size < 1">Unassign</CButton>
+          <CButton size="sm" color="danger" class="me-1" @click="showProcessRejectBatch(processRejectBatch, [...checkedItems])" :disabled="checkedItems.size < 1">Process Reject</CButton>
+          <CButton size="sm" color="warning" @click="showRequestRejectBatch(requestRejectBatch, [...checkedItems])" :disabled="checkedItems.size < 1">Request Reject</CButton>
         </div>
       </CCardHeader>
       <CCardBody class="p-0">
@@ -67,11 +67,11 @@
           <CTableBody>
             <CTableRow v-for="(item,index) in tasks.data" :key="index" :data-key="item._id" class="selectable">
               <CTableDataCell v-show="role=='admin'" class="checkitems" :data-key="item._id">
-                  <div v-if="item.taskStatus!='processed' && item.taskStatus!='done' && (item.taskAssigne === 'unassigned' || item.taskAssigne === '')">
+                  <div v-if="item.taskStatus!='processed' && item.taskStatus!='done'">
                   <input type="checkbox" v-model="checkedItems" :value="item._id" class="checkboxitems">
                   <!-- <CFormCheck  id="item._id" v-model="checkedItems" :value="item.id"/> -->
                   </div>
-                  <div v-if="(item.taskAssigne !== '' && item.taskAssigne !== 'unassigned') || item.taskStatus=='processed' || item.taskStatus=='done'">
+                  <div v-if="item.taskStatus=='processed' || item.taskStatus=='done'">
                   <input type="checkbox" disabled/>
                   </div>
               </CTableDataCell>
@@ -136,7 +136,7 @@
               </CTableDataCell>
             </CTableRow>
             <CTableRow>
-              <CTableDataCell v-show="tasks.total < 1" class="text-center" :colspan="role === 'admin' ? 8 : 7">No records found</CTableDataCell>
+              <CTableDataCell v-show="tasks.total < 1" class="text-center" :colspan="role === 'admin' ? 9 : 7">No records found</CTableDataCell>
             </CTableRow>
           </CTableBody>
         </CTable>
@@ -205,7 +205,7 @@
               </template>
             </MultiSelect>
           </div>
-          <CButton color="primary">Save changes</CButton>
+          <CButton color="primary" :disabled="!work">Save changes</CButton>
         </CForm>
       </CModalBody>
     </CModal>
@@ -381,7 +381,7 @@ export default {
   name: 'TaskList',
   components: { MultiSelect },
   methods: {
-    showClearAssign(cb) {
+    showClearAssign(cb, items) {
       this.$swal({
         title: 'Are Sure ?',
         icon: 'info',
@@ -391,7 +391,7 @@ export default {
         cancelButtonText: 'Cancel'
       }).then((result)=> {
         if(result.isConfirmed) {
-          cb()
+          cb(items)
 
           this.$swal('Saved','','success');
         }
@@ -408,6 +408,38 @@ export default {
       }).then((result)=> {
         if(result.isConfirmed) {
           cb(task)
+
+          this.$swal('Saved','','success');
+        }
+      })
+    },
+    showRequestRejectBatch(cb, items) {
+      this.$swal({
+        title: 'Are Sure ?',
+        icon: 'info',
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText: 'Yes, Sure',
+        cancelButtonText: 'Cancel'
+      }).then((result)=> {
+        if(result.isConfirmed) {
+          cb(items)
+
+          this.$swal('Saved','','success');
+        }
+      })
+    },
+    showProcessRejectBatch(cb, items) {
+      this.$swal({
+        title: 'Are Sure ?',
+        icon: 'info',
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText: 'Yes, Sure',
+        cancelButtonText: 'Cancel'
+      }).then((result)=> {
+        if(result.isConfirmed) {
+          cb(items)
 
           this.$swal('Saved','','success');
         }
@@ -458,6 +490,8 @@ export default {
     const modalAdd = ref(false)
     const modalAssign = ref(false)
     const modalDetail = ref(false)
+
+    const modalAssignItems = ref([])
 
     const account_number = ref('')
     const anRekening = ref('')
@@ -548,14 +582,6 @@ export default {
       // socket
       var acknowledgedcreate = [] ;
 
-      // socket.on('incidents connected', (message) => {
-      //   console.log(message, 'iconnected')
-      // })
-
-      // socket.on('incidents created', (message) => {
-      //   console.log(message, 'icreated')
-      // })
-
       socket.on('tasks created', (message) => {
         if (!~acknowledgedcreate.indexOf(message._id)){
           // add to array of acknowledged events
@@ -613,14 +639,21 @@ export default {
       getUser()
     });
 
+    function clearCheckedItems(data) {
+      const filteredCheckedItems = data.filter(task => checkedItems.value.has(task._id)).map(task => task._id)
+
+      checkedItems.value.clear()
+      checkedItems.value.add(...filteredCheckedItems)
+    }
+
     function loadTask(taskStatus, searchTitle, userId, accountNumber, accountName, amount, bankType, pages, from, to) {
       // let status = (taskStatus != '') ? taskStatus : 'unprocess';
       const taskAssigne =`${window.localStorage.getItem('username')}`;
       const skip = (pages > 1) ? (pages-1) * 100 : 0;
 
       const param_admin = {
-        ...(from ? { 'createdAt[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00').toISOString() } : {}),
-        ...(to ? { 'createdAt[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59').toISOString() } : {}),
+        ...(from ? { 'createdAt[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00') } : {}),
+        ...(to ? { 'createdAt[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59') } : {}),
         // taskStatus: status,
         'taskStatus[$in]': statusFilter.value,
         userId: userId,
@@ -634,8 +667,8 @@ export default {
       }
 
       const param_users = {
-        ...(from ? { 'createdAt[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00').toISOString() } : {}),
-        ...(to ? { 'createdAt[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59').toISOString() } : {}),
+        ...(from ? { 'createdAt[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00') } : {}),
+        ...(to ? { 'createdAt[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59') } : {}),
         // taskStatus: status,
         'taskStatus[$in]': statusFilter.value,
         userId: userId,
@@ -650,15 +683,13 @@ export default {
 
       const params = (window.localStorage.getItem('role') === 'admin') ? param_admin : param_users;
 
-      // console.log("where",params,taskAssigne)
-
       axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         },
         params
       }).then((result) => {
-        checkedItems.value.clear();
+        clearCheckedItems(result.data.data)
 
         tasks.value = result.data;
         countData.value = result.data.data;
@@ -703,7 +734,7 @@ export default {
     }
 
     function updateWorker(cb){
-      checkedItems.value.forEach(element =>{
+      modalAssignItems.value.forEach(element =>{
         axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`, {
           headers: {
             Authorization:window.localStorage.getItem('accessToken')
@@ -713,7 +744,7 @@ export default {
           let taskh = result.data.taskHistory;
 
           taskh.push({
-            status: `task assigned by lina ${window.localStorage.getItem('username')}`,
+            status: `task assigned by ${window.localStorage.getItem('username')}`,
             updatedAt:date.toISOString()
           })
 
@@ -735,13 +766,14 @@ export default {
       })
 
       checkedItems.value.clear();
+      modalAssignItems.value = [];
       modalAssign.value = false;
 
-      cb()
+      // cb()
     }
 
-    function clearAssign() {
-      checkedItems.value.forEach(element => {
+    function clearAssign(items) {
+      items.forEach(element => {
         axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
           headers: {
             Authorization:window.localStorage.getItem('accessToken')
@@ -765,12 +797,19 @@ export default {
         })
       });
 
-      console.log('success update');
       checkedItems.value.clear();
     }
 
     function requestReject(task) {
-      axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${task._id}`,{_id:task._id,taskStatus: 'request_reject'},{
+      let date = new Date();
+      let taskh = task.taskHistory;
+
+      taskh.push({
+        status: `task requested reject by ${window.localStorage.getItem('username')}`,
+        updatedAt:date.toISOString()
+      })
+
+      axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${task._id}`,{_id:task._id,taskStatus: 'request_reject',taskHistory:taskh},{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -780,19 +819,26 @@ export default {
         console.log(err);
       })
 
-      console.log('success update');
       checkedItems.value.clear();
     }
 
-    function requestRejectBatch() {
-      checkedItems.value.forEach(element => {
+    function requestRejectBatch(items) {
+      items.forEach(element => {
         axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
           headers: {
             Authorization:window.localStorage.getItem('accessToken')
           }
-        }).then((results)=> {
+        }).then((task)=> {
+          let date = new Date();
+          let taskh = task.data.taskHistory;
+
+          taskh.push({
+            status: `task requested reject by ${window.localStorage.getItem('username')}`,
+            updatedAt:date.toISOString()
+          })
+
           // Axios update
-          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskStatus: 'request_reject'},{
+          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskStatus: 'request_reject',taskHistory:taskh},{
             headers: {
               Authorization:window.localStorage.getItem('accessToken')
             }
@@ -807,19 +853,26 @@ export default {
         })
       });
 
-      console.log('success update');
       checkedItems.value.clear();
     }
 
-    function processRejectBatch() {
-      checkedItems.value.forEach(element => {
+    function processRejectBatch(items) {
+      items.forEach(element => {
         axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
           headers: {
             Authorization:window.localStorage.getItem('accessToken')
           }
-        }).then((results)=> {
+        }).then((task)=> {
+          let date = new Date();
+          let taskh = task.data.taskHistory;
+
+          taskh.push({
+            status: `task rejected by ${window.localStorage.getItem('username')}`,
+            updatedAt:date.toISOString()
+          })
+
           // Axios update
-          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{_id:`${element}`,taskStatus: 'reject'},{
+          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{_id:`${element}`,taskStatus: 'reject',taskHistory:taskh},{
             headers: {
               Authorization:window.localStorage.getItem('accessToken')
             }
@@ -834,7 +887,6 @@ export default {
         })
       });
 
-      console.log('success update');
       checkedItems.value.clear();
     }
 
@@ -981,22 +1033,6 @@ export default {
         toClipboard(text);
     }
 
-    function extractIds(els) {
-        return els.map(v => v.getAttribute('data-key'))
-    }
-
-    function onStart({event, selection}) {
-        if (!event?.ctrlKey && !event?.metaKey) {
-            selection.clearSelection();
-            checkedItems.value.clear();
-        }
-    }
-
-    function onMove({store: { changed: { added, removed } }, selection}) {
-        extractIds(added).forEach(id => checkedItems.value.add(id));
-        extractIds(removed).forEach(id => checkedItems.value.delete(id));
-    }
-
     const shifting = reactive({
       active: false,
       start: 0,
@@ -1038,6 +1074,12 @@ export default {
       })
     }
 
+    function openModalAssign(items) {
+      modalAssign.value = true
+
+      modalAssignItems.value = [...items]
+    }
+
     return {
       dateFilter,
       searchFilter,
@@ -1064,7 +1106,10 @@ export default {
       visibleLiveDemo,
       modalAdd,
       modalAssign,
+      modalAssignItems,
       modalDetail,
+
+      openModalAssign,
 
       account_number,
       anRekening,
@@ -1120,10 +1165,6 @@ export default {
       shift,
       rupiah,
       copy,
-
-      extractIds,
-      onStart,
-      onMove
     }
   }
 }
