@@ -639,7 +639,7 @@ export default {
         'taskData.amount': amount,
         'taskData.bank_type': bankType,
         $skip: skip,
-        '$sort[_id]': -1, 
+        '$sort[createdAt]':-1,
         'taskAssigne': searchTitle
       }
 
@@ -654,6 +654,7 @@ export default {
         'taskData.amount': amount,
         'taskData.bank_type': bankType,
         $skip: skip,
+        '$sort[createdAt]':-1,
         taskAssigne: taskAssigne
       }
 
