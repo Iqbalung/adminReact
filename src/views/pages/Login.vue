@@ -7,7 +7,7 @@
             <CCard class="p-4">
               <CCardBody>
                 <CForm v-on:submit.prevent="login">
-                  <CAlert color="danger" v-if="validation.message">{{ validation.message }}</CAlert>
+                  <CAlert color="danger" v-if="validation.message" dismissible>{{ validation.message }}</CAlert>
                   <h1>Login</h1>
                   <p class="text-medium-emphasis">Sign In to your account</p>
                   <CInputGroup class="mb-3">

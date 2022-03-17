@@ -61,9 +61,9 @@
             <!-- <CTableHeaderCell scope="col" v-show="role == 'admin'"
               >Assigned</CTableHeaderCell
             > -->
-            <CTableHeaderCell scope="col">Amount</CTableHeaderCell>
+            <CTableHeaderCell scope="col" v-show="role == 'admin'">Amount</CTableHeaderCell>
             <CTableHeaderCell scope="col">From</CTableHeaderCell>
-            <CTableHeaderCell scope="col">To</CTableHeaderCell>
+            <CTableHeaderCell scope="col" v-show="role == 'admin'">To</CTableHeaderCell>
             <CTableHeaderCell scope="col">Status</CTableHeaderCell>
             <CTableHeaderCell scope="col">Updated At</CTableHeaderCell>
             <!-- <CTableHeaderCell scope="col">Action</CTableHeaderCell> -->
@@ -145,7 +145,7 @@
             <CTableDataCell
               v-show="debt.total < 1"
               class="text-center"
-              :colspan="role === 'admin' ? 8 : 6"
+              :colspan="role === 'admin' ? 6 : 4"
               >No records found</CTableDataCell
             >
           </CTableRow>

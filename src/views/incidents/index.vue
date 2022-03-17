@@ -69,14 +69,14 @@
               />
             </CTableHeaderCell> -->
             <CTableHeaderCell scope="col">No</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Created</CTableHeaderCell>
+            <CTableHeaderCell scope="col" v-show="role == 'admin'">Created</CTableHeaderCell>
             <!-- <CTableHeaderCell scope="col" v-show="role == 'admin'"
               >Assigned</CTableHeaderCell
             > -->
             <CTableHeaderCell scope="col">RefNumber</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Date Crawl</CTableHeaderCell>
+            <CTableHeaderCell scope="col" v-show="role == 'admin'">Date Crawl</CTableHeaderCell>
             <CTableHeaderCell scope="col">From</CTableHeaderCell>
-            <CTableHeaderCell scope="col">To</CTableHeaderCell>
+            <CTableHeaderCell scope="col" v-show="role == 'admin'">To</CTableHeaderCell>
             <CTableHeaderCell scope="col">Status</CTableHeaderCell>
             <!-- <CTableHeaderCell scope="col">Action</CTableHeaderCell> -->
           </CTableRow>
@@ -156,7 +156,7 @@
             <CTableDataCell
               v-show="incidents.total < 1"
               class="text-center"
-              :colspan="role === 'admin' ? 8 : 6"
+              :colspan="role === 'admin' ? 7 : 4"
               >No records found</CTableDataCell
             >
           </CTableRow>
