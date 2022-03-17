@@ -11,7 +11,6 @@
         <CIcon icon="cil-task" /> Tasks
         <CBadge color="danger" class="ms-auto">{{ taskCount }}</CBadge>
       </CDropdownItem>
-      <CDropdownItem> <CIcon icon="cil-user" /> Profile </CDropdownItem>
       <CDropdownItem @click="handleClick">
         <CIcon icon="cil-lock-locked" /> Logout
       </CDropdownItem>
