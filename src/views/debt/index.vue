@@ -1,5 +1,26 @@
 <template>
   <CCard class="mb-4">
+    <CCardBody>
+      <div class="row gx-2" v-if="role === 'admin'">
+        <div class="col">
+          <Datepicker v-model="dateFilter" range @closed="pickDate" :enableTimePicker="false"></Datepicker>
+        </div>
+        <div class="col">
+          <MultiSelect :options="bankOptions" placeholder="Bank" v-model="bankFilter" searchable @open="getBanks" />
+        </div>
+        <div class="col">
+          <CFormInput
+            type="text"
+            id="search"
+            v-model="searchFilter"
+            placeholder="Receiver"
+          />
+        </div>
+      </div>
+    </CCardBody>
+  </CCard>
+
+  <CCard class="mb-4">
     <CCardHeader
       class="bg-white d-flex align-items-center justify-content-between"
     >
@@ -9,39 +30,7 @@
           debt.total ? debt.total : 0
         }}</CBadge>
       </span>
-      <div v-if="role === 'admin'">
-        <CFormInput
-          type="text"
-          id="search"
-          v-model="searchFilter"
-          placeholder="Receiver"
-        />
-        <!-- <CButton
-          size="sm"
-          color="success"
-          class="me-1"
-          @click="
-            () => {
-              modalAssign = true
-            }
-          "
-          >Assign Task</CButton
-        >
-        <CButton
-          size="sm"
-          color="secondary"
-          class="me-1"
-          @click="showClearAssign(clearAssign)"
-          >Unassign</CButton
-        >
-        <CButton size="sm" color="danger" class="me-1">Process Reject</CButton>
-        <CButton
-          size="sm"
-          color="warning"
-          @click="showRequestReject(requestRejectBatch)"
-          >Request Reject</CButton
-        > -->
-      </div>
+      <CButton size="sm" color="primary" @click="exportDebt(exportDebtFeedback)">Export Debt</CButton>
       <!-- <CDropdown color="light">
         <CDropdownToggle color="dark">{{
           filterListActive.label
@@ -95,7 +84,7 @@
             </CTableDataCell>
             <CTableDataCell v-show="role == 'admin'">
               <div class="overflow-auto">
-                {{ item.account_receiver }}
+                {{ item.account_receiver ? item.account_receiver : '-' }}
               </div>
             </CTableDataCell>
             <CTableDataCell>
@@ -178,21 +167,46 @@
 <script>
 import axios from 'axios'
 import { reactive, onMounted, watch, ref } from 'vue'
+import MultiSelect from '@vueform/multiselect'
+import VueSweetalert2 from 'vue-sweetalert2'
+import XLSX from 'xlsx'
 
 export default {
   name: 'DebtList',
+  components: { MultiSelect },
+  methods: {
+    exportDebtFeedback() {
+      this.$swal({
+        title:'Debt Exported',
+        icon:'success'
+      })
+    }
+  },
   setup() {
     let searchFilter = ref('')
     const debt = ref([])
     const perPage = ref(100)
     let currentPages = ref(1)
     const role = ref(window.localStorage.getItem('role'))
+    const bankOptions = ref([]);
+    const bankFilter = ref('')
+    const dateFilter = ref()
 
     watch(searchFilter, value => {
       loadDebt(currentPages.value, searchFilter.value)
     })
 
+    watch(dateFilter, value => loadDebt(currentPages.value, searchFilter.value))
+
+    watch(bankFilter, value => loadDebt(currentPages.value, searchFilter.value))
+
     onMounted(() => {
+      // date
+      const startDate = new Date(new Date().setDate(new Date().getDate() - 1));
+      const endDate = new Date();
+
+      dateFilter.value = [startDate, endDate];
+
       var acknowledgedcreate = []
 
       socket.on('debt created', (message) => {
@@ -219,6 +233,9 @@ export default {
         '$sort[_id]': -1,
         $skip: skip,
         account_receiver: searchTitle,
+        ...(dateFilter.value ? { 'date[$gte]': new Date(dateFilter.value[0].toISOString().substring(0, 10) + 'T00:00:00').toISOString() } : {}),
+        ...(dateFilter.value ? { 'date[$lte]': new Date(dateFilter.value[1].toISOString().substring(0, 10) + 'T23:59:59').toISOString() } : {}),
+        ...(bankFilter.value ? { 'ib.username': bankFilter.value } : {})
       }
 
       console.log(params)
@@ -243,6 +260,29 @@ export default {
       loadDebt(currentPages.value, searchFilter.value)
     }
 
+    function getBanks() {
+      axios.get(`${process.env.VUE_APP_URL_API}/bank`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      }).then(results => results.data.data.map(result => result.username)).then(results => {
+        bankOptions.value = results
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+    }
+
+    function exportDebt(cb) {
+      const worksheet = XLSX.utils.json_to_sheet(debt.value.data)
+      const workbook = XLSX.utils.book_new()
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Debt");
+
+      XLSX.writeFile(workbook, "debt.xlsx");
+
+      cb()
+    }
+
     return {
       searchFilter,
       changePg,
@@ -251,9 +291,14 @@ export default {
       perPage,
       currentPages,
       role,
+      bankOptions,
+      bankFilter,
+      getBanks,
+      dateFilter,
+      exportDebt
     }
   },
 }
 </script>
 
-<style></style>
+<style src="@vueform/multiselect/themes/default.css"></style>
