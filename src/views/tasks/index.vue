@@ -44,7 +44,7 @@
           <CButton size="sm" color="secondary" class="me-1" @click="showClearAssign(clearAssign, [...checkedItems])" :disabled="checkedItems.size < 1">Unassign</CButton>
           <CButton size="sm" color="danger" class="me-1" @click="showProcessRejectBatch(processRejectBatch, [...checkedItems])" :disabled="checkedItems.size < 1">Process Reject</CButton>
           <CButton size="sm" color="warning" @click="showRequestRejectBatch(requestRejectBatch, [...checkedItems])" :disabled="checkedItems.size < 1">Request Reject</CButton>
-          <CButton size="sm" color="primary" @click="exportTasks(exportTasksFeedback)">Export Tasks</CButton>
+          <CButton size="sm" color="primary" @click="exportTasks(exportTasksFeedback)" class="ms-1">Export Tasks</CButton>
         </div>
       </CCardHeader>
       <CCardBody class="p-0">
@@ -653,7 +653,10 @@ export default {
       const filteredCheckedItems = data.filter(task => checkedItems.value.has(task._id)).map(task => task._id)
 
       checkedItems.value.clear()
-      checkedItems.value.add(...filteredCheckedItems)
+      
+      if (filteredCheckedItems.length) {
+        checkedItems.value.add(...filteredCheckedItems)
+      }
     }
 
     function loadTask(taskStatus, searchTitle, userId, accountNumber, accountName, amount, bankType, pages, from, to) {
