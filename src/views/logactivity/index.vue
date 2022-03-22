@@ -94,6 +94,8 @@ export default {
         }
       })
 
+      setInterval(() => loadLogActivity(currentPages.value), 5000)
+
       loadLogActivity(currentPages.value)
     })
 
