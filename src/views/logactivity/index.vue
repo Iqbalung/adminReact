@@ -9,6 +9,11 @@
           logactivities.total ? logactivities.total : 0
         }}</CBadge>
       </span>
+      <div>
+        <CFormSelect
+          :options="['All Process', ...filterTypeOptions]" v-model="filter.process_name">
+        </CFormSelect>
+      </div>
     </CCardHeader>
     <CCardBody class="p-0">
       <CTable responsive>
@@ -45,7 +50,7 @@
             <CTableDataCell
               v-show="logactivities.total < 1"
               class="text-center"
-              :colspan="role === 'admin' ? 3 : 3"
+              :colspan="role === 'admin' ? 4 : 4"
               >No records found</CTableDataCell
             >
           </CTableRow>
@@ -75,6 +80,15 @@ export default {
     const perPage = ref(100)
     let currentPages = ref(1)
     const role = ref(window.localStorage.getItem('role'))
+    const filter = reactive({
+      process_name: ''
+    })
+    const filterTypeOptions = ref([
+      { label: 'Cron Engine', value: 'Cron Engine' },
+      { label: 'Process Mutation', value: 'Process Mutation' }
+    ])
+
+    watch(filter, loadLogActivity)
 
     onMounted(() => {
 
@@ -101,8 +115,10 @@ export default {
 
     function loadLogActivity(pages) {
       const skip = pages > 1 ? (pages - 1) * 100 : 0
+      const process_name = filterTypeOptions.value.some(options => options.value === filter.process_name) ? filter.process_name : ''
 
       const params = {
+        ...(process_name ? { 'process_name': process_name } : {}),
         '$sort[_id]': -1,
         $skip: skip
       }
@@ -133,7 +149,9 @@ export default {
       logactivities,
       perPage,
       currentPages,
-      role
+      role,
+      filter,
+      filterTypeOptions
     }
   },
 }
