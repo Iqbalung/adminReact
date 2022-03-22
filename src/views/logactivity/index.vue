@@ -27,7 +27,7 @@
             </CTableDataCell>
             <CTableDataCell>
               <div class="overflow-auto">
-                {{ item.createdAt }}
+                {{ new Date(item.date).toLocaleString() }}
               </div>
             </CTableDataCell>
             <CTableDataCell>
