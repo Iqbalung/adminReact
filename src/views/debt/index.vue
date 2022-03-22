@@ -94,7 +94,7 @@
             </CTableDataCell>
             <CTableDataCell>
               <div class="overflow-auto">
-                {{ item.updatedAt ? item.updatedAt : '-' }}
+                {{ item.date_crawl ? item.date_crawl : '-' }}
               </div>
             </CTableDataCell>
             <!-- <CTableDataCell
