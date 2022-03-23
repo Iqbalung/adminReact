@@ -9,10 +9,15 @@
           logactivities.total ? logactivities.total : 0
         }}</CBadge>
       </span>
-      <div>
-        <CFormSelect
-          :options="['All Process', ...filterTypeOptions]" v-model="filter.process_name">
-        </CFormSelect>
+      <div class="d-flex align-items-center">
+        <div>
+          <CFormSelect
+            :options="['All Process', ...filterTypeOptions]" v-model="filter.process_name">
+          </CFormSelect>
+        </div>
+        <div>
+          <CButton @click="refresh" color="primary" class="ms-1">Refresh</CButton>
+        </div>
       </div>
     </CCardHeader>
     <CCardBody class="p-0">
@@ -108,7 +113,7 @@ export default {
         }
       })
 
-      setInterval(() => loadLogActivity(currentPages.value), 5000)
+      // setInterval(() => loadLogActivity(currentPages.value), 5000)
 
       loadLogActivity(currentPages.value)
     })
@@ -143,6 +148,10 @@ export default {
       loadLogActivity(currentPages.value)
     }
 
+    function refresh() {
+      loadLogActivity(currentPages.value)
+    }
+
     return {
       changePg,
       loadLogActivity,
@@ -151,7 +160,8 @@ export default {
       currentPages,
       role,
       filter,
-      filterTypeOptions
+      filterTypeOptions,
+      refresh
     }
   },
 }
