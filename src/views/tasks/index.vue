@@ -119,7 +119,7 @@
               <CTableDataCell>
                   <div class="overflow-auto">
                   {{ item.taskData.userId.substring(0, item.taskData.userId.indexOf('\n')) }}
-                  <CTooltip content="Copy Account Amount!" placement="right">
+                  <CTooltip content="Copy Account User ID!" placement="right">
                       <template #toggler="{ on }">
                       <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.userId)">
                           <CIcon name="cil-copy"/>
@@ -655,7 +655,7 @@ export default {
       checkedItems.value.clear()
       
       if (filteredCheckedItems.length) {
-        checkedItems.value.add(...filteredCheckedItems)
+        checkedItems.value = new Set(filteredCheckedItems)
       }
     }
 

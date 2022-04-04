@@ -94,7 +94,7 @@
             </CTableDataCell>
             <CTableDataCell>
               <div class="overflow-auto">
-                {{ item.updatedAt ? item.updatedAt : '-' }}
+                {{ item.date_crawl ? item.date_crawl : '-' }}
               </div>
             </CTableDataCell>
             <!-- <CTableDataCell
@@ -233,8 +233,8 @@ export default {
         '$sort[_id]': -1,
         $skip: skip,
         account_receiver: searchTitle,
-        ...(dateFilter.value ? { 'date[$gte]': new Date(dateFilter.value[0].toISOString().substring(0, 10) + 'T00:00:00').toISOString() } : {}),
-        ...(dateFilter.value ? { 'date[$lte]': new Date(dateFilter.value[1].toISOString().substring(0, 10) + 'T23:59:59').toISOString() } : {}),
+        ...(dateFilter.value ? { 'date[$gte]': new Date(dateFilter.value[0].toISOString().substring(0, 10) + 'T00:00:00') } : {}),
+        ...(dateFilter.value ? { 'date[$lte]': new Date(dateFilter.value[1].toISOString().substring(0, 10) + 'T23:59:59') } : {}),
         ...(bankFilter.value ? { 'ib.username': bankFilter.value } : {})
       }
 

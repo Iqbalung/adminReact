@@ -9,6 +9,16 @@
           logactivities.total ? logactivities.total : 0
         }}</CBadge>
       </span>
+      <div class="d-flex align-items-center">
+        <div>
+          <CFormSelect
+            :options="['All Process', ...filterTypeOptions]" v-model="filter.process_name">
+          </CFormSelect>
+        </div>
+        <div>
+          <CButton @click="refresh" color="primary" class="ms-1">Refresh</CButton>
+        </div>
+      </div>
     </CCardHeader>
     <CCardBody class="p-0">
       <CTable responsive>
@@ -27,7 +37,7 @@
             </CTableDataCell>
             <CTableDataCell>
               <div class="overflow-auto">
-                {{ item.createdAt }}
+                {{ new Date(item.date).toLocaleString() }}
               </div>
             </CTableDataCell>
             <CTableDataCell>
@@ -45,7 +55,7 @@
             <CTableDataCell
               v-show="logactivities.total < 1"
               class="text-center"
-              :colspan="role === 'admin' ? 3 : 3"
+              :colspan="role === 'admin' ? 4 : 4"
               >No records found</CTableDataCell
             >
           </CTableRow>
@@ -75,6 +85,15 @@ export default {
     const perPage = ref(100)
     let currentPages = ref(1)
     const role = ref(window.localStorage.getItem('role'))
+    const filter = reactive({
+      process_name: ''
+    })
+    const filterTypeOptions = ref([
+      { label: 'Cron Engine', value: 'Cron Engine' },
+      { label: 'Process Mutation', value: 'Process Mutation' }
+    ])
+
+    watch(filter, loadLogActivity)
 
     onMounted(() => {
 
@@ -94,13 +113,17 @@ export default {
         }
       })
 
+      // setInterval(() => loadLogActivity(currentPages.value), 5000)
+
       loadLogActivity(currentPages.value)
     })
 
     function loadLogActivity(pages) {
       const skip = pages > 1 ? (pages - 1) * 100 : 0
+      const process_name = filterTypeOptions.value.some(options => options.value === filter.process_name) ? filter.process_name : ''
 
       const params = {
+        ...(process_name ? { 'process_name': process_name } : {}),
         '$sort[_id]': -1,
         $skip: skip
       }
@@ -125,13 +148,20 @@ export default {
       loadLogActivity(currentPages.value)
     }
 
+    function refresh() {
+      loadLogActivity(currentPages.value)
+    }
+
     return {
       changePg,
       loadLogActivity,
       logactivities,
       perPage,
       currentPages,
-      role
+      role,
+      filter,
+      filterTypeOptions,
+      refresh
     }
   },
 }
