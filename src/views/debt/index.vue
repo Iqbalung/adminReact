@@ -67,6 +67,7 @@
             <CTableHeaderCell scope="col">Trx Type</CTableHeaderCell>
             <CTableHeaderCell scope="col">Saldo</CTableHeaderCell>
             <CTableHeaderCell scope="col">Status</CTableHeaderCell>
+            <CTableHeaderCell scope="col">User Id</CTableHeaderCell>
             <CTableHeaderCell scope="col">Updated At</CTableHeaderCell>
             <!-- <CTableHeaderCell scope="col">Action</CTableHeaderCell> -->
           </CTableRow>
@@ -82,9 +83,16 @@
             <CTableDataCell>
               {{ index + 1 + (currentPages - 1) * perPage }}
             </CTableDataCell>
-            <CTableDataCell v-show="role == 'admin'">{{
-              item.amount
-            }}</CTableDataCell>
+            <CTableDataCell v-show="role == 'admin'">
+              {{
+                item.amount
+                  ? 'Rp. ' +
+                    item.amount
+                      .toString()
+                      .replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1\.')
+                  : 'Rp. -'
+              }}
+            </CTableDataCell>
             <CTableDataCell>
               <div class="overflow-auto">
                 {{ item.ib.name }}
@@ -119,7 +127,12 @@
             </CTableDataCell>
             <CTableDataCell>
               <div class="overflow-auto">
-                {{ item.date_crawl ? item.date_crawl : '-' }}
+                {{ item.ib.username }}
+              </div>
+            </CTableDataCell>
+            <CTableDataCell>
+              <div class="overflow-auto">
+                {{ item.date_crawl ? formatDate(item.date_crawl) : '-' }}
               </div>
             </CTableDataCell>
             <!-- <CTableDataCell
@@ -170,7 +183,7 @@
             <CTableDataCell
               v-show="debt.total < 1"
               class="text-center"
-              :colspan="role === 'admin' ? 6 : 4"
+              :colspan="role === 'admin' ? 9 : 7"
               >No records found</CTableDataCell
             >
           </CTableRow>
@@ -195,6 +208,7 @@ import { reactive, onMounted, watch, ref } from 'vue'
 import MultiSelect from '@vueform/multiselect'
 import VueSweetalert2 from 'vue-sweetalert2'
 import XLSX from 'xlsx'
+import momentTz from 'moment-timezone'
 
 export default {
   name: 'DebtList',
@@ -258,12 +272,10 @@ export default {
         '$sort[_id]': -1,
         $skip: skip,
         account_receiver: searchTitle,
-        ...(dateFilter.value ? { 'date[$gte]': new Date(dateFilter.value[0].toISOString().substring(0, 10) + 'T00:00:00') } : {}),
-        ...(dateFilter.value ? { 'date[$lte]': new Date(dateFilter.value[1].toISOString().substring(0, 10) + 'T23:59:59') } : {}),
+        ...(dateFilter.value ? { 'date_crawl[$gte]': new Date(dateFilter.value[0].toISOString().substring(0, 10) + 'T00:00:00') } : {}),
+        ...(dateFilter.value ? { 'date_crawl[$lte]': new Date(dateFilter.value[1].toISOString().substring(0, 10) + 'T23:59:59') } : {}),
         ...(bankFilter.value ? { 'ib.username': bankFilter.value } : {})
       }
-
-      console.log(params)
 
       axios
         .get(`${process.env.VUE_APP_URL_API}/debt`, {
@@ -308,6 +320,10 @@ export default {
       cb()
     }
 
+    function formatDate(date) {
+      return momentTz(date).tz('Asia/Jakarta').format()
+    }
+
     return {
       searchFilter,
       changePg,
@@ -320,7 +336,8 @@ export default {
       bankFilter,
       getBanks,
       dateFilter,
-      exportDebt
+      exportDebt,
+      formatDate
     }
   },
 }

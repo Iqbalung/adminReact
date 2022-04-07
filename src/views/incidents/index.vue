@@ -87,12 +87,12 @@
               {{ index + 1 + (currentPages - 1) * perPage }}
             </CTableDataCell>
             <CTableDataCell v-show="role == 'admin'">
-              {{ item.createdAt }}
+              {{ formatDate(item.createdAt) }}
             </CTableDataCell>
             <CTableDataCell>{{ item.refNumber }}</CTableDataCell>
-            <CTableDataCell v-show="role == 'admin'">{{
-              item.dateCrawl
-            }}</CTableDataCell>
+            <CTableDataCell v-show="role == 'admin'">
+              {{ formatDate(item.dateCrawl) }}
+            </CTableDataCell>
             <CTableDataCell>
               <div class="overflow-auto">
                 {{ item.detailData.ib.name }}
@@ -178,6 +178,7 @@
 <script>
 import axios from 'axios'
 import { reactive, onMounted, watch, ref } from 'vue'
+import momentTz from 'moment-timezone'
 
 export default {
   name: 'IncidentsList',
@@ -243,6 +244,10 @@ export default {
       loadIncidents(currentPages.value, searchFilter.value)
     }
 
+    function formatDate(date) {
+      return momentTz(date).tz('Asia/Jakarta').format()
+    }
+
     return {
       searchFilter,
       changePg,
@@ -251,6 +256,7 @@ export default {
       perPage,
       currentPages,
       role,
+      formatDate
     }
   },
 }
