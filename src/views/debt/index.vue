@@ -64,13 +64,21 @@
             <CTableHeaderCell scope="col" v-show="role == 'admin'">Amount</CTableHeaderCell>
             <CTableHeaderCell scope="col">From</CTableHeaderCell>
             <CTableHeaderCell scope="col" v-show="role == 'admin'">To</CTableHeaderCell>
+            <CTableHeaderCell scope="col">Trx Type</CTableHeaderCell>
+            <CTableHeaderCell scope="col">Saldo</CTableHeaderCell>
             <CTableHeaderCell scope="col">Status</CTableHeaderCell>
             <CTableHeaderCell scope="col">Updated At</CTableHeaderCell>
             <!-- <CTableHeaderCell scope="col">Action</CTableHeaderCell> -->
           </CTableRow>
         </CTableHead>
         <CTableBody>
-          <CTableRow v-for="(item, index) in debt.data" :key="index">
+          <CTableRow
+            v-for="(item, index) in debt.data"
+            :key="index"
+            :color="
+              item.trxType == 'CR' ? 'warning' : !item.status ? 'danger' : ''
+            "
+          >
             <CTableDataCell>
               {{ index + 1 + (currentPages - 1) * perPage }}
             </CTableDataCell>
@@ -85,6 +93,23 @@
             <CTableDataCell v-show="role == 'admin'">
               <div class="overflow-auto">
                 {{ item.account_receiver ? item.account_receiver : '-' }}
+              </div>
+            </CTableDataCell>
+            <CTableDataCell>
+              <div class="overflow-auto">
+                {{ item.trxType ? item.trxType : '-' }}
+              </div>
+            </CTableDataCell>
+            <CTableDataCell>
+              <div class="overflow-auto">
+                {{
+                  item.latestBalance
+                    ? 'Rp. ' +
+                      item.latestBalance
+                        .toString()
+                        .replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1\.')
+                    : 'Rp. -'
+                }}
               </div>
             </CTableDataCell>
             <CTableDataCell>
