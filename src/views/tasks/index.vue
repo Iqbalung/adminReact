@@ -67,7 +67,7 @@
           </CTableHead>
           <CTableBody>
             <CTableRow v-for="(item,index) in tasks.data" :key="index" :data-key="item._id" class="selectable">
-              <CTableDataCell v-show="role=='admin'" class="checkitems" :data-key="item._id">
+              <CTableDataCell v-show="role=='admin'" class="checkitems" :data-key="item._id" :class="{ 'text-danger': item.isCopied }">
                   <div v-if="item.taskStatus!='processed' && item.taskStatus!='done'">
                   <input type="checkbox" v-model="checkedItems" :value="item._id" class="checkboxitems">
                   <!-- <CFormCheck  id="item._id" v-model="checkedItems" :value="item.id"/> -->
@@ -76,52 +76,52 @@
                   <input type="checkbox" disabled/>
                   </div>
               </CTableDataCell>
-              <CTableDataCell>{{ new Date(item.createdAt).toLocaleDateString() }}</CTableDataCell>
-              <CTableDataCell v-show="role=='admin' && checkStatusFilterActive('reject')">
+              <CTableDataCell :class="{ 'text-danger': item.isCopied }">{{ formatDate(item.createdAt) }}</CTableDataCell>
+              <CTableDataCell :class="{ 'text-danger': item.isCopied }" v-show="role=='admin' && checkStatusFilterActive('reject')">
                 {{ item.updatedAt ? item.updatedAt : '-' }}</CTableDataCell>
-              <CTableDataCell v-show="role=='admin'">{{ item.taskAssigne }}</CTableDataCell>
-              <CTableDataCell>
-                  <div class="overflow-auto">{{ item.taskData.account_number }}
-                  <CTooltip content="Copy Account Number" placement="right">
+              <CTableDataCell :class="{ 'text-danger': item.isCopied }" v-show="role=='admin'">{{ item.taskAssigne }}</CTableDataCell>
+              <CTableDataCell :class="{ 'text-danger': item.isCopied }">
+                  <div class="overflow-auto" :class="{ 'text-danger': item.isCopied }">{{ item.taskData.account_number }}
+                  <CTooltip content="Copy Account Number" placement="right" v-if="!item.isCopied?.accountNumber">
                       <template #toggler="{ on }">
 
-                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.account_number)">
+                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.account_number, item._id, 'accountNumber')">
                           <CIcon name="cil-copy"/>
                       </CButton>
                       </template>
                   </CTooltip>
                   </div>
               </CTableDataCell>
-              <CTableDataCell>
+              <CTableDataCell :class="{ 'text-danger': item.isCopied }">
                   <div class="overflow-auto">{{ item.taskData.anRekening }}
-                  <CTooltip content="Copy Account Name" placement="right">
+                  <CTooltip content="Copy Account Name" placement="right" v-if="!item.isCopied?.anRekening">
                       <template #toggler="{ on }">
 
-                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.anRekening)">
+                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.anRekening, item._id, 'anRekening')">
                           <CIcon name="cil-copy"/>
                       </CButton>
                       </template>
                   </CTooltip>
                   </div>
               </CTableDataCell>
-              <CTableDataCell>
+              <CTableDataCell :class="{ 'text-danger': item.isCopied }">
                   <div class="overflow-auto">
                   {{ rupiah(item.taskData.amount) }}
-                  <CTooltip content="Copy Account Amount!" placement="right">
+                  <CTooltip content="Copy Account Amount!" placement="right" v-if="!item.isCopied?.amount">
                       <template #toggler="{ on }">
-                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.amount)">
+                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.amount, item._id, 'amount')">
                           <CIcon name="cil-copy"/>
                       </CButton>
                       </template>
                   </CTooltip>
                   </div>
               </CTableDataCell>
-              <CTableDataCell>
+              <CTableDataCell :class="{ 'text-danger': item.isCopied }">
                   <div class="overflow-auto">
                   {{ item.taskData.userId.substring(0, item.taskData.userId.indexOf('\n')) }}
-                  <CTooltip content="Copy Account User ID!" placement="right">
+                  <CTooltip content="Copy Account User ID!" placement="right" v-if="!item.isCopied?.userId">
                       <template #toggler="{ on }">
-                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.userId)">
+                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.userId, item._id, 'userId')">
                           <CIcon name="cil-copy"/>
                       </CButton>
                       </template>
@@ -380,6 +380,7 @@ import useClipboard from 'vue-clipboard3'
 import MultiSelect from '@vueform/multiselect'
 import VueSweetalert2 from 'vue-sweetalert2'
 import XLSX from 'xlsx'
+import momentTz from 'moment-timezone'
 
 export default {
   name: 'TaskList',
@@ -485,7 +486,7 @@ export default {
     const bankTypeFilter = ref('');
     const statusFilterOptions = ref([
         { label: 'Unprocess', value: 'unprocess', checked: true },
-        { label: 'Unassigned', value: 'unassigned', checked: false },
+        { label: 'Assigned', value: 'assigned', checked: false },
         { label: 'Processed', value: 'processed', checked: false },
         { label: 'Done', value: 'done', checked: false },
         { label: 'Request Reject', value: 'request_reject', checked: false },
@@ -551,6 +552,8 @@ export default {
       taskStatus:'Unassigned',
     });
     let shift = ref(true)
+
+    const copied = ref(new Set)
 
     watch(dateFilter, value => {
       loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, value ? value[0] : '', value ? value[1] : '')
@@ -762,7 +765,11 @@ export default {
           })
 
           // Axios update
-          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`, { taskAssigne:work.value, taskHistory:taskh },{
+          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`, {
+            taskAssigne:work.value,
+            taskHistory:taskh,
+            taskStatus: 'assigned'
+          },{
             headers: {
               Authorization:window.localStorage.getItem('accessToken')
             }
@@ -795,7 +802,11 @@ export default {
           let taskh = results.data.taskHistory[0];
 
           // Axios update
-          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{taskAssigne:'unassigned',taskHistory:taskh},{
+          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`,{
+            taskStatus: 'unprocess',
+            taskAssigne:'unassigned',
+            taskHistory:taskh
+          },{
             headers: {
               Authorization:window.localStorage.getItem('accessToken')
             }
@@ -1024,7 +1035,7 @@ export default {
     function getCellColor(status) {
       const colors = {
         unprocess: 'secondary',
-        unassigned: 'dark',
+        assigned: 'secondary',
         done: 'success',
         processed: 'info',
         request_reject: 'warning',
@@ -1041,9 +1052,23 @@ export default {
         }).format(number);
     }
 
-    function copy(text){
+    async function copy(text, id, key){
         let { toClipboard }=useClipboard();
         toClipboard(text);
+
+        try {
+          await axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${id}`, {
+            [`isCopied.${key}`]: true 
+          }, {
+            headers: {
+              Authorization:window.localStorage.getItem('accessToken')
+            }
+          })
+
+          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+        } catch (err) {
+          console.log(err)
+        }
     }
 
     const shifting = reactive({
@@ -1106,6 +1131,11 @@ export default {
       modalAssign.value = true
 
       modalAssignItems.value = [...items]
+    }
+
+    function formatDate(date) {
+      return momentTz(date).format()
+      // return new Date(date).toLocaleDateString()
     }
 
     return {
@@ -1195,7 +1225,9 @@ export default {
       rupiah,
       copy,
       
-      exportTasks
+      exportTasks,
+      copied,
+      formatDate
     }
   }
 }
