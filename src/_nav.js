@@ -3,7 +3,7 @@ const bank = {
   name: 'Bank',
   to: '/bank',
   icon: 'cil-chart-pie',
-};
+}
 
 // const bank_account = {
 //   (this.window.localStorage.getItem('role')== 'admin') ? bank : null;
@@ -61,6 +61,24 @@ export default [
     name: 'Log Activity',
     to: '/log',
     icon: 'cil-settings',
+  },
+  {
+    component: 'CNavGroup',
+    name: 'Web control',
+    to: '',
+    icon: 'cil-puzzle',
+    items: [
+      {
+        component: 'CNavItem',
+        name: 'Agwlmain',
+        to: '/agwlbot',
+      },
+      {
+        component: 'CNavItem',
+        name: 'Agwlbca',
+        to: '/agwlbca',
+      },
+    ],
   },
   // {
   //   component: 'CNavTitle',

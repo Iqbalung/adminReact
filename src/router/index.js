@@ -210,6 +210,32 @@ const routes = [
           return next()
         },
       },
+      {
+        path: '/agwlbot',
+        name: 'Agwlbot',
+        component: () => import('@/views/webcontrol/agwlbot.vue'),
+        beforeEnter: (to, from, next) => {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name: 'Login',
+            })
+          }
+          return next()
+        },
+      },
+      {
+        path: '/agwlbca',
+        name: 'Agwlbca',
+        component: () => import('@/views/webcontrol/agwlbca.vue'),
+        beforeEnter: (to, from, next) => {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name: 'Login',
+            })
+          }
+          return next()
+        },
+      },
     ],
   },
 
