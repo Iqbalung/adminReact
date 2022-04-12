@@ -65,7 +65,20 @@
               <CTableHeaderCell scope="col">Action</CTableHeaderCell>
             </CTableRow>
           </CTableHead>
-          <CTableBody>
+          <CTableBody v-if="isLoading">
+            <CTableRow>
+              <CTableDataCell
+                align="middle"
+                class="text-center"
+                :colspan="role === 'admin' ? (checkStatusFilterActive('reject') ? 10 : 9) : 7"
+                >
+                  <CSpinner
+                    color="primary"
+                  />
+              </CTableDataCell>
+            </CTableRow>
+          </CTableBody>
+          <CTableBody v-else>
             <CTableRow v-for="(item,index) in tasks.data" :key="index" :data-key="item._id" class="selectable">
               <CTableDataCell v-show="role=='admin'" class="checkitems" :data-key="item._id" :class="{ 'text-danger': item.isCopied }">
                   <div v-if="item.taskStatus!='processed' && item.taskStatus!='done'">
@@ -554,6 +567,7 @@ export default {
     let shift = ref(true)
 
     const copied = ref(new Set)
+    const isLoading = ref(true)
 
     watch(dateFilter, value => {
       loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, value ? value[0] : '', value ? value[1] : '')
@@ -711,6 +725,8 @@ export default {
         countData.value = result.data.data;
 
         shift.value = false
+
+        isLoading.value = false
       }).catch((err) =>{
         console.log(err.response);
       });
@@ -1135,6 +1151,7 @@ export default {
 
     function formatDate(date) {
       return momentTz(date).format()
+      // return momentTz(date).tz('Asia/Jakarta').format()
       // return new Date(date).toLocaleDateString()
     }
 
@@ -1227,7 +1244,8 @@ export default {
       
       exportTasks,
       copied,
-      formatDate
+      formatDate,
+      isLoading
     }
   }
 }

@@ -13,29 +13,28 @@
           <CForm @submit.prevent="store()">
             <div class="mb-3">
               <CFormLabel for="email">Email address</CFormLabel>
-              <CFormInput type="email" id="email" placeholder="User email" v-model="user.email"/>
-              <div v-if="validation.email" class="text-danger">{{ validation.email.message }}</div>
-              <div v-if="valid" class="text-danger">{{ valid.message }}</div>
+              <CFormInput type="email" id="email" placeholder="User email" v-model="user.email" :invalid="validation.email" />
+              <CFormFeedback v-if="validation.email" invalid>{{ validation.email.message }}</CFormFeedback>
             </div>
             <div class="mb-3">
               <CFormLabel for="name">Full name</CFormLabel>
-              <CFormInput type="text" id="name" placeholder="Full name" v-model="user.name"/>
-              <div v-if="validation.name" class="text-danger">{{ validation.name.message }}</div>
+              <CFormInput type="text" id="name" placeholder="Full name" v-model="user.name" :invalid="validation.name" />
+              <CFormFeedback v-if="validation.name" invalid>{{ validation.name.message }}</CFormFeedback>
             </div>
             <div class="mb-3">
               <CFormLabel for="username">Username</CFormLabel>
-              <CFormInput type="text" id="username" placeholder="Username" v-model="user.username"/>
-              <div v-if="validation.username" class="text-danger">{{ validation.username.message }}</div>
+              <CFormInput type="text" id="username" placeholder="Username" v-model="user.username" :invalid="validation.username" />
+              <CFormFeedback v-if="validation.username" invalid>{{ validation.username.message }}</CFormFeedback>
             </div>
             <div class="mb-3">
               <CFormLabel for="rekening">Rekening</CFormLabel>
-              <MultiSelect :options="bankOptions" mode="tags" placeholder="Rekening" searchable v-model="user.banks" />
-              <div v-if="validation.banks" class="text-danger">{{ validation.banks.message }}</div>
+              <MultiSelect :options="bankOptions" mode="tags" placeholder="Rekening" searchable v-model="user.banks" :invalid="validation.banks" />
+              <CFormFeedback v-if="validation.banks" invalid>{{ validation.banks.message }}</CFormFeedback>
             </div>
             <div class="mb-3">
               <CFormLabel for="ip">IP Address</CFormLabel>
-              <MultiSelect :options="ipOptions"  mode="tags" placeholder="IP Address" createOption tagPlaceholder="Press enter to create a tag" searchable @option="addIp" v-model="user.ip" />
-              <div v-if="validation.ip" class="text-danger">{{ validation.ip.message }}</div>
+              <MultiSelect :options="ipOptions"  mode="tags" placeholder="IP Address" createOption tagPlaceholder="Press enter to create a tag" searchable @option="addIp" v-model="user.ip" :invalid="validation.ip" />
+              <CFormFeedback v-if="validation.ip" invalid>{{ validation.ip.message }}</CFormFeedback>
             </div>
             <div class="mb-3">
               <CFormLabel for="password">Password</CFormLabel>
@@ -44,8 +43,8 @@
                 id="password"
                 placeholder="Password"
                 v-model="user.password"
-              />
-              <div v-if="validation.password" class="text-danger">{{ validation.password.message }}</div>
+                :invalid="validation.password" />
+              <CFormFeedback v-if="validation.password" invalid>{{ validation.password.message }}</CFormFeedback>
             </div>
             <div class="mb-3">
               <CButton color="primary" class="rounded">Save</CButton>
@@ -87,7 +86,7 @@ export default {
     }
 
     function store() {
-      axios.post(`${process.env.VUE_APP_URL_API}/users`, user,{
+      axios.post(`${process.env.VUE_APP_URL_API}/users`, {...user, plainPassword: user.password},{
          headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
@@ -98,7 +97,6 @@ export default {
         })
       }).catch((err)=>{
         validation.value = err.response.data.errors
-        valid.value = err.response.data;
       })
     }
     onMounted(function() {

@@ -13,23 +13,23 @@
           <CForm @submit.prevent="update()">
             <div class="mb-3">
               <CFormLabel for="email">Email address</CFormLabel>
-              <CFormInput type="email" id="email" placeholder="User email" v-model="user.email"/>
-              <div v-if="validation.email" class="text-danger">{{ validation.email.message }}</div>
+              <CFormInput type="email" id="email" placeholder="User email" v-model="user.email" :invalid="validation.email" />
+              <CFormFeedback v-if="validation.email" invalid>{{ validation.email.message }}</CFormFeedback>
             </div>
             <div class="mb-3">
               <CFormLabel for="name">Full name</CFormLabel>
-              <CFormInput type="text" id="name" placeholder="Full name" v-model="user.name"/>
-              <div v-if="validation.name" class="text-danger">{{ validation.name.message }}</div>
+              <CFormInput type="text" id="name" placeholder="Full name" v-model="user.name" :invalid="validation.name" />
+              <CFormFeedback v-if="validation.name" invalid>{{ validation.name.message }}</CFormFeedback>
             </div>
             <div class="mb-3">
               <CFormLabel for="username">Username</CFormLabel>
-              <CFormInput type="text" id="username" placeholder="Username" v-model="user.username"/>
-              <div v-if="validation.username" class="text-danger">{{ validation.username.message }}</div>
+              <CFormInput type="text" id="username" placeholder="Username" v-model="user.username" :invalid="validation.username" />
+              <CFormFeedback v-if="validation.username" invalid>{{ validation.username.message }}</CFormFeedback>
             </div>
             <div class="mb-3">
               <CFormLabel for="ip">IP Address</CFormLabel>
-              <MultiSelect :options="ipOptions"  mode="tags" placeholder="IP Address" createOption tagPlaceholder="Press enter to create a tag" searchable @option="addIp" v-model="user.ip" />
-              <div v-if="validation.ip" class="text-danger">{{ validation.ip.message }}</div>
+              <MultiSelect :options="ipOptions"  mode="tags" placeholder="IP Address" createOption tagPlaceholder="Press enter to create a tag" searchable @option="addIp" v-model="user.ip" :invalid="validation.ip" />
+              <CFormFeedback v-if="validation.ip" invalid>{{ validation.ip.message }}</CFormFeedback>
             </div>
 
             <div class="mb-3">

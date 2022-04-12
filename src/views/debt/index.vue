@@ -72,7 +72,20 @@
             <!-- <CTableHeaderCell scope="col">Action</CTableHeaderCell> -->
           </CTableRow>
         </CTableHead>
-        <CTableBody>
+        <CTableBody v-if="isLoading">
+          <CTableRow>
+            <CTableDataCell
+              align="middle"
+              class="text-center"
+              :colspan="role === 'admin' ? 9 : 7"
+              >
+                <CSpinner
+                  color="primary"
+                />
+            </CTableDataCell>
+          </CTableRow>
+        </CTableBody>
+        <CTableBody v-else>
           <CTableRow
             v-for="(item, index) in debt.data"
             :key="index"
@@ -230,6 +243,7 @@ export default {
     const bankOptions = ref([]);
     const bankFilter = ref('')
     const dateFilter = ref()
+    const isLoading = ref(true)
 
     watch(searchFilter, value => {
       loadDebt(currentPages.value, searchFilter.value)
@@ -287,6 +301,7 @@ export default {
         .then((result) => {
           debt.value = result.data
           // totalData.value = result.data.total
+          stopLoading()
         })
         .catch((err) => {
           console.log(err.response)
@@ -324,6 +339,14 @@ export default {
       return momentTz(date).tz('Asia/Jakarta').format()
     }
 
+    function startLoading() {
+      isLoading.value = true
+    }
+
+    function stopLoading() {
+      isLoading.value = false
+    }
+
     return {
       searchFilter,
       changePg,
@@ -337,7 +360,8 @@ export default {
       getBanks,
       dateFilter,
       exportDebt,
-      formatDate
+      formatDate,
+      isLoading
     }
   },
 }

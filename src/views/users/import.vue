@@ -1,17 +1,22 @@
 <template>
     <CCard>
-        <CCardHeader class="bg-white">Import Excel</CCardHeader>
+        <CCardHeader class="bg-white d-flex align-items-center justify-content-between">
+            Import Excel
+            <CButton color="success" size="sm" v-on:click="downloadTemplate">
+                Download Template Data User
+            </CButton>
+        </CCardHeader>
         <CCardBody>
             <router-link :to="{ name: 'Users' }">
             <CButton color="primary">
                 <CIcon class="text-white" name="cil-arrow-left" /> Back
             </CButton>
             </router-link>
-            <CForm class="mt-3" @submit.prevent="submit">
+            <CForm class="mt-3" @submit.prevent="submit(successFeedback)">
                 <div class="mb-3">
                     <CFormLabel for="file">Upload File</CFormLabel>
-                    <CFormInput type="file" id="file" @change="setFile" />
-                    <div v-if="fileEmpty" class="text-danger">{{ fileEmpty.message }}</div>
+                    <CFormInput type="file" id="file" @change="setFile" :invalid="error !== ''" />
+                    <CFormFeedback v-if="error !== ''" invalid>{{ error }}</CFormFeedback>
                 </div>
                 <CButton type="submit" color="primary">Import</CButton>
             </CForm>
@@ -24,46 +29,80 @@
     import XLSX from 'xlsx'
     import axios from 'axios'
     import router from '../../router'
+    import VueSweetalert2 from 'vue-sweetalert2'
 
     export default {
+        components: { VueSweetalert2 },
+        methods: {
+            successFeedback(cb) {
+                console.log('ad')
+              this.$swal({
+                title:'Users Imported',
+                icon:'success',
+                confirmButtonText: 'Ok'
+              }).then(res => {
+                if (res.isConfirmed) {
+                    cb()
+                }
+              })
+            },
+            downloadTemplate() {
+                window.open(`${process.env.VUE_APP_URL_API}/template-import-user.xlsx`)
+            }
+        },
         setup() {
+            const error = ref('')
             const file = ref()
-            const fileEmpty = ref({})
             const setFile = e => {
                 const excel = e.target.files[0]
 
                 file.value = excel
             }
-            const submit = () => {
+            const submit = cb => {
+                error.value = ''
+
                 if (file.value) {
                     const reader = new FileReader()
                     reader.onload = e => {
                         const data = new Uint8Array(e.target.result)
-                        const workbook = XLSX.read(data, { type: 'array' })
-                        const worksheet = workbook.Sheets.Sheet1
-                        const worksheetJson = XLSX.utils.sheet_to_json(worksheet)
+                        try {
+                            const workbook = XLSX.read(data, { type: 'array' })
 
-                        const imports = []
+                            const worksheet = workbook.Sheets.Sheet1
+                            const worksheetJson = XLSX.utils.sheet_to_json(worksheet)
 
-                        for (const user of worksheetJson) {
-                            imports.push(axios.post(`${process.env.VUE_APP_URL_API}/users`, user, {
-                                headers: {
-                                    Authorization: window.localStorage.getItem('accessToken')
+                            if (!worksheetJson.length) {
+                                error.value = "File is invalid"
+                            } else {
+                                const imports = []
+
+                                for (const user of worksheetJson) {
+                                    imports.push(axios.post(`${process.env.VUE_APP_URL_API}/users`, user, {
+                                        headers: {
+                                            Authorization: window.localStorage.getItem('accessToken')
+                                        }
+                                    }))                            
                                 }
-                            }))                            
-                        }
 
-                        Promise.all(imports)
-                            .then(() => router.push({ name: "Users" }))
-                            .catch(console.log)
+                                Promise.all(imports)
+                                    .then(() => {
+                                        cb(router.push({ name: "Users" }))
+                                    })
+                                    .catch(err => {
+                                        error.value = "File is invalid"
+                                    })
+                            }
+                        } catch (err) {
+                            error.value = err.message
+                        }
                     }
                     reader.readAsArrayBuffer(file.value)
                 } else {
-                    fileEmpty.value.message = "File is required"
+                    error.value = "File is required"
                 }
             }
 
-            return { file, fileEmpty, setFile, submit }
+            return { file, error, setFile, submit }
         }
     }
 </script>
