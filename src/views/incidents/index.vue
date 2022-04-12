@@ -81,7 +81,20 @@
             <!-- <CTableHeaderCell scope="col">Action</CTableHeaderCell> -->
           </CTableRow>
         </CTableHead>
-        <CTableBody>
+        <CTableBody v-if="isLoading">
+          <CTableRow>
+            <CTableDataCell
+              align="middle"
+              class="text-center"
+              :colspan="role === 'admin' ? 7 : 4"
+              >
+                <CSpinner
+                  color="primary"
+                />
+            </CTableDataCell>
+          </CTableRow>
+        </CTableBody>
+        <CTableBody v-else>
           <CTableRow v-for="(item, index) in incidents.data" :key="index">
             <CTableDataCell>
               {{ index + 1 + (currentPages - 1) * perPage }}
@@ -188,6 +201,7 @@ export default {
     const perPage = ref(100)
     let currentPages = ref(1)
     const role = ref(window.localStorage.getItem('role'))
+    const isLoading = ref(true)
 
     watch(searchFilter, value => {
       loadIncidents(currentPages.value, searchFilter.value)
@@ -233,6 +247,8 @@ export default {
         })
         .then((result) => {
           incidents.value = result.data
+
+          stopLoading()
           // totalData.value = result.data.total
         })
         .catch((err) => {
@@ -248,6 +264,14 @@ export default {
       return momentTz(date).tz('Asia/Jakarta').format()
     }
 
+    function startLoading() {
+      isLoading.value = true
+    }
+
+    function stopLoading() {
+      isLoading.value = false
+    }
+
     return {
       searchFilter,
       changePg,
@@ -257,6 +281,7 @@ export default {
       currentPages,
       role,
       formatDate
+      isLoading
     }
   },
 }

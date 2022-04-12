@@ -28,7 +28,20 @@
                   <CTableHeaderCell class="text-center">Action</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
-              <CTableBody>
+              <CTableBody v-if="isLoading">
+                <CTableRow>
+                  <CTableDataCell
+                    align="middle"
+                    class="text-center"
+                    :colspan="8"
+                    >
+                      <CSpinner
+                        color="primary"
+                      />
+                  </CTableDataCell>
+                </CTableRow>
+              </CTableBody>
+              <CTableBody v-else>
                 <CTableRow v-for="(item,index) in users" :key="index">
                   <CTableDataCell class="text-center">
                     <CAvatar size="md" :src="item.avatar" />
@@ -75,7 +88,7 @@
                   </CTableDataCell>
                 </CTableRow>
                 <CTableRow>
-                  <CTableDataCell colspan="6" v-show="users.length <= 0">
+                  <CTableDataCell class="text-center" colspan="8" v-show="users.length <= 0">
                     No records found
                   </CTableDataCell>
                 </CTableRow>
@@ -94,6 +107,7 @@ export default {
   setup() {
     //reactive state
     let users = ref([]);
+    const isLoading = ref(true)
 
     onMounted(()=> {
       // get data
@@ -104,6 +118,8 @@ export default {
       })
       .then((result) => {
         users.value = result.data;
+
+        stopLoading()
       }).catch((err) =>{
         console.log(err.response);
       });
@@ -125,9 +141,18 @@ export default {
       })
     }
 
+    function startLoading() {
+      isLoading.value = true
+    }
+
+    function stopLoading() {
+      isLoading.value = false
+    }
+
     return {
       users,
-      destroy
+      destroy,
+      isLoading
     }
   }
 }

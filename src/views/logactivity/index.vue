@@ -30,7 +30,20 @@
             <CTableHeaderCell scope="col">Message</CTableHeaderCell>
           </CTableRow>
         </CTableHead>
-        <CTableBody>
+        <CTableBody v-if="isLoading">
+          <CTableRow>
+            <CTableDataCell
+              align="middle"
+              class="text-center"
+              :colspan="4"
+              >
+                <CSpinner
+                  color="primary"
+                />
+            </CTableDataCell>
+          </CTableRow>
+        </CTableBody>
+        <CTableBody v-else>
           <CTableRow v-for="(item, index) in logactivities.data" :key="index">
             <CTableDataCell>
               {{ index + 1 + (currentPages - 1) * perPage }}
@@ -92,8 +105,12 @@ export default {
       { label: 'Cron Engine', value: 'Cron Engine' },
       { label: 'Process Mutation', value: 'Process Mutation' }
     ])
+    const isLoading = ref(true)
 
-    watch(filter, loadLogActivity)
+    watch(filter, () => {
+      startLoading()
+      loadLogActivity()
+    })
 
     onMounted(() => {
 
@@ -138,6 +155,7 @@ export default {
         .then((result) => {
           logactivities.value = result.data
           // totalData.value = result.data.total
+          stopLoading()
         })
         .catch((err) => {
           console.log(err.response)
@@ -145,11 +163,21 @@ export default {
     }
 
     function changePg() {
+      startLoading()
       loadLogActivity(currentPages.value)
     }
 
     function refresh() {
+      startLoading()
       loadLogActivity(currentPages.value)
+    }
+
+    function startLoading() {
+      isLoading.value = true
+    }
+
+    function stopLoading() {
+      isLoading.value = false
     }
 
     return {
@@ -161,7 +189,8 @@ export default {
       role,
       filter,
       filterTypeOptions,
-      refresh
+      refresh,
+      isLoading
     }
   },
 }

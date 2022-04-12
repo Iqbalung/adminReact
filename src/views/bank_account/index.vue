@@ -20,7 +20,20 @@
                   <CTableHeaderCell class="text-center" v-show="role=='admin'">Action</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
-              <CTableBody>
+              <CTableBody v-if="isLoading">
+                <CTableRow>
+                  <CTableDataCell
+                    align="middle"
+                    class="text-center"
+                    :colspan="2"
+                    >
+                      <CSpinner
+                        color="primary"
+                      />
+                  </CTableDataCell>
+                </CTableRow>
+              </CTableBody>
+              <CTableBody v-else>
                 <CTableRow v-for="(item,index) in banks" :key="index">
                   <CTableDataCell>
                     <div>{{ item.username }}</div>
@@ -62,6 +75,8 @@ export default {
     //reactive state
     let banks = ref([]);
 
+    const isLoading = ref(true)
+
     onMounted(()=> {
       // get data
       axios.get(`${process.env.VUE_APP_URL_API}/bank`,{
@@ -71,6 +86,8 @@ export default {
       })
       .then((result) => {
         banks.value = result.data.data;
+
+        stopLoading()
       }).catch((err) =>{
         console.log(err.response);
       });
@@ -92,9 +109,18 @@ export default {
       })
     }
 
+    function startLoading() {
+      isLoading.value = true
+    }
+
+    function stopLoading() {
+      isLoading.value = false
+    }
+
     return {
       banks,
-      destroy
+      destroy,
+      isLoading
     }
   }
 }
