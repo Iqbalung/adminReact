@@ -13,13 +13,13 @@
           <CForm @submit.prevent="store()">
             <div class="mb-3">
               <CFormLabel for="username">username</CFormLabel>
-              <CFormInput type="text" id="username" placeholder="username" v-model="bank.username"/>
-              <div v-if="validation.username" class="text-danger">{{ validation.username.message }}</div>
+              <CFormInput type="text" id="username" placeholder="username" v-model="bank.username" :invalid="validation.username" />
+              <CFormFeedback v-if="validation.username" invalid>{{ validation.username.message }}</CFormFeedback>
             </div>
             <div class="mb-3">
               <CFormLabel for="password">password</CFormLabel>
-              <CFormInput type="password" id="password" placeholder="Password" v-model="bank.password"/>
-              <div v-if="validation.password" class="text-danger">{{ validation.password.message }}</div>
+              <CFormInput type="password" id="password" placeholder="Password" v-model="bank.password" :invalid="validation.password" />
+              <CFormFeedback v-if="validation.password" invalid>{{ validation.password.message }}</CFormFeedback>
             </div>
             <div class="mb-3">
               <CButton color="primary" class="rounded">Save</CButton>
