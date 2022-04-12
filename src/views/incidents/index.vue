@@ -280,7 +280,7 @@ export default {
       perPage,
       currentPages,
       role,
-      formatDate
+      formatDate,
       isLoading
     }
   },

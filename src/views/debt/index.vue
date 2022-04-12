@@ -360,11 +360,8 @@ export default {
       getBanks,
       dateFilter,
       exportDebt,
-<<<<<<< HEAD
-      formatDate
-=======
+      formatDate,
       isLoading
->>>>>>> b816c33 (add loading spinner)
     }
   },
 }

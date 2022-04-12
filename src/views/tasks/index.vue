@@ -1151,6 +1151,7 @@ export default {
 
     function formatDate(date) {
       return momentTz(date).format()
+      // return momentTz(date).tz('Asia/Jakarta').format()
       // return new Date(date).toLocaleDateString()
     }
 
@@ -1243,7 +1244,7 @@ export default {
       
       exportTasks,
       copied,
-      formatDate
+      formatDate,
       isLoading
     }
   }
