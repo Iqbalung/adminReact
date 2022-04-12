@@ -46,7 +46,7 @@
               })
             },
             downloadTemplate() {
-                window.open(`${process.env.VUE_APP_URL_API}/example-import-bank.xlsx`)
+                window.open(`${process.env.VUE_APP_URL_API}/template-import-bank.xlsx`)
             }
         },
         setup() {
@@ -62,30 +62,34 @@
                     const reader = new FileReader()
                     reader.onload = e => {
                         const data = new Uint8Array(e.target.result)
-                        const workbook = XLSX.read(data, { type: 'array' })
-                        const worksheet = workbook.Sheets.Sheet1
-                        const worksheetJson = XLSX.utils.sheet_to_json(worksheet)
+                        try {
+                            const workbook = XLSX.read(data, { type: 'array' })
+                            const worksheet = workbook.Sheets.Sheet1
+                            const worksheetJson = XLSX.utils.sheet_to_json(worksheet)
 
-                        if (!worksheetJson.length) {
-                            error.value = "File is invalid"
-                        } else {
-                            const imports = []
+                            if (!worksheetJson.length) {
+                                error.value = "File is invalid"
+                            } else {
+                                const imports = []
 
-                            for (const bank of worksheetJson) {
-                                imports.push(axios.post(`${process.env.VUE_APP_URL_API}/bank`, bank, {
-                                    headers: {
-                                        Authorization: window.localStorage.getItem('accessToken')
-                                    }
-                                }))
+                                for (const bank of worksheetJson) {
+                                    imports.push(axios.post(`${process.env.VUE_APP_URL_API}/bank`, bank, {
+                                        headers: {
+                                            Authorization: window.localStorage.getItem('accessToken')
+                                        }
+                                    }))
+                                }
+
+                                Promise.all(imports)
+                                    .then(() => {
+                                        cb(router.push({ name: "Bank Account" }))
+                                    })
+                                    .catch(err => {
+                                        error.value = "File is invalid"
+                                    })
                             }
-
-                            Promise.all(imports)
-                                .then(() => {
-                                    cb(router.push({ name: "Bank Account" }))
-                                })
-                                .catch(err => {
-                                    error.value = "File is invalid"
-                                })
+                        } catch (err) {
+                            error.value = err.message
                         }
                     }
                     reader.readAsArrayBuffer(file.value)
