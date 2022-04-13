@@ -505,7 +505,7 @@ export default {
         { label: 'Request Reject', value: 'request_reject', checked: false },
         { label: 'Reject', value: 'reject', checked: false },
     ])
-    const statusFilter = ref(['unprocess'])
+    const statusFilter = ref([window.localStorage.getItem('role') === 'admin' ? 'unprocess' : 'assigned'])
     const collapseFilter = ref(false)
 
     const tasks = ref([]);
@@ -599,6 +599,11 @@ export default {
 
     onMounted(()=> {
       setShiftClick()
+
+      if (role.value !== 'admin') {
+        statusFilterOptions.value[0].checked = false
+        statusFilterOptions.value[1].checked = true
+      }
       
       // date
       const startDate = new Date(new Date().setDate(new Date().getDate() - 1));
@@ -635,26 +640,14 @@ export default {
         loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '')
       })
 
-      var acknowledged = [];
-
       socket.on('tasks patched', (message) => {
-        if (!~acknowledged.indexOf(message._id)){
-          // add to array of acknowledged events
-          acknowledged.unshift(message._id);
+        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
 
-          // prevent array from growing to large
-          if (acknowledged.length > 20){
-            acknowledged.length = 20;
-          }
-
-          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
-
-          if (message.taskAssigne == window.localStorage.getItem('username')) {
-            if (message.taskStatus=='done'){
-              showToast('Transfer Berhasil ', message.taskTittle, message.updatedAt);
-            } else {
-              showToast('Task Baru ', message.taskTittle, message.updatedAt);
-            }
+        if (message.taskAssigne == window.localStorage.getItem('username')) {
+          if (message.taskStatus=='done'){
+            showToast('Transfer Berhasil ', message.taskTittle, message.updatedAt);
+          } else {
+            showToast('Task Baru ', message.taskTittle, message.updatedAt);
           }
         }
       });
@@ -1012,8 +1005,6 @@ export default {
           time: dt
         });
         playSound();
-        console.log(toasts.value);
-        console.log(dt);
     }
 
     function changePg() {
