@@ -79,8 +79,8 @@
             </CTableRow>
           </CTableBody>
           <CTableBody v-else>
-            <CTableRow v-for="(item,index) in tasks.data" :key="index" :data-key="item._id" class="selectable">
-              <CTableDataCell v-show="role=='admin'" class="checkitems" :data-key="item._id" :class="{ 'text-danger': item.isCopied }">
+            <CTableRow v-for="(item,index) in tasks.data" :key="index" :data-key="item._id" class="selectable" :color="checkIsCopied(item.isCopied) ? 'danger' : null">
+              <CTableDataCell v-show="role=='admin'" class="checkitems" :data-key="item._id">
                   <div v-if="item.taskStatus!='processed' && item.taskStatus!='done'">
                   <input type="checkbox" v-model="checkedItems" :value="item._id" class="checkboxitems">
                   <!-- <CFormCheck  id="item._id" v-model="checkedItems" :value="item.id"/> -->
@@ -89,12 +89,12 @@
                   <input type="checkbox" disabled/>
                   </div>
               </CTableDataCell>
-              <CTableDataCell :class="{ 'text-danger': item.isCopied }">{{ formatDate(item.createdAt) }}</CTableDataCell>
-              <CTableDataCell :class="{ 'text-danger': item.isCopied }" v-show="role=='admin' && checkStatusFilterActive('reject')">
+              <CTableDataCell>{{ formatDate(item.createdAt) }}</CTableDataCell>
+              <CTableDataCell v-show="role=='admin' && checkStatusFilterActive('reject')">
                 {{ item.updatedAt ? item.updatedAt : '-' }}</CTableDataCell>
-              <CTableDataCell :class="{ 'text-danger': item.isCopied }" v-show="role=='admin'">{{ item.taskAssigne }}</CTableDataCell>
-              <CTableDataCell :class="{ 'text-danger': item.isCopied }">
-                  <div class="overflow-auto" :class="{ 'text-danger': item.isCopied }">{{ item.taskData.account_number }}
+              <CTableDataCell v-show="role=='admin'">{{ item.taskAssigne }}</CTableDataCell>
+              <CTableDataCell>
+                  <div class="overflow-auto">{{ item.taskData.account_number }}
                   <CTooltip content="Copy Account Number" placement="right" v-if="!item.isCopied?.accountNumber">
                       <template #toggler="{ on }">
 
@@ -105,7 +105,7 @@
                   </CTooltip>
                   </div>
               </CTableDataCell>
-              <CTableDataCell :class="{ 'text-danger': item.isCopied }">
+              <CTableDataCell>
                   <div class="overflow-auto">{{ item.taskData.anRekening }}
                   <CTooltip content="Copy Account Name" placement="right" v-if="!item.isCopied?.anRekening">
                       <template #toggler="{ on }">
@@ -117,7 +117,7 @@
                   </CTooltip>
                   </div>
               </CTableDataCell>
-              <CTableDataCell :class="{ 'text-danger': item.isCopied }">
+              <CTableDataCell>
                   <div class="overflow-auto">
                   {{ rupiah(item.taskData.amount) }}
                   <CTooltip content="Copy Account Amount!" placement="right" v-if="!item.isCopied?.amount">
@@ -129,7 +129,7 @@
                   </CTooltip>
                   </div>
               </CTableDataCell>
-              <CTableDataCell :class="{ 'text-danger': item.isCopied }">
+              <CTableDataCell>
                   <div class="overflow-auto">
                   {{ item.taskData.userId.substring(0, item.taskData.userId.indexOf('\n')) }}
                   <CTooltip content="Copy Account User ID!" placement="right" v-if="!item.isCopied?.userId">
@@ -141,7 +141,7 @@
                   </CTooltip>
                   </div>
               </CTableDataCell>
-              <CTableDataCell :color="getCellColor(item.taskStatus)">{{ item.taskStatus }}</CTableDataCell>
+              <CTableDataCell :color="checkIsCopied(item.isCopied) ? 'danger' : getCellColor(item.taskStatus)">{{ item.taskStatus }}</CTableDataCell>
               <CTableDataCell>
                   <CButton size="sm" class="text-primary" variant="ghost" color="light" :disabled="item.taskStatus === 'processed'" @click="processTask(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
                     Detail
@@ -1133,6 +1133,10 @@ export default {
     function checkStatusFilterActive(status) {
       return statusFilter.value.length ? statusFilter.value.every(filter => filter === status) : false
     }
+
+    function checkIsCopied(isCopied) {
+      return isCopied && Object.keys(isCopied).length >= 3
+    }
     
     function openModalAssign(items) {
       modalAssign.value = true
@@ -1161,6 +1165,7 @@ export default {
       filterListActive,
       filterLists,
       checkStatusFilterActive,
+      checkIsCopied,
 
       getCellColor,
 
