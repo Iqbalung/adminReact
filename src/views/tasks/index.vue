@@ -1135,9 +1135,9 @@ export default {
     }
 
     function formatDate(date) {
-      return date
-      // return momentTz(date).format()
-      // return momentTz(date).tz('Asia/Jakarta').format()
+      // return date
+      return momentTz(date).utc().format('YYYY-MM-DDTHH:mm:ss')
+      // return momentTz(date).tz('Asia/Jakarta', true).format()
       // return new Date(date).toLocaleDateString()
     }
 
