@@ -97,7 +97,17 @@ export default {
           name:'Users'
         })
       }).catch((err)=>{
-        validation.value = err.response.data.errors
+        if (err.response.status === 409) {
+          const [key] = Object.keys(err.response.data.errors)
+
+          validation.value = {
+            [key]: {
+              message: err.response.data.message
+            }
+          }
+        } else {
+          validation.value = err.response.data.errors
+        }
       })
     }
     return {
