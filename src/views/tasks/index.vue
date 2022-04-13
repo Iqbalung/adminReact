@@ -612,26 +612,16 @@ export default {
       dateFilter.value = [startDate, endDate];
 
       // socket
-      var acknowledgedcreate = [] ;
 
       socket.on('tasks created', (message) => {
-        if (!~acknowledgedcreate.indexOf(message._id)){
-          // add to array of acknowledged events
-          acknowledgedcreate.unshift(message._id);
+        console.log('test')
+        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
 
-          // prevent array from growing to large
-          if(acknowledgedcreate.length > 20){
-            acknowledgedcreate.length = 20;
-          }
-
-          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
-
-          if (message.taskAssigne == window.localStorage.getItem('username')) {
-            if(message.taskStatus=='done'){
-              showToast('Transfer Berhasil ', message.taskTittle, message.createdAt);
-            } else{
-              showToast('Task Baru ', message.taskTittle, message.createdAt);
-            }
+        if (message.taskAssigne == window.localStorage.getItem('username')) {
+          if(message.taskStatus=='done'){
+            showToast('Transfer Berhasil ', message.taskTittle, message.createdAt);
+          } else{
+            showToast('Task Baru ', message.taskTittle, message.createdAt);
           }
         }
       })
@@ -1145,7 +1135,8 @@ export default {
     }
 
     function formatDate(date) {
-      return momentTz(date).format()
+      return date
+      // return momentTz(date).format()
       // return momentTz(date).tz('Asia/Jakarta').format()
       // return new Date(date).toLocaleDateString()
     }
