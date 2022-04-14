@@ -674,7 +674,11 @@ export default {
 
       const param_admin = {
         ...(from ? { 'createdAt[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00') } : {}),
-        ...(to ? { 'createdAt[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59') } : {}),
+        ...(to
+          ? { 'createdAt[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59') }
+          : from
+            ? { 'createdAt[$lte]': new Date(from.toISOString().substring(0, 10) + 'T23:59:59') }
+            : {}),
         // taskStatus: status,
         'taskStatus[$in]': statusFilter.value,
         userId: userId,
