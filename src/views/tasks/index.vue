@@ -263,38 +263,42 @@
     <CModalBody>
     <div class="d-flex justify-content-between">
       <div class="">
-      <p class="mb-0 fw-bold">Task Title :</p>
-      <p>{{ taskTittle }}</p>
-      <p class="mb-0 fw-bold">Task Assigne :</p>
-      <p>{{ taskAssigne }}</p>
-      <p class="mb-0 fw-bold">Task Ref Number :</p>
-      <p>{{ taskRefNumber }}</p>
-      <p class="mb-0 fw-bold">Task Sla Time :</p>
-      <p>{{ taskSlaTime }}</p>
-      <p class="mb-0 fw-bold">Task Expired Time :</p>
-      <p>{{ taskExpiredTime }}</p>
-      <p class="mb-0 fw-bold">Task Status :</p>
-      <p>{{ taskStatus }}</p>
-      <p class="mb-0 fw-bold">Task History :</p>
-      <p v-for="(item,index) in taskHistory" :key="index">
-        {{ item.updatedAt  }}
-        <br/>
-        {{ item.status }}
-      </p>
+        <p class="mb-0 fw-bold">Task Title :</p>
+        <p>{{ taskTittle }}</p>
+        <p class="mb-0 fw-bold">Task Assigne :</p>
+        <p>{{ taskAssigne }}</p>
+        <p class="mb-0 fw-bold">Task Ref Number :</p>
+        <p>{{ taskRefNumber }}</p>
+        <p class="mb-0 fw-bold">Task Sla Time :</p>
+        <p>{{ taskSlaTime }}</p>
+        <p class="mb-0 fw-bold">Task Expired Time :</p>
+        <p>{{ taskExpiredTime }}</p>
+        <p class="mb-0 fw-bold">Task Status :</p>
+        <p>{{ taskStatus }}</p>
+        <p class="mb-0 fw-bold">Task History :</p>
+        <div class="timeline">
+          <div class="tl-item" v-for="(item,index) in taskHistory" :key="index">
+              <div class="tl-dot b-primary"></div>
+              <div class="tl-content">
+                  <div class="">{{ item.status }}</div>
+                  <div class="tl-date text-muted mt-1">{{ item.updatedAt }}</div>
+              </div>
+          </div>
+        </div>
       </div>
       <div>
-      <p class="mb-0 fw-bold">Account Number :</p>
-      <p>{{ account_number }}</p>
-      <p class="mb-0 fw-bold">Card Holder :</p>
-      <p>{{ anRekening }}</p>
-      <p class="mb-0 fw-bold">Bank Type :</p>
-      <p>{{ bank_type }}</p>
-      <p class="mb-0 fw-bold">Task Created By :</p>
-      <p>{{ taskCreatedBy }}</p>
-      <p class="mb-0 fw-bold">Amount :</p>
-      <p>{{ amount }}</p>
-      <p class="mb-0 fw-bold">Mutation ID :</p>
-      <p>{{ mutation_id }}</p>
+        <p class="mb-0 fw-bold">Account Number :</p>
+        <p>{{ account_number }}</p>
+        <p class="mb-0 fw-bold">Card Holder :</p>
+        <p>{{ anRekening }}</p>
+        <p class="mb-0 fw-bold">Bank Type :</p>
+        <p>{{ bank_type }}</p>
+        <p class="mb-0 fw-bold">Task Created By :</p>
+        <p>{{ taskCreatedBy }}</p>
+        <p class="mb-0 fw-bold">Amount :</p>
+        <p>{{ amount }}</p>
+        <p class="mb-0 fw-bold">Mutation ID :</p>
+        <p>{{ mutation_id }}</p>
       </div>
     </div>
     </CModalBody>
@@ -394,6 +398,7 @@ import MultiSelect from '@vueform/multiselect'
 import VueSweetalert2 from 'vue-sweetalert2'
 import XLSX from 'xlsx'
 import momentTz from 'moment-timezone'
+import './timeline.css'
 
 export default {
   name: 'TaskList',
