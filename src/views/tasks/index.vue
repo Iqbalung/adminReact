@@ -1083,8 +1083,18 @@ export default {
       end: 0
     })
 
-    function getShiftArea(start, end) {
+    function getShiftArea(startId, endId) {
       let getting = false
+      let start = startId
+      let end = endId
+
+      const startIndex = tasks.value.data.findIndex(task => task._id === start)
+      const endIndex = tasks.value.data.findIndex(task => task._id === end)
+
+      if (endIndex < startIndex) {
+        start = endId
+        end = startId
+      }
 
       tasks.value.data.forEach(task => {
         if (task._id === start) getting = true
