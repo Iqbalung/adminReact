@@ -27,6 +27,16 @@
               <CFormFeedback v-if="validation.username" invalid>{{ validation.username.message }}</CFormFeedback>
             </div>
             <div class="mb-3">
+              <CFormLabel for="role">Role</CFormLabel>
+              <CFormSelect
+                :options="[
+                  { label: 'Worker', value: 'worker' },
+                  { label: 'Admin', value: 'admin' },
+                ]" v-model="user.role" :invalid="validation.role">
+              </CFormSelect>
+              <CFormFeedback v-if="validation.role" invalid>{{ validation.role.message }}</CFormFeedback>
+            </div>
+            <div class="mb-3">
               <CFormLabel for="rekening">Rekening</CFormLabel>
               <MultiSelect :options="bankOptions" mode="tags" placeholder="Rekening" searchable v-model="user.banks" :invalid="validation.banks" />
               <CFormFeedback v-if="validation.banks" invalid>{{ validation.banks.message }}</CFormFeedback>
@@ -96,7 +106,17 @@ export default {
           name:'Users'
         })
       }).catch((err)=>{
-        validation.value = err.response.data.errors
+        if (err.response.status === 409) {
+          const [key] = Object.keys(err.response.data.errors)
+
+          validation.value = {
+            [key]: {
+              message: err.response.data.message
+            }
+          }
+        } else {
+          validation.value = err.response.data.errors
+        }
       })
     }
     onMounted(function() {

@@ -25,7 +25,7 @@
           <CInputGroup>
             <CFormInput type="text" id="search" v-model="userIdFilter" placeholder="User ID" />
             <CFormInput type="text" id="search" v-model="bankTypeFilter" placeholder="Bank" />
-            <CFormInput type="text" id="search" v-model="amountFilter" placeholder="Nominal" />
+            <CFormInput type="text" id="search" :value="amountFilter" v-on:input="amountFilter = formatNumber($event.target.value)" placeholder="Nominal" />
             <CFormInput type="text" id="search" v-model="accountNameFilter" placeholder="Name Account" />
             <CFormInput type="text" id="search" v-model="accountNumberFilter" placeholder="Account Bank" />
           </CInputGroup>
@@ -79,8 +79,8 @@
             </CTableRow>
           </CTableBody>
           <CTableBody v-else>
-            <CTableRow v-for="(item,index) in tasks.data" :key="index" :data-key="item._id" class="selectable">
-              <CTableDataCell v-show="role=='admin'" class="checkitems" :data-key="item._id" :class="{ 'text-danger': item.isCopied }">
+            <CTableRow v-for="(item,index) in tasks.data" :key="index" :data-key="item._id" class="selectable" :color="checkIsCopied(item.isCopied) ? 'danger' : null">
+              <CTableDataCell v-show="role=='admin'" class="checkitems" :data-key="item._id">
                   <div v-if="item.taskStatus!='processed' && item.taskStatus!='done'">
                   <input type="checkbox" v-model="checkedItems" :value="item._id" class="checkboxitems">
                   <!-- <CFormCheck  id="item._id" v-model="checkedItems" :value="item.id"/> -->
@@ -89,12 +89,12 @@
                   <input type="checkbox" disabled/>
                   </div>
               </CTableDataCell>
-              <CTableDataCell :class="{ 'text-danger': item.isCopied }">{{ formatDate(item.createdAt) }}</CTableDataCell>
-              <CTableDataCell :class="{ 'text-danger': item.isCopied }" v-show="role=='admin' && checkStatusFilterActive('reject')">
+              <CTableDataCell>{{ formatDate(item.createdAt) }}</CTableDataCell>
+              <CTableDataCell v-show="role=='admin' && checkStatusFilterActive('reject')">
                 {{ item.updatedAt ? item.updatedAt : '-' }}</CTableDataCell>
-              <CTableDataCell :class="{ 'text-danger': item.isCopied }" v-show="role=='admin'">{{ item.taskAssigne }}</CTableDataCell>
-              <CTableDataCell :class="{ 'text-danger': item.isCopied }">
-                  <div class="overflow-auto" :class="{ 'text-danger': item.isCopied }">{{ item.taskData.account_number }}
+              <CTableDataCell v-show="role=='admin'">{{ item.taskAssigne }}</CTableDataCell>
+              <CTableDataCell>
+                  <div class="overflow-auto">{{ item.taskData.account_number }}
                   <CTooltip content="Copy Account Number" placement="right" v-if="!item.isCopied?.accountNumber">
                       <template #toggler="{ on }">
 
@@ -105,7 +105,7 @@
                   </CTooltip>
                   </div>
               </CTableDataCell>
-              <CTableDataCell :class="{ 'text-danger': item.isCopied }">
+              <CTableDataCell>
                   <div class="overflow-auto">{{ item.taskData.anRekening }}
                   <CTooltip content="Copy Account Name" placement="right" v-if="!item.isCopied?.anRekening">
                       <template #toggler="{ on }">
@@ -117,7 +117,7 @@
                   </CTooltip>
                   </div>
               </CTableDataCell>
-              <CTableDataCell :class="{ 'text-danger': item.isCopied }">
+              <CTableDataCell>
                   <div class="overflow-auto">
                   {{ rupiah(item.taskData.amount) }}
                   <CTooltip content="Copy Account Amount!" placement="right" v-if="!item.isCopied?.amount">
@@ -129,7 +129,7 @@
                   </CTooltip>
                   </div>
               </CTableDataCell>
-              <CTableDataCell :class="{ 'text-danger': item.isCopied }">
+              <CTableDataCell>
                   <div class="overflow-auto">
                   {{ item.taskData.userId.substring(0, item.taskData.userId.indexOf('\n')) }}
                   <CTooltip content="Copy Account User ID!" placement="right" v-if="!item.isCopied?.userId">
@@ -141,7 +141,7 @@
                   </CTooltip>
                   </div>
               </CTableDataCell>
-              <CTableDataCell :color="getCellColor(item.taskStatus)">{{ item.taskStatus }}</CTableDataCell>
+              <CTableDataCell :color="checkIsCopied(item.isCopied) ? 'danger' : getCellColor(item.taskStatus)">{{ item.taskStatus }}</CTableDataCell>
               <CTableDataCell>
                   <CButton size="sm" class="text-primary" variant="ghost" color="light" :disabled="item.taskStatus === 'processed'" @click="processTask(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
                     Detail
@@ -263,38 +263,42 @@
     <CModalBody>
     <div class="d-flex justify-content-between">
       <div class="">
-      <p class="mb-0 fw-bold">Task Title :</p>
-      <p>{{ taskTittle }}</p>
-      <p class="mb-0 fw-bold">Task Assigne :</p>
-      <p>{{ taskAssigne }}</p>
-      <p class="mb-0 fw-bold">Task Ref Number :</p>
-      <p>{{ taskRefNumber }}</p>
-      <p class="mb-0 fw-bold">Task Sla Time :</p>
-      <p>{{ taskSlaTime }}</p>
-      <p class="mb-0 fw-bold">Task Expired Time :</p>
-      <p>{{ taskExpiredTime }}</p>
-      <p class="mb-0 fw-bold">Task Status :</p>
-      <p>{{ taskStatus }}</p>
-      <p class="mb-0 fw-bold">Task History :</p>
-      <p v-for="(item,index) in taskHistory" :key="index">
-        {{ item.updatedAt  }}
-        <br/>
-        {{ item.status }}
-      </p>
+        <p class="mb-0 fw-bold">Task Title :</p>
+        <p>{{ taskTittle }}</p>
+        <p class="mb-0 fw-bold">Task Assigne :</p>
+        <p>{{ taskAssigne }}</p>
+        <p class="mb-0 fw-bold">Task Ref Number :</p>
+        <p>{{ taskRefNumber }}</p>
+        <p class="mb-0 fw-bold">Task Sla Time :</p>
+        <p>{{ taskSlaTime }}</p>
+        <p class="mb-0 fw-bold">Task Expired Time :</p>
+        <p>{{ formatDate(taskExpiredTime, false) }}</p>
+        <p class="mb-0 fw-bold">Task Status :</p>
+        <p>{{ taskStatus }}</p>
+        <p class="mb-0 fw-bold">Task History :</p>
+        <div class="timeline">
+          <div class="tl-item" v-for="(item,index) in taskHistory" :key="index">
+              <div class="tl-dot b-primary"></div>
+              <div class="tl-content">
+                  <div class="">{{ item.status }}</div>
+                  <div class="tl-date text-muted mt-1">{{ formatDate(item.updatedAt, false) }}</div>
+              </div>
+          </div>
+        </div>
       </div>
       <div>
-      <p class="mb-0 fw-bold">Account Number :</p>
-      <p>{{ account_number }}</p>
-      <p class="mb-0 fw-bold">Card Holder :</p>
-      <p>{{ anRekening }}</p>
-      <p class="mb-0 fw-bold">Bank Type :</p>
-      <p>{{ bank_type }}</p>
-      <p class="mb-0 fw-bold">Task Created By :</p>
-      <p>{{ taskCreatedBy }}</p>
-      <p class="mb-0 fw-bold">Amount :</p>
-      <p>{{ amount }}</p>
-      <p class="mb-0 fw-bold">Mutation ID :</p>
-      <p>{{ mutation_id }}</p>
+        <p class="mb-0 fw-bold">Account Number :</p>
+        <p>{{ account_number }}</p>
+        <p class="mb-0 fw-bold">Card Holder :</p>
+        <p>{{ anRekening }}</p>
+        <p class="mb-0 fw-bold">Bank Type :</p>
+        <p>{{ bank_type }}</p>
+        <p class="mb-0 fw-bold">Task Created By :</p>
+        <p>{{ taskCreatedBy }}</p>
+        <p class="mb-0 fw-bold">Amount :</p>
+        <p>{{ amount }}</p>
+        <p class="mb-0 fw-bold">Mutation ID :</p>
+        <p>{{ mutation_id }}</p>
       </div>
     </div>
     </CModalBody>
@@ -302,7 +306,6 @@
       <CButton color="secondary" @click="() => { modalDetail = false }">
         Cancel
       </CButton>
-      <CButton color="primary" @click="showProc(proc)">Process</CButton>
     </CModalFooter>
   </CModal>
   <!-- Modal Detail Task -->
@@ -394,6 +397,7 @@ import MultiSelect from '@vueform/multiselect'
 import VueSweetalert2 from 'vue-sweetalert2'
 import XLSX from 'xlsx'
 import momentTz from 'moment-timezone'
+import './timeline.css'
 
 export default {
   name: 'TaskList',
@@ -505,7 +509,7 @@ export default {
         { label: 'Request Reject', value: 'request_reject', checked: false },
         { label: 'Reject', value: 'reject', checked: false },
     ])
-    const statusFilter = ref(['unprocess'])
+    const statusFilter = ref([window.localStorage.getItem('role') === 'admin' ? 'unprocess' : 'assigned'])
     const collapseFilter = ref(false)
 
     const tasks = ref([]);
@@ -589,7 +593,7 @@ export default {
       loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     })
 
-    watch(amountFilter, value => {
+    watch(amountFilter, value => {      
       loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     })
 
@@ -599,6 +603,11 @@ export default {
 
     onMounted(()=> {
       setShiftClick()
+
+      if (role.value !== 'admin') {
+        statusFilterOptions.value[0].checked = false
+        statusFilterOptions.value[1].checked = true
+      }
       
       // date
       const startDate = new Date(new Date().setDate(new Date().getDate() - 1));
@@ -607,26 +616,16 @@ export default {
       dateFilter.value = [startDate, endDate];
 
       // socket
-      var acknowledgedcreate = [] ;
 
       socket.on('tasks created', (message) => {
-        if (!~acknowledgedcreate.indexOf(message._id)){
-          // add to array of acknowledged events
-          acknowledgedcreate.unshift(message._id);
+        console.log('test')
+        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
 
-          // prevent array from growing to large
-          if(acknowledgedcreate.length > 20){
-            acknowledgedcreate.length = 20;
-          }
-
-          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
-
-          if (message.taskAssigne == window.localStorage.getItem('username')) {
-            if(message.taskStatus=='done'){
-              showToast('Transfer Berhasil ', message.taskTittle, message.createdAt);
-            } else{
-              showToast('Task Baru ', message.taskTittle, message.createdAt);
-            }
+        if (message.taskAssigne == window.localStorage.getItem('username')) {
+          if(message.taskStatus=='done'){
+            showToast('Transfer Berhasil ', message.taskTittle, message.createdAt);
+          } else{
+            showToast('Task Baru ', message.taskTittle, message.createdAt);
           }
         }
       })
@@ -635,27 +634,19 @@ export default {
         loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '')
       })
 
-      var acknowledged = [];
-
       socket.on('tasks patched', (message) => {
-        if (!~acknowledged.indexOf(message._id)){
-          // add to array of acknowledged events
-          acknowledged.unshift(message._id);
+        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
 
-          // prevent array from growing to large
-          if (acknowledged.length > 20){
-            acknowledged.length = 20;
+        if (message.taskAssigne == window.localStorage.getItem('username')) {
+          if (message.taskStatus=='done'){
+            showToast('Transfer Berhasil ', message.taskTittle, message.updatedAt);
+          } else if (message.taskStatus === 'assigned') {
+            showToast('Task Baru ', message.taskTittle, message.updatedAt);
           }
+        }
 
-          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
-
-          if (message.taskAssigne == window.localStorage.getItem('username')) {
-            if (message.taskStatus=='done'){
-              showToast('Transfer Berhasil ', message.taskTittle, message.updatedAt);
-            } else {
-              showToast('Task Baru ', message.taskTittle, message.updatedAt);
-            }
-          }
+        if (role.value === 'admin' && message.taskStatus === 'request_reject') {
+          showToast('Task Request Reject', message.taskTittle, message.updatedAt)
         }
       });
 
@@ -683,13 +674,17 @@ export default {
 
       const param_admin = {
         ...(from ? { 'createdAt[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00') } : {}),
-        ...(to ? { 'createdAt[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59') } : {}),
+        ...(to
+          ? { 'createdAt[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59') }
+          : from
+            ? { 'createdAt[$lte]': new Date(from.toISOString().substring(0, 10) + 'T23:59:59') }
+            : {}),
         // taskStatus: status,
         'taskStatus[$in]': statusFilter.value,
         userId: userId,
         'taskData.account_number': accountNumber,
         'taskData.anRekening': accountName,
-        'taskData.amount': amount,
+        'taskData.amount': amount.replace(/\W/gi, ''),
         'taskData.bank_type': bankType,
         $skip: skip,
         '$sort[createdAt]':-1,
@@ -704,7 +699,7 @@ export default {
         userId: userId,
         'taskData.account_number': accountNumber,
         'taskData.anRekening': accountName,
-        'taskData.amount': amount,
+        'taskData.amount': amount.replace(/\W/gi, ''),
         'taskData.bank_type': bankType,
         $skip: skip,
         '$sort[createdAt]':-1,
@@ -790,7 +785,7 @@ export default {
               Authorization:window.localStorage.getItem('accessToken')
             }
           }).then(()=> {
-            loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+            // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
           }).catch((err)=>{
             console.log(err);
           })
@@ -827,7 +822,7 @@ export default {
               Authorization:window.localStorage.getItem('accessToken')
             }
           }).then(()=> {
-            loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+            // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
           }).catch((err)=>{
             console.log(err);
           })
@@ -854,7 +849,7 @@ export default {
           Authorization:window.localStorage.getItem('accessToken')
         }
       }).then(()=> {
-        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+        // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
       }).catch((err)=>{
         console.log(err);
       })
@@ -883,7 +878,7 @@ export default {
               Authorization:window.localStorage.getItem('accessToken')
             }
           }).then(()=> {
-            loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+            // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
           }).catch((err)=>{
             console.log(err);
           })
@@ -917,7 +912,7 @@ export default {
               Authorization:window.localStorage.getItem('accessToken')
             }
           }).then(()=> {
-            loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+            // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
           }).catch((err)=>{
             console.log(err);
           })
@@ -966,7 +961,7 @@ export default {
           }
         })
         .then(()=> {
-          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+          // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
         }).catch((err)=>{
           console.log(err);
         })
@@ -1012,8 +1007,6 @@ export default {
           time: dt
         });
         playSound();
-        console.log(toasts.value);
-        console.log(dt);
     }
 
     function changePg() {
@@ -1081,7 +1074,7 @@ export default {
             }
           })
 
-          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+          // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
         } catch (err) {
           console.log(err)
         }
@@ -1093,8 +1086,18 @@ export default {
       end: 0
     })
 
-    function getShiftArea(start, end) {
+    function getShiftArea(startId, endId) {
       let getting = false
+      let start = startId
+      let end = endId
+
+      const startIndex = tasks.value.data.findIndex(task => task._id === start)
+      const endIndex = tasks.value.data.findIndex(task => task._id === end)
+
+      if (endIndex < startIndex) {
+        start = endId
+        end = startId
+      }
 
       tasks.value.data.forEach(task => {
         if (task._id === start) getting = true
@@ -1142,6 +1145,10 @@ export default {
     function checkStatusFilterActive(status) {
       return statusFilter.value.length ? statusFilter.value.every(filter => filter === status) : false
     }
+
+    function checkIsCopied(isCopied) {
+      return isCopied && Object.keys(isCopied).length >= 3
+    }
     
     function openModalAssign(items) {
       modalAssign.value = true
@@ -1149,10 +1156,13 @@ export default {
       modalAssignItems.value = [...items]
     }
 
-    function formatDate(date) {
-      return momentTz(date).format()
-      // return momentTz(date).tz('Asia/Jakarta').format()
-      // return new Date(date).toLocaleDateString()
+    function formatDate(date, utc = true) {
+      const format = 'YYYY-MM-DDTHH:mm:ss'
+      return utc ? momentTz(date).utc().format(format) : momentTz(date).tz('Asia/Jakarta').format(format)
+    }
+
+    function formatNumber(number) {
+      return number !== '' ? new Intl.NumberFormat().format(number.replace(/\D/gi, '')) : ''
     }
 
     return {
@@ -1170,6 +1180,7 @@ export default {
       filterListActive,
       filterLists,
       checkStatusFilterActive,
+      checkIsCopied,
 
       getCellColor,
 
@@ -1245,6 +1256,7 @@ export default {
       exportTasks,
       copied,
       formatDate,
+      formatNumber,
       isLoading
     }
   }
