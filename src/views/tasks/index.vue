@@ -25,7 +25,7 @@
           <CInputGroup>
             <CFormInput type="text" id="search" v-model="userIdFilter" placeholder="User ID" />
             <CFormInput type="text" id="search" v-model="bankTypeFilter" placeholder="Bank" />
-            <CFormInput type="text" id="search" v-model="amountFilter" placeholder="Nominal" />
+            <CFormInput type="text" id="search" :value="amountFilter" v-on:input="amountFilter = formatNumber($event.target.value)" placeholder="Nominal" />
             <CFormInput type="text" id="search" v-model="accountNameFilter" placeholder="Name Account" />
             <CFormInput type="text" id="search" v-model="accountNumberFilter" placeholder="Account Bank" />
           </CInputGroup>
@@ -589,7 +589,7 @@ export default {
       loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     })
 
-    watch(amountFilter, value => {
+    watch(amountFilter, value => {      
       loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     })
 
@@ -636,9 +636,13 @@ export default {
         if (message.taskAssigne == window.localStorage.getItem('username')) {
           if (message.taskStatus=='done'){
             showToast('Transfer Berhasil ', message.taskTittle, message.updatedAt);
-          } else {
+          } else if (message.taskStatus === 'assigned') {
             showToast('Task Baru ', message.taskTittle, message.updatedAt);
           }
+        }
+
+        if (role.value === 'admin' && message.taskStatus === 'request_reject') {
+          showToast('Task Request Reject', message.taskTittle, message.updatedAt)
         }
       });
 
@@ -672,7 +676,7 @@ export default {
         userId: userId,
         'taskData.account_number': accountNumber,
         'taskData.anRekening': accountName,
-        'taskData.amount': amount,
+        'taskData.amount': amount.replace(/\W/gi, ''),
         'taskData.bank_type': bankType,
         $skip: skip,
         '$sort[createdAt]':-1,
@@ -687,7 +691,7 @@ export default {
         userId: userId,
         'taskData.account_number': accountNumber,
         'taskData.anRekening': accountName,
-        'taskData.amount': amount,
+        'taskData.amount': amount.replace(/\W/gi, ''),
         'taskData.bank_type': bankType,
         $skip: skip,
         '$sort[createdAt]':-1,
@@ -773,7 +777,7 @@ export default {
               Authorization:window.localStorage.getItem('accessToken')
             }
           }).then(()=> {
-            loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+            // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
           }).catch((err)=>{
             console.log(err);
           })
@@ -810,7 +814,7 @@ export default {
               Authorization:window.localStorage.getItem('accessToken')
             }
           }).then(()=> {
-            loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+            // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
           }).catch((err)=>{
             console.log(err);
           })
@@ -837,7 +841,7 @@ export default {
           Authorization:window.localStorage.getItem('accessToken')
         }
       }).then(()=> {
-        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+        // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
       }).catch((err)=>{
         console.log(err);
       })
@@ -866,7 +870,7 @@ export default {
               Authorization:window.localStorage.getItem('accessToken')
             }
           }).then(()=> {
-            loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+            // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
           }).catch((err)=>{
             console.log(err);
           })
@@ -900,7 +904,7 @@ export default {
               Authorization:window.localStorage.getItem('accessToken')
             }
           }).then(()=> {
-            loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+            // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
           }).catch((err)=>{
             console.log(err);
           })
@@ -949,7 +953,7 @@ export default {
           }
         })
         .then(()=> {
-          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+          // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
         }).catch((err)=>{
           console.log(err);
         })
@@ -1062,7 +1066,7 @@ export default {
             }
           })
 
-          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+          // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
         } catch (err) {
           console.log(err)
         }
@@ -1139,6 +1143,10 @@ export default {
       return momentTz(date).utc().format('YYYY-MM-DDTHH:mm:ss')
       // return momentTz(date).tz('Asia/Jakarta', true).format()
       // return new Date(date).toLocaleDateString()
+    }
+
+    function formatNumber(number) {
+      return number !== '' ? new Intl.NumberFormat().format(number.replace(/\D/gi, '')) : ''
     }
 
     return {
@@ -1232,6 +1240,7 @@ export default {
       exportTasks,
       copied,
       formatDate,
+      formatNumber,
       isLoading
     }
   }
