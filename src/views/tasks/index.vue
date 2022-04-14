@@ -272,7 +272,7 @@
         <p class="mb-0 fw-bold">Task Sla Time :</p>
         <p>{{ taskSlaTime }}</p>
         <p class="mb-0 fw-bold">Task Expired Time :</p>
-        <p>{{ taskExpiredTime }}</p>
+        <p>{{ formatDate(taskExpiredTime, false) }}</p>
         <p class="mb-0 fw-bold">Task Status :</p>
         <p>{{ taskStatus }}</p>
         <p class="mb-0 fw-bold">Task History :</p>
@@ -281,7 +281,7 @@
               <div class="tl-dot b-primary"></div>
               <div class="tl-content">
                   <div class="">{{ item.status }}</div>
-                  <div class="tl-date text-muted mt-1">{{ item.updatedAt }}</div>
+                  <div class="tl-date text-muted mt-1">{{ formatDate(item.updatedAt, false) }}</div>
               </div>
           </div>
         </div>
@@ -306,7 +306,6 @@
       <CButton color="secondary" @click="() => { modalDetail = false }">
         Cancel
       </CButton>
-      <CButton color="primary" @click="showProc(proc)">Process</CButton>
     </CModalFooter>
   </CModal>
   <!-- Modal Detail Task -->
@@ -1153,11 +1152,9 @@ export default {
       modalAssignItems.value = [...items]
     }
 
-    function formatDate(date) {
-      // return date
-      return momentTz(date).utc().format('YYYY-MM-DDTHH:mm:ss')
-      // return momentTz(date).tz('Asia/Jakarta', true).format()
-      // return new Date(date).toLocaleDateString()
+    function formatDate(date, utc = true) {
+      const format = 'YYYY-MM-DDTHH:mm:ss'
+      return utc ? momentTz(date).utc().format(format) : momentTz(date).tz('Asia/Jakarta').format(format)
     }
 
     function formatNumber(number) {
