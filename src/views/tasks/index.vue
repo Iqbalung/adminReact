@@ -4,16 +4,13 @@
     <CCard class="mb-4">
       <CCardBody>
         <CInputGroup class="mb-2">
-          <Datepicker v-model="dateFilter" range @closed="pickDate" :enableTimePicker="false" class="date-filter"></Datepicker>
+          <Datepicker v-model="dateFilter" range :enableTimePicker="false" class="date-filter"></Datepicker>
           <CFormInput type="text" id="search" v-model="searchFilter" placeholder="Worker" class="search-filter" />
           <b-dropdown class="filter-status" variant="light" text="Status" auto-close="outside">
             <b-dropdown-item-button v-for="(option, key) in statusFilterOptions" :key="key">
               <CFormCheck :id="option.value" :value="option.value" :label="option.label" :checked="option.checked" @change="selectStatusFilter"></CFormCheck>
             </b-dropdown-item-button>
           </b-dropdown>
-          <div class="d-grid">
-            <CButton color="primary" class="filter-button">Search</CButton>
-          </div>
         </CInputGroup>
         <div class="d-flex justify-content-end">
           <CButton color="secondary" size="sm" @click="collapseFilter = !collapseFilter">
@@ -21,15 +18,18 @@
             <CIcon :icon="cilChevronCircleDownAlt" v-else />
           </CButton>
         </div>
-        <CCollapse :visible="collapseFilter" :class="{ 'mt-2': collapseFilter }">
-          <CInputGroup>
-            <CFormInput type="text" id="search" v-model="userIdFilter" placeholder="User ID" />
-            <CFormInput type="text" id="search" v-model="bankTypeFilter" placeholder="Bank" />
-            <CFormInput type="text" id="search" :value="amountFilter" v-on:input="amountFilter = formatNumber($event.target.value)" placeholder="Nominal" />
-            <CFormInput type="text" id="search" v-model="accountNameFilter" placeholder="Name Account" />
-            <CFormInput type="text" id="search" v-model="accountNumberFilter" placeholder="Account Bank" />
-          </CInputGroup>
-        </CCollapse>
+        <form @submit.prevent="search">
+          <CCollapse :visible="collapseFilter" :class="{ 'mt-2': collapseFilter }">
+            <CInputGroup>
+              <CFormInput type="text" id="search" v-model="userIdFilter" placeholder="User ID" />
+              <CFormInput type="text" id="search" v-model="bankTypeFilter" placeholder="Bank" />
+              <CFormInput type="text" id="search" :value="amountFilter" v-on:input="amountFilter = formatNumber($event.target.value)" placeholder="Nominal" />
+              <CFormInput type="text" id="search" v-model="accountNameFilter" placeholder="Name Account" />
+              <CFormInput type="text" id="search" v-model="accountNumberFilter" placeholder="Account Bank" />
+            </CInputGroup>
+            <CButton color="primary" class="mt-2">Search</CButton>
+          </CCollapse>
+        </form>
       </CCardBody>
     </CCard>
 
@@ -390,7 +390,7 @@
 <script>
 import router from '../../router'
 import axios from 'axios'
-import { reactive, onMounted, watch, ref } from 'vue'
+import { reactive, onBeforeMount, onMounted, watch, ref } from 'vue'
 import { cilChevronCircleDownAlt, cilXCircle } from '@coreui/icons';
 import useClipboard from 'vue-clipboard3'
 import MultiSelect from '@vueform/multiselect'
@@ -405,7 +405,7 @@ export default {
   methods: {
     showClearAssign(cb, items) {
       this.$swal({
-        title: 'Are Sure ?',
+        title: 'Are You Sure ?',
         icon: 'info',
         showCancelButton: true,
         focusConfirm: false,
@@ -421,7 +421,7 @@ export default {
     },
     showRequestReject(cb, task) {
       this.$swal({
-        title: 'Are Sure ?',
+        title: 'Are You Sure ?',
         icon: 'info',
         showCancelButton: true,
         focusConfirm: false,
@@ -437,7 +437,7 @@ export default {
     },
     showRequestRejectBatch(cb, items) {
       this.$swal({
-        title: 'Are Sure ?',
+        title: 'Are You Sure ?',
         icon: 'info',
         showCancelButton: true,
         focusConfirm: false,
@@ -453,7 +453,7 @@ export default {
     },
     showProcessRejectBatch(cb, items) {
       this.$swal({
-        title: 'Are Sure ?',
+        title: 'Are You Sure ?',
         icon: 'info',
         showCancelButton: true,
         focusConfirm: false,
@@ -574,32 +574,34 @@ export default {
     const isLoading = ref(true)
 
     watch(dateFilter, value => {
+      startLoading()
       loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, value ? value[0] : '', value ? value[1] : '')
     })
 
     watch(searchFilter, value => {
+      startLoading()
       loadTask(filterListActive.value.value, value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     })
 
-    watch(userIdFilter, value => {
-      loadTask(filterListActive.value.value, searchFilter.value, value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
-    })
+    // watch(userIdFilter, value => {
+    //   loadTask(filterListActive.value.value, searchFilter.value, value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+    // })
 
-    watch(accountNumberFilter, value => {
-      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
-    })
+    // watch(accountNumberFilter, value => {
+    //   loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+    // })
 
-    watch(accountNameFilter, value => {
-      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
-    })
+    // watch(accountNameFilter, value => {
+    //   loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+    // })
 
-    watch(amountFilter, value => {      
-      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
-    })
+    // watch(amountFilter, value => {      
+    //   loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+    // })
 
-    watch(bankTypeFilter, value => {
-      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
-    })
+    // watch(bankTypeFilter, value => {
+    //   loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+    // })
 
     onMounted(()=> {
       setShiftClick()
@@ -618,24 +620,29 @@ export default {
       // socket
 
       socket.on('tasks created', (message) => {
-        console.log('test')
-        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+        if (message.hasOwnProperty('taskTittle')) {
+          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
 
-        if (message.taskAssigne == window.localStorage.getItem('username')) {
-          if(message.taskStatus=='done'){
-            showToast('Transfer Berhasil ', message.taskTittle, message.createdAt);
-          } else{
-            showToast('Task Baru ', message.taskTittle, message.createdAt);
+          if (message.taskAssigne == window.localStorage.getItem('username')) {
+            if(message.taskStatus=='done'){
+              showToast('Transfer Berhasil ', message.taskTittle, message.createdAt);
+            } else{
+              showToast('Task Baru ', message.taskTittle, message.createdAt);
+            }
           }
         }
       })
 
       socket.on('tasks updated', (message) => {
-        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '')
+        if (message.hasOwnProperty('taskTittle')) {
+          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '')
+        }
       })
 
       socket.on('tasks patched', (message) => {
-        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+        if (message.hasOwnProperty('taskTittle')) {
+          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+        }
 
         if (message.taskAssigne == window.localStorage.getItem('username')) {
           if (message.taskStatus=='done'){
@@ -665,6 +672,12 @@ export default {
       if (filteredCheckedItems.length) {
         checkedItems.value = new Set(filteredCheckedItems)
       }
+    }
+
+    function search() {
+      startLoading()
+
+      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     }
 
     function loadTask(taskStatus, searchTitle, userId, accountNumber, accountName, amount, bankType, pages, from, to) {
@@ -721,7 +734,7 @@ export default {
 
         shift.value = false
 
-        isLoading.value = false
+        stopLoading()
       }).catch((err) =>{
         console.log(err.response);
       });
@@ -1014,6 +1027,7 @@ export default {
     }
 
     function pickDate() {
+      startLoading()
       loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '')
     }
 
@@ -1038,6 +1052,7 @@ export default {
       statusFilterOptions.value[index].checked = checked
       statusFilter.value = statusFilterOptions.value.filter(option => option.checked).map(option => option.value)
 
+      startLoading()
       loadTask(value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '')
     }
 
@@ -1165,6 +1180,14 @@ export default {
       return number !== '' ? new Intl.NumberFormat().format(number.replace(/\D/gi, '')) : ''
     }
 
+    function startLoading() {
+      isLoading.value = true
+    }
+
+    function stopLoading() {
+      isLoading.value = false
+    }
+
     return {
       dateFilter,
       searchFilter,
@@ -1257,7 +1280,8 @@ export default {
       copied,
       formatDate,
       formatNumber,
-      isLoading
+      isLoading,
+      search
     }
   }
 }
