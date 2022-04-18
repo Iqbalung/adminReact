@@ -13,7 +13,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0,shrink-to-fit=no">
     <meta name="description" content="CoreUI Vue.js Admin Template">
     <meta name="author" content="creativeLabs Łukasz Holeczek">
-    <title>CoreUI Vue.js Admin Template</title>
+    <title>Realtime Engine</title>
     <!-- favicons for all devices -->
     <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
@@ -36,53 +36,7 @@
     <script src="https://unpkg.com/socket.io-client@1.7.3/dist/socket.io.js"></script>
 
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.0/socket.io.js" integrity="sha512-nYuHvSAhY5lFZ4ixSViOwsEKFvlxHMU2NHts1ILuJgOS6ptUmAGt/0i5czIgMOahKZ6JN84YFDA+mCdky7dD8A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
-  <script>
-    console.log('oke')
-    // console.log(process.env.VUE_APP_URL_API);
-    socket = io(window.localStorage.getItem('urlApi'),{
-    extraHeaders: {
-      Authorization: `Bearer ${window.localStorage.getItem('accessToken')}`
-    }
-  })
-
-// socket.emit('create',function(){
-//   //
-// })
-// socket.emit('update',function(){
-//   //
-// })
-// socket.emit('patched',function(){
-//   //
-// })
-
-  socket.emit('create', 'authentication', {
-    strategy: 'local',
-    email: 'lina@gmail.com',
-    password: '12345678'
-  }, function(error, authResult) {
-    // console.log(authResult);
-    // authResult will be {"accessToken": "your token", "user": user }
-    // You can now send authenticated messages to the server
-  });
-  socket.emit('update', 'authentication', {
-    strategy: 'local',
-    email: 'lina@gmail.com',
-    password: '12345678'
-  }, function(error, authResult) {
-    // console.log(authResult);
-    // authResult will be {"accessToken": "your token", "user": user }
-    // You can now send authenticated messages to the server
-  });
-  socket.emit('patch', 'authentication', {
-    strategy: 'local',
-    email: 'lina@gmail.com',
-    password: '12345678'
-  }, function(error, authResult) {
-    // console.log(authResult);
-    // authResult will be {"accessToken": "your token", "user": user }
-    // You can now send authenticated messages to the server
-  });
-  </script>
+  <script src="socket.js"></script>
 
   </head>
   <body>
