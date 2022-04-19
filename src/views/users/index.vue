@@ -81,7 +81,7 @@
                       <CIcon class="text-white" name="cil-pencil"/>
                     </CBadge>
                     </router-link>
-                    <CBadge color="danger" class="rounded" @click="destroy(item._id,index)">
+                    <CBadge color="danger" class="rounded" @click="deleteAlert(destroy, item._id,index)">
                       <CIcon class="text-white" name="cil-trash"/>
                     </CBadge>
                     </div>
@@ -104,6 +104,24 @@ import axios from 'axios'
 import {onMounted,ref} from 'vue'
 export default {
   name:'UserList',
+  methods: {
+    deleteAlert(cb, id, index) {
+      this.$swal({
+        title: 'Are You Sure ?',
+        icon: 'info',
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText: 'Yes, Sure',
+        cancelButtonText: 'Cancel'
+      }).then((result)=> {
+        if(result.isConfirmed) {
+          cb(id, index)
+
+          this.$swal('Saved','','success');
+        }
+      })
+    },
+  },
   setup() {
     //reactive state
     let users = ref([]);
