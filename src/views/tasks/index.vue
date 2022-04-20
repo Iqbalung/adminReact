@@ -397,6 +397,9 @@ import MultiSelect from '@vueform/multiselect'
 import VueSweetalert2 from 'vue-sweetalert2'
 import XLSX from 'xlsx'
 import momentTz from 'moment-timezone'
+import feathers from '@feathersjs/feathers';
+import socketio from '@feathersjs/socketio-client';
+import io from 'socket.io-client';
 import './timeline.css'
 
 export default {
@@ -603,8 +606,47 @@ export default {
     //   loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     // })
 
+    const handleSocketCreated = message => {
+      if (message.hasOwnProperty('taskTittle')) {
+        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+
+        if (message.taskAssigne == window.localStorage.getItem('username')) {
+          if(message.taskStatus=='done'){
+            showToast('Transfer Berhasil ', message.taskTittle, message.createdAt);
+          } else{
+            showToast('Task Baru ', message.taskTittle, message.createdAt);
+          }
+        }
+      }
+    }
+
+    const handleSocketUpdated = message => {
+      if (message.hasOwnProperty('taskTittle')) {
+        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '')
+      }
+    }
+
+    const handleSocketPatched = message => {
+      if (message.hasOwnProperty('taskTittle')) {
+        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+      }
+
+      if (message.taskAssigne == window.localStorage.getItem('username')) {
+        if (message.taskStatus=='done'){
+          showToast('Transfer Berhasil ', message.taskTittle, message.updatedAt);
+        } else if (message.taskStatus === 'assigned') {
+          showToast('Task Baru ', message.taskTittle, message.updatedAt);
+        }
+      }
+
+      if (role.value === 'admin' && message.taskStatus === 'request_reject') {
+        showToast('Task Request Reject', message.taskTittle, message.updatedAt)
+      }
+    }
+
     onMounted(()=> {
       setShiftClick()
+      setSocket()
 
       if (role.value !== 'admin') {
         statusFilterOptions.value[0].checked = false
@@ -619,43 +661,17 @@ export default {
 
       // socket
 
-      socket.on('tasks created', (message) => {
-        if (message.hasOwnProperty('taskTittle')) {
-          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+      // socket.on('tasks created', (message) => {
+      //   handleSocketCreated(message)
+      // })
 
-          if (message.taskAssigne == window.localStorage.getItem('username')) {
-            if(message.taskStatus=='done'){
-              showToast('Transfer Berhasil ', message.taskTittle, message.createdAt);
-            } else{
-              showToast('Task Baru ', message.taskTittle, message.createdAt);
-            }
-          }
-        }
-      })
+      // socket.on('tasks updated', (message) => {
+      //   handleSocketUpdated(message)
+      // })
 
-      socket.on('tasks updated', (message) => {
-        if (message.hasOwnProperty('taskTittle')) {
-          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '')
-        }
-      })
-
-      socket.on('tasks patched', (message) => {
-        if (message.hasOwnProperty('taskTittle')) {
-          loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
-        }
-
-        if (message.taskAssigne == window.localStorage.getItem('username')) {
-          if (message.taskStatus=='done'){
-            showToast('Transfer Berhasil ', message.taskTittle, message.updatedAt);
-          } else if (message.taskStatus === 'assigned') {
-            showToast('Task Baru ', message.taskTittle, message.updatedAt);
-          }
-        }
-
-        if (role.value === 'admin' && message.taskStatus === 'request_reject') {
-          showToast('Task Request Reject', message.taskTittle, message.updatedAt)
-        }
-      });
+      // socket.on('tasks patched', (message) => {
+      //   handleSocketPatched(message)
+      // });
 
       // get data
       loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
@@ -675,7 +691,7 @@ export default {
     }
 
     function search() {
-      startLoading()
+      // startLoading()
 
       loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     }
@@ -684,6 +700,7 @@ export default {
       // let status = (taskStatus != '') ? taskStatus : 'unprocess';
       const taskAssigne =`${window.localStorage.getItem('username')}`;
       const skip = (pages > 1) ? (pages-1) * 100 : 0;
+
 
       const param_admin = {
         ...(from ? { 'createdAt[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00') } : {}),
@@ -706,7 +723,11 @@ export default {
 
       const param_users = {
         ...(from ? { 'createdAt[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00') } : {}),
-        ...(to ? { 'createdAt[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59') } : {}),
+        ...(to
+          ? { 'createdAt[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59') }
+          : from
+            ? { 'createdAt[$lte]': new Date(from.toISOString().substring(0, 10) + 'T23:59:59') }
+            : {}),
         // taskStatus: status,
         'taskStatus[$in]': statusFilter.value,
         userId: userId,
@@ -1186,6 +1207,44 @@ export default {
 
     function stopLoading() {
       isLoading.value = false
+    }
+
+    function setSocket() {
+      const client = io(process.env.VUE_APP_URL_API, {
+        extraHeaders: {
+          Authorization: `Bearer ${window.localStorage.getItem('accessToken')}`
+        }
+      });
+      const app = feathers();
+
+      app.configure(socketio(client));
+
+      client.on('connect', async () => {
+        console.log('connected')
+        client.emit('create', 'authentication', {
+          strategy: 'jwt',
+          accessToken: window.localStorage.getItem('accessToken')
+        }, function(error, newAuthResult) {
+          console.log('auth success')
+
+          app.service('tasks')
+            .on('created', message => {
+              console.log('created task from socet')
+              handleSocketCreated(message)
+            });
+          app.service('tasks')
+            .on('patched', message => {
+              console.log('patched task from socet')
+              handleSocketPatched(message)
+            });
+          app.service('tasks')
+            .on('updated', message => {
+              console.log('updated task from socet')
+              handleSocketUpdated(message)
+            });
+        });
+
+      });
     }
 
     return {
