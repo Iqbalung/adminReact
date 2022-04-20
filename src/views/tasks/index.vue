@@ -691,7 +691,7 @@ export default {
     }
 
     function search() {
-      // startLoading()
+      startLoading()
 
       loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     }
