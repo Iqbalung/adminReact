@@ -1220,26 +1220,26 @@ export default {
       app.configure(socketio(client));
 
       client.on('connect', async () => {
-        console.log('connected')
+        // console.log('connected')
         client.emit('create', 'authentication', {
           strategy: 'jwt',
           accessToken: window.localStorage.getItem('accessToken')
         }, function(error, newAuthResult) {
-          console.log('auth success')
+          // console.log('auth success')
 
           app.service('tasks')
             .on('created', message => {
-              console.log('created task from socet')
+              // console.log('created task from socet')
               handleSocketCreated(message)
             });
           app.service('tasks')
             .on('patched', message => {
-              console.log('patched task from socet')
+              // console.log('patched task from socet')
               handleSocketPatched(message)
             });
           app.service('tasks')
             .on('updated', message => {
-              console.log('updated task from socet')
+              // console.log('updated task from socet')
               handleSocketUpdated(message)
             });
         });
