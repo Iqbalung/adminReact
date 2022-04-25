@@ -1,7 +1,7 @@
 <template>
-  <CCard class="mb-4">
+  <CCard class="mb-4" v-if="role === 'admin'">
     <CCardBody>
-      <div class="row gx-2" v-if="role === 'admin'">
+      <div class="row gx-2">
         <div class="col">
           <Datepicker v-model="dateFilter" range @closed="pickDate" :enableTimePicker="false"></Datepicker>
         </div>

@@ -3,7 +3,7 @@
    <CCard class="mb-4">
       <CCardHeader>Profile</CCardHeader>
       <CCardBody>
-        <div class="mt-3">
+        <div>
           <CForm @submit.prevent="store()">
             <div class="mb-3 col-4">
               <CFormLabel for="email">Email address</CFormLabel>
