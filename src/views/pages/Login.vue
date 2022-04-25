@@ -6,8 +6,8 @@
           <CCardGroup>
             <CCard class="p-4">
               <CCardBody>
+                <CAlert color="danger" :visible="validation.message !== null" dismissible @close="() => { resetValidation() }">{{ validation.message }}</CAlert>
                 <CForm v-on:submit.prevent="login">
-                  <CAlert color="danger" v-if="validation.message" dismissible>{{ validation.message }}</CAlert>
                   <h1>Login</h1>
                   <p class="text-medium-emphasis">Sign In to your account</p>
                   <CInputGroup class="mb-3">
@@ -15,9 +15,9 @@
                       <CIcon icon="cil-user" />
                     </CInputGroupText>
                     <CFormInput
-                      v-model="form.username"
-                      placeholder="Username"
-                      autocomplete="username"
+                      v-model="form.email"
+                      placeholder="Email"
+                      autocomplete="email"
                     />
                   </CInputGroup>
                   <CInputGroup class="mb-4">
@@ -36,15 +36,16 @@
                       <CButton
                         color="primary"
                         class="px-4"
+                        :disabled="loading"
                       >
                         Login
                       </CButton>
                     </CCol>
-                    <CCol :xs="6" class="text-right">
+                    <!-- <CCol :xs="6" class="text-right">
                       <CButton color="link" class="px-0">
                         Forgot password?
                       </CButton>
-                    </CCol>
+                    </CCol> -->
                   </CRow>
                 </CForm>
               </CCardBody>
@@ -81,18 +82,26 @@ export default {
   data() {
     return {
       form: {
-        username: '',
+        email: '',
         password: '',
       },
-      validation: []
+      validation: {
+        message: null
+      },
+      loading: false
     }
   },
   methods: {
+    resetValidation() {
+      this.validation.message = null
+    },
     login() {
+      this.loading = true
+
       axios
         .post(`${process.env.VUE_APP_URL_API}/authentication`, {
           strategy: 'local',
-          email: this.form.username,
+          email: this.form.email,
           password: this.form.password,
         })
         .then((response) => {
@@ -125,6 +134,8 @@ export default {
         })
         .catch((error) => {
           this.validation = error.response.data;
+        }).finally(() => {
+          this.loading = false
         })
     },
   }
