@@ -1193,7 +1193,7 @@ export default {
     }
 
     function formatDate(date, utc = true) {
-      const format = 'YYYY-MM-DDTHH:mm:ss'
+      const format = 'DD MMM YYYY HH:mm:ss'
       return utc ? momentTz(date).utc().format(format) : momentTz(date).tz('Asia/Jakarta').format(format)
     }
 
