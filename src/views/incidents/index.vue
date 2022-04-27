@@ -261,7 +261,7 @@ export default {
     }
 
     function formatDate(date) {
-      return momentTz(date).tz('Asia/Jakarta').format()
+      return momentTz(date).tz('Asia/Jakarta').format('DD MMM YYYY HH:mm:ss')
     }
 
     function startLoading() {
