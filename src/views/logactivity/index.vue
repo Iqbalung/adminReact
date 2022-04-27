@@ -50,7 +50,7 @@
             </CTableDataCell>
             <CTableDataCell>
               <div class="overflow-auto">
-                {{ new Date(item.date).toLocaleString() }}
+                {{ formatDate(item.date, false) }}
               </div>
             </CTableDataCell>
             <CTableDataCell>
@@ -89,6 +89,7 @@
 
 <script>
 import axios from 'axios'
+import momentTz from 'moment-timezone'
 import { reactive, onMounted, watch, ref } from 'vue'
 
 export default {
@@ -180,6 +181,11 @@ export default {
       isLoading.value = false
     }
 
+    function formatDate(date, utc = true) {
+      const format = 'DD MMM YYYY HH:mm:ss'
+      return utc ? momentTz(date).utc().format(format) : momentTz(date).tz('Asia/Jakarta').format(format)
+    }
+
     return {
       changePg,
       loadLogActivity,
@@ -190,7 +196,8 @@ export default {
       filter,
       filterTypeOptions,
       refresh,
-      isLoading
+      isLoading,
+      formatDate
     }
   },
 }
