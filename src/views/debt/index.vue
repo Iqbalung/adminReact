@@ -30,7 +30,10 @@
           debt.total ? debt.total : 0
         }}</CBadge>
       </span>
-      <CButton size="sm" color="primary" @click="exportDebt(exportDebtFeedback)">Export Debt</CButton>
+      <div>
+        <CButton size="sm" color="primary" class="me-2" @click="exportDebt(exportDebtFeedback)">Export Debt</CButton>
+        <CButton size="sm" color="success" @click="reconciliation">Reconciliation</CButton>
+      </div>
       <!-- <CDropdown color="light">
         <CDropdownToggle color="dark">{{
           filterListActive.label
@@ -347,6 +350,22 @@ export default {
       isLoading.value = false
     }
 
+    async function reconciliation() {
+      startLoading()
+
+      try {
+        await axios.post(`http://154.53.61.4:3000/request-recon`, {
+          date: momentTz().format('YYYY-MM-DD')
+        })
+
+        loadDebt()
+      } catch (err) {
+        console.log(err)
+      } finally {
+        stopLoading()
+      }
+    }
+
     return {
       searchFilter,
       changePg,
@@ -361,7 +380,8 @@ export default {
       dateFilter,
       exportDebt,
       formatDate,
-      isLoading
+      isLoading,
+      reconciliation
     }
   },
 }
