@@ -32,7 +32,7 @@
       </span>
       <div>
         <CButton size="sm" color="primary" class="me-2" @click="exportDebt(exportDebtFeedback)">Export Debt</CButton>
-        <CButton size="sm" color="success" @click="reconciliation">Reconciliation</CButton>
+        <CButton size="sm" color="success" @click="openRequestRecon">Request Recon</CButton>
       </div>
       <!-- <CDropdown color="light">
         <CDropdownToggle color="dark">{{
@@ -216,6 +216,24 @@
       </div>
     </CCardBody>
   </CCard>
+
+  <CModal :visible="visibleRequestRecon" @close="() => { visibleRequestRecon = false }">
+    <form v-on:submit.prevent="requestRecon(requestReconFeedback)">
+      <CModalHeader>
+        <CModalTitle>Request Reconciliation</CModalTitle>
+      </CModalHeader>
+      <CModalBody>
+        <label class="form-label">Reconciliation Date</label>
+        <Datepicker placeholder="Reconciliation Date" :enableTimePicker="false" v-model="reconDate" />
+      </CModalBody>
+      <CModalFooter>
+        <CButton type="button" color="secondary" @click="() => { visibleRequestRecon = false }">
+          Close
+        </CButton>
+        <CButton color="primary">Request Recon</CButton>
+      </CModalFooter>
+    </form>
+  </CModal>
 </template>
 
 <script>
@@ -235,6 +253,12 @@ export default {
         title:'Debt Exported',
         icon:'success'
       })
+    },
+    requestReconFeedback() {
+      this.$swal({
+        title:'Request Recon Created',
+        icon:'success'
+      })
     }
   },
   setup() {
@@ -247,6 +271,8 @@ export default {
     const bankFilter = ref('')
     const dateFilter = ref()
     const isLoading = ref(true)
+    const visibleRequestRecon = ref(false)
+    const reconDate = ref(new Date)
 
     watch(searchFilter, value => {
       loadDebt(currentPages.value, searchFilter.value)
@@ -350,19 +376,24 @@ export default {
       isLoading.value = false
     }
 
-    async function reconciliation() {
-      startLoading()
+    function openRequestRecon() {
+      visibleRequestRecon.value = true
+    }
 
+    async function requestRecon(cb) {
       try {
-        await axios.post(`http://154.53.61.4:3000/request-recon`, {
-          date: momentTz().format('YYYY-MM-DD')
+        await axios.post(`${process.env.VUE_APP_URL_API}/jobrecon`, {
+          date: momentTz(reconDate.value).format('YYYY-MM-DD')
+        }, {
+          headers: {
+            Authorization:window.localStorage.getItem('accessToken')
+          }
         })
 
-        loadDebt()
+        visibleRequestRecon.value = false
+        cb()
       } catch (err) {
         console.log(err)
-      } finally {
-        stopLoading()
       }
     }
 
@@ -381,7 +412,10 @@ export default {
       exportDebt,
       formatDate,
       isLoading,
-      reconciliation
+      requestRecon,
+      openRequestRecon,
+      visibleRequestRecon,
+      reconDate,
     }
   },
 }
