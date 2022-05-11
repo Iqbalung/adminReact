@@ -61,7 +61,7 @@ export default {
     });
 
     function update() {
-      let banks = (bank.password!='') ? {username:bank.username,password:bank.password} : {username:bank.username}
+      let banks = {username:bank.username,password:bank.password}
       // console.log(banks);
       axios.patch(`${process.env.VUE_APP_URL_API}/bank/${route.params.id}`,banks,{
         headers: {
