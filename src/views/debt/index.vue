@@ -218,21 +218,18 @@
   </CCard>
 
   <CModal :visible="visibleRequestRecon" @close="() => { visibleRequestRecon = false }">
-    <form v-on:submit.prevent="requestRecon(requestReconFeedback)">
-      <CModalHeader>
-        <CModalTitle>Request Reconciliation</CModalTitle>
-      </CModalHeader>
-      <CModalBody>
-        <label class="form-label">Reconciliation Date</label>
-        <Datepicker placeholder="Reconciliation Date" :enableTimePicker="false" v-model="reconDate" />
-      </CModalBody>
-      <CModalFooter>
-        <CButton type="button" color="secondary" @click="() => { visibleRequestRecon = false }">
-          Close
-        </CButton>
+    <CModalHeader>
+      <CModalTitle>Request Reconciliation</CModalTitle>
+    </CModalHeader>
+    <CModalBody>
+      <form v-on:submit.prevent="requestRecon(requestReconFeedback)">
+        <div class="mb-3">
+          <label class="form-label">Reconciliation Date</label>
+          <Datepicker placeholder="Reconciliation Date" :enableTimePicker="false" v-model="reconDate" />
+        </div>
         <CButton color="primary">Request Recon</CButton>
-      </CModalFooter>
-    </form>
+      </form>
+    </CModalBody>
   </CModal>
 </template>
 
