@@ -1,7 +1,17 @@
 <template>
   <div>
     <CCard class="mb-4">
-      <CCardHeader class="bg-white">Agwl Bot</CCardHeader>
+      <CCardHeader class="bg-white">Agwl Bot
+        <CButton
+          size="sm"
+          class="rounded d-inline-block p-0"
+          color="secondary"
+          variant="ghost"
+          @click="test()"
+        >
+          <CIcon name="cil-copy" />
+        </CButton>
+      </CCardHeader>
       <CCardBody>
         <iframe
           src="http://194.233.64.209:3010/agwlmain/control"
@@ -13,4 +23,30 @@
     </CCard>
   </div>
 </template>
-<script></script>
+<script>
+import axios from 'axios'
+export default {
+  setup(){
+    async function test() {
+      try {
+        await axios.get('http://154.53.61.4:3010/')
+        .then(res => {
+          let result = {
+            code : res.status,
+            data : res.data
+          }
+          console.log(result)
+        }).catch(err => {
+          console.log(err)
+        })
+      } catch (e) {
+        console.log(e)
+      }
+    }
+
+    return {
+      test
+    }
+  }
+}
+</script>
