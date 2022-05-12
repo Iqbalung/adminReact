@@ -1,22 +1,31 @@
 <template>
   <CCard class="mb-4">
     <CCardHeader
-      class="bg-white d-flex align-items-center justify-content-between"
+      class="bg-white"
     >
-      <span>
-        Data Found
-        <CBadge color="primary">{{
-          logactivities.total ? logactivities.total : 0
-        }}</CBadge>
-      </span>
-      <div class="d-flex align-items-center">
-        <div>
-          <CFormSelect
-            :options="['All Process', ...filterTypeOptions]" v-model="filter.process_name">
-          </CFormSelect>
+      <div class="row align-items-center justify-content-between">
+        <div class="col">
+          <span>
+            Data Found
+            <CBadge color="primary">{{
+              logactivities.total ? logactivities.total : 0
+            }}</CBadge>
+          </span>
         </div>
-        <div>
-          <CButton @click="refresh" color="primary" class="ms-1">Refresh</CButton>
+        <div class="col">
+          <div class="row gx-2 align-items-center justify-content-end">
+            <div class="col">
+              <MultiSelect :options="bankOptions" placeholder="Bank" v-model="filter.account" searchable @open="getBanks" />
+            </div>
+            <div class="col col-auto">
+              <CFormSelect
+                :options="['All Process', ...filterTypeOptions]" v-model="filter.process_name">
+              </CFormSelect>
+            </div>
+            <div class="col col-auto">
+              <CButton @click="refresh" color="primary">Refresh</CButton>
+            </div>
+          </div>
         </div>
       </div>
     </CCardHeader>
@@ -91,8 +100,10 @@
 import axios from 'axios'
 import momentTz from 'moment-timezone'
 import { reactive, onMounted, watch, ref } from 'vue'
+import MultiSelect from '@vueform/multiselect'
 
 export default {
+  components: { MultiSelect },
   name: 'DebtList',
   setup() {
     const logactivities = ref([])
@@ -100,12 +111,15 @@ export default {
     let currentPages = ref(1)
     const role = ref(window.localStorage.getItem('role'))
     const filter = reactive({
-      process_name: ''
+      process_name: '',
+      account: ''
     })
     const filterTypeOptions = ref([
       { label: 'Cron Engine', value: 'Cron Engine' },
-      { label: 'Process Mutation', value: 'Process Mutation' }
+      { label: 'Process Mutation', value: 'Process Mutation' },
+      { label: 'Reconciliation', value: 'Reconciliation' },
     ])
+    const bankOptions = ref([]);
     const isLoading = ref(true)
 
     watch(filter, () => {
@@ -139,9 +153,11 @@ export default {
     function loadLogActivity(pages) {
       const skip = pages > 1 ? (pages - 1) * 100 : 0
       const process_name = filterTypeOptions.value.some(options => options.value === filter.process_name) ? filter.process_name : ''
+      const account = filter.account
 
       const params = {
         ...(process_name ? { 'process_name': process_name } : {}),
+        ...(account ? { 'account': account } : {}),
         '$sort[_id]': -1,
         $skip: skip
       }
@@ -186,6 +202,18 @@ export default {
       return utc ? momentTz(date).utc().format(format) : momentTz(date).tz('Asia/Jakarta').format(format)
     }
 
+    function getBanks() {
+      axios.get(`${process.env.VUE_APP_URL_API}/bank`,{
+        headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      }).then(results => results.data.data.map(result => result.username)).then(results => {
+        bankOptions.value = results
+      }).catch((err) =>{
+        console.log(err.response);
+      });
+    }
+
     return {
       changePg,
       loadLogActivity,
@@ -197,7 +225,9 @@ export default {
       filterTypeOptions,
       refresh,
       isLoading,
-      formatDate
+      formatDate,
+      bankOptions,
+      getBanks
     }
   },
 }
