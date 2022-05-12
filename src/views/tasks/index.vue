@@ -1183,7 +1183,7 @@ export default {
     }
 
     function checkIsCopied(isCopied) {
-      return isCopied && Object.keys(isCopied).length >= 3
+      return isCopied && isCopied.hasOwnProperty('accountNumber') && isCopied.hasOwnProperty('amount')
     }
     
     function openModalAssign(items) {
