@@ -71,6 +71,7 @@
             <CTableHeaderCell scope="col">Saldo</CTableHeaderCell>
             <CTableHeaderCell scope="col">Status</CTableHeaderCell>
             <CTableHeaderCell scope="col">User Id</CTableHeaderCell>
+            <CTableHeaderCell scope="col">User Id Task</CTableHeaderCell>
             <CTableHeaderCell scope="col">Updated At</CTableHeaderCell>
             <!-- <CTableHeaderCell scope="col">Action</CTableHeaderCell> -->
           </CTableRow>
@@ -149,6 +150,9 @@
               </div>
             </CTableDataCell>
             <CTableDataCell>
+              {{ item.idUser ? item.idUser : '-' }}
+            </CTableDataCell>
+            <CTableDataCell>
               <div class="overflow-auto">
                 {{ item.date_crawl ? formatDate(item.date_crawl) : '-' }}
               </div>
@@ -201,7 +205,7 @@
             <CTableDataCell
               v-show="debt.total < 1"
               class="text-center"
-              :colspan="role === 'admin' ? 9 : 7"
+              :colspan="role === 'admin' ? 10 : 8"
               >No records found</CTableDataCell
             >
           </CTableRow>
