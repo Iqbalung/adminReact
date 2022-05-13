@@ -81,7 +81,7 @@
             <CTableDataCell
               align="middle"
               class="text-center"
-              :colspan="role === 'admin' ? 9 : 7"
+              :colspan="role === 'admin' ? 10 : 8"
               >
                 <CSpinner
                   color="primary"
