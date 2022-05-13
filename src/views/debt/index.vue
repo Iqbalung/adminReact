@@ -100,14 +100,16 @@
               {{ index + 1 + (currentPages - 1) * perPage }}
             </CTableDataCell>
             <CTableDataCell v-show="role == 'admin'">
-              {{
-                item.amount
-                  ? 'Rp. ' +
-                    item.amount
-                      .toString()
-                      .replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1\.')
-                  : 'Rp. -'
-              }}
+              <div class="rp">
+                {{
+                  item.amount
+                    ? 'Rp. ' +
+                      item.amount
+                        .toString()
+                        .replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1\.')
+                    : 'Rp. -'
+                }}
+              </div>
             </CTableDataCell>
             <CTableDataCell>
               <div class="overflow-auto">
@@ -125,7 +127,7 @@
               </div>
             </CTableDataCell>
             <CTableDataCell>
-              <div class="overflow-auto">
+              <div class="rp">
                 {{
                   item.latestBalance
                     ? 'Rp. ' +
@@ -419,3 +421,9 @@ export default {
 </script>
 
 <style src="@vueform/multiselect/themes/default.css"></style>
+
+<style>
+.rp {
+  white-space: nowrap;
+}
+</style>

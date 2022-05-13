@@ -17,6 +17,7 @@
               <CTableHead color="light">
                 <CTableRow>
                   <CTableHeaderCell>Username</CTableHeaderCell>
+                  <CTableHeaderCell v-show="role=='admin'">Status</CTableHeaderCell>
                   <CTableHeaderCell class="text-center" v-show="role=='admin'">Action</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
@@ -25,7 +26,7 @@
                   <CTableDataCell
                     align="middle"
                     class="text-center"
-                    :colspan="2"
+                    :colspan="3"
                     >
                       <CSpinner
                         color="primary"
@@ -37,6 +38,9 @@
                 <CTableRow v-for="(item,index) in banks" :key="index">
                   <CTableDataCell>
                     <div>{{ item.username }}</div>
+                  </CTableDataCell>
+                  <CTableDataCell v-show="role=='admin'">
+                    <CFormSwitch :label="item.status ? 'Active' : 'Nonactive'" :id="'switch-' + index" :checked="item.status" v-on:change="updateStatus(item, index)" />
                   </CTableDataCell>
                   <CTableDataCell class="text-center" v-show="role=='admin'">
                     <div>
@@ -97,6 +101,10 @@ export default {
 
     onMounted(()=> {
       // get data
+      loadBank()
+    });
+
+    async function loadBank() {
       axios.get(`${process.env.VUE_APP_URL_API}/bank`,{
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
@@ -109,7 +117,7 @@ export default {
       }).catch((err) =>{
         console.log(err.response);
       });
-    });
+    }
 
     function destroy(id,index) {
       axios.delete(`${process.env.VUE_APP_URL_API}/bank/${id}`,{
@@ -135,9 +143,24 @@ export default {
       isLoading.value = false
     }
 
+    async function updateStatus(item, index) {
+      axios.patch(`${process.env.VUE_APP_URL_API}/bank/${item._id}`, {
+        status: !item.status
+      }, {
+        headers: {
+          Authorization: window.localStorage.getItem('accessToken')
+        }
+      }).then(() => {
+        banks.value[index].status = !item.status
+      }).catch(err => {
+        console.log(err.response)
+      })
+    }
+
     return {
       banks,
       destroy,
+      updateStatus,
       isLoading
     }
   }

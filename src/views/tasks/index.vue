@@ -47,22 +47,22 @@
           <CButton size="sm" color="primary" @click="exportTasks(exportTasksFeedback)" class="ms-1">Export Tasks</CButton>
         </div>
       </CCardHeader>
-      <CCardBody class="p-0">
+      <CCardBody class="p-0 task-table">
         <CTable responsive>
           <CTableHead>
             <CTableRow>
-              <CTableHeaderCell scope="col" v-if="role === 'admin'">
+              <CTableHeaderCell v-if="role === 'admin'">
                   <input type="checkbox" @change="e => shiftAll(e.target.checked)" v-model="shift" :disabled="checkStatusFilterActive('done')" />
               </CTableHeaderCell>
-              <CTableHeaderCell scope="col">Created</CTableHeaderCell>
-              <CTableHeaderCell scope="col" v-show="role=='admin' && checkStatusFilterActive('reject')">Updated At</CTableHeaderCell>
-              <CTableHeaderCell scope="col" v-show="role=='admin'">Assigned</CTableHeaderCell>
-              <CTableHeaderCell scope="col">Account Number</CTableHeaderCell>
-              <CTableHeaderCell scope="col">Name</CTableHeaderCell>
-              <CTableHeaderCell scope="col">Amount</CTableHeaderCell>
-              <CTableHeaderCell scope="col">UserId</CTableHeaderCell>
-              <CTableHeaderCell scope="col">Status</CTableHeaderCell>
-              <CTableHeaderCell scope="col">Action</CTableHeaderCell>
+              <CTableHeaderCell>Created</CTableHeaderCell>
+              <CTableHeaderCell v-show="role=='admin' && checkStatusFilterActive('reject')">Updated At</CTableHeaderCell>
+              <CTableHeaderCell v-show="role=='admin'">Assigned</CTableHeaderCell>
+              <CTableHeaderCell>Account Number</CTableHeaderCell>
+              <CTableHeaderCell>Name</CTableHeaderCell>
+              <CTableHeaderCell>Amount</CTableHeaderCell>
+              <CTableHeaderCell>UserId</CTableHeaderCell>
+              <CTableHeaderCell>Status</CTableHeaderCell>
+              <CTableHeaderCell>Action</CTableHeaderCell>
             </CTableRow>
           </CTableHead>
           <CTableBody v-if="isLoading">
@@ -1183,7 +1183,7 @@ export default {
     }
 
     function checkIsCopied(isCopied) {
-      return isCopied && Object.keys(isCopied).length >= 3
+      return isCopied && isCopied.hasOwnProperty('accountNumber') && isCopied.hasOwnProperty('amount')
     }
     
     function openModalAssign(items) {
@@ -1347,3 +1347,29 @@ export default {
 </script>
 
 <style src="@vueform/multiselect/themes/default.css"></style>
+
+
+<style>
+.task-table .table-responsive {
+  display: block;
+  max-height: 500px;
+  overflow: auto;
+}
+.task-table th {
+  background-color: white;
+  position: sticky;
+  top: 0;
+}
+.task-table th::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 1px;
+  width: 100%;
+  border-bottom: 2px solid currentColor;
+}
+.task-table tbody {
+  border-top: none !important;
+}
+</style>
