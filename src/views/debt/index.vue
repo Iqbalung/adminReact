@@ -48,7 +48,7 @@
         </CDropdownMenu>
       </CDropdown> -->
     </CCardHeader>
-    <CCardBody class="p-0">
+    <CCardBody class="p-0 debt-table">
       <CTable responsive>
         <CTableHead>
           <CTableRow>
@@ -70,7 +70,6 @@
             <CTableHeaderCell scope="col">Trx Type</CTableHeaderCell>
             <CTableHeaderCell scope="col">Saldo</CTableHeaderCell>
             <CTableHeaderCell scope="col">Status</CTableHeaderCell>
-            <CTableHeaderCell scope="col">User Id</CTableHeaderCell>
             <CTableHeaderCell scope="col">User Id Task</CTableHeaderCell>
             <CTableHeaderCell scope="col">Updated At</CTableHeaderCell>
             <!-- <CTableHeaderCell scope="col">Action</CTableHeaderCell> -->
@@ -81,7 +80,7 @@
             <CTableDataCell
               align="middle"
               class="text-center"
-              :colspan="role === 'admin' ? 10 : 8"
+              :colspan="role === 'admin' ? 9 : 7"
               >
                 <CSpinner
                   color="primary"
@@ -101,7 +100,7 @@
               {{ index + 1 + (currentPages - 1) * perPage }}
             </CTableDataCell>
             <CTableDataCell v-show="role == 'admin'">
-              <div class="rp">
+              <div class="nowrap">
                 {{
                   item.amount
                     ? 'Rp. ' +
@@ -113,12 +112,12 @@
               </div>
             </CTableDataCell>
             <CTableDataCell>
-              <div class="overflow-auto">
+              <div class="nowrap">
                 {{ item.ib.name }}
               </div>
             </CTableDataCell>
             <CTableDataCell v-show="role == 'admin'">
-              <div class="overflow-auto">
+              <div class="nowrap">
                 {{ item.account_receiver ? item.account_receiver : '-' }}
               </div>
             </CTableDataCell>
@@ -128,7 +127,7 @@
               </div>
             </CTableDataCell>
             <CTableDataCell>
-              <div class="rp">
+              <div class="nowrap">
                 {{
                   item.latestBalance
                     ? 'Rp. ' +
@@ -145,15 +144,10 @@
               </div>
             </CTableDataCell>
             <CTableDataCell>
-              <div class="overflow-auto">
-                {{ item.ib.username }}
-              </div>
+              {{ item.idUser?.substring(0, item.idUser.indexOf('\n')) }}
             </CTableDataCell>
             <CTableDataCell>
-              {{ item.idUser ? item.idUser : '-' }}
-            </CTableDataCell>
-            <CTableDataCell>
-              <div class="overflow-auto">
+              <div class="nowrap">
                 {{ item.date_crawl ? formatDate(item.date_crawl) : '-' }}
               </div>
             </CTableDataCell>
@@ -205,7 +199,7 @@
             <CTableDataCell
               v-show="debt.total < 1"
               class="text-center"
-              :colspan="role === 'admin' ? 10 : 8"
+              :colspan="role === 'admin' ? 9 : 7"
               >No records found</CTableDataCell
             >
           </CTableRow>
@@ -427,7 +421,29 @@ export default {
 <style src="@vueform/multiselect/themes/default.css"></style>
 
 <style>
-.rp {
+.nowrap {
   white-space: nowrap;
+}
+.debt-table .table-responsive {
+  display: block;
+  max-height: 500px;
+  overflow: auto;
+}
+.debt-table th {
+  background-color: white;
+  position: sticky;
+  top: 0;
+}
+.debt-table th::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 1px;
+  width: 100%;
+  border-bottom: 2px solid currentColor;
+}
+.debt-table tbody {
+  border-top: none !important;
 }
 </style>
