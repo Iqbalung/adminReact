@@ -4,7 +4,7 @@
       <CCardHeader class="bg-white">Agwl Bot</CCardHeader>
       <CCardBody>
         <iframe
-          src="http://154.53.61.4:3010/agwlbca/control"
+          src="https://agwlbot.my.id/agwlbca/control"
           width="100%"
           height="500px"
           frameborder="0"
