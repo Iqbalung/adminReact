@@ -14,7 +14,7 @@
       </CCardHeader>
       <CCardBody>
         <iframe
-          src="http://194.233.64.209:3010/agwlmain/control"
+          src="https://agwlbot.my.id:8080/agwlmain/control"
           width="100%"
           height="500px"
           frameborder="0"
