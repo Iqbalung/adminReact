@@ -29,7 +29,7 @@
         </div>
       </div>
     </CCardHeader>
-    <CCardBody class="p-0">
+    <CCardBody class="p-0 logactivity-table">
       <CTable responsive>
         <CTableHead>
           <CTableRow>
@@ -234,3 +234,29 @@ export default {
 </script>
 
 <style src="@vueform/multiselect/themes/default.css"></style>
+
+
+<style>
+.logactivity-table .table-responsive {
+  display: block;
+  max-height: 500px;
+  overflow: auto;
+}
+.logactivity-table th {
+  background-color: white;
+  position: sticky;
+  top: 0;
+}
+.logactivity-table th::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 1px;
+  width: 100%;
+  border-bottom: 2px solid currentColor;
+}
+.logactivity-table tbody {
+  border-top: none !important;
+}
+</style>
