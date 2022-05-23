@@ -2,7 +2,7 @@
 <div>
 <CCard class="mb-4">
           <CCardHeader class="bg-white">Bank List</CCardHeader>
-          <CCardBody>
+          <CCardBody class="bank-table">
             <router-link  :to="{name:'Create Bank'}" v-show="role=='admin'">
               <CButton color="primary">
               <CIcon class="text-white" name="cil-plus"/> Add Bank
@@ -13,7 +13,7 @@
               <CIcon class="text-white" name="cil-plus"/> Import Excel
               </CButton>
             </router-link>
-              <CTable align="middle" class="mt-3 mb-0 mt-2 border border-1" hover responsive>
+              <CTable align="middle" class="border border-top-0" hover responsive>
               <CTableHead color="light">
                 <CTableRow>
                   <CTableHeaderCell>Username</CTableHeaderCell>
@@ -166,3 +166,38 @@ export default {
   }
 }
 </script>
+
+<style>
+.bank-table .table-responsive {
+  display: block;
+  max-height: 500px;
+  overflow: auto;
+  margin-top: 1rem!important;
+}
+.bank-table th {
+  background-color: white;
+  position: sticky;
+  top: 0;
+}
+.bank-table th::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 1px;
+  width: 100%;
+  border-bottom: 1px solid #dee2e6!important;
+}
+.bank-table th::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 1px;
+  width: 100%;
+  border-bottom: 2px solid currentColor;
+}
+.bank-table tbody {
+  border-top: none !important;
+}
+</style>

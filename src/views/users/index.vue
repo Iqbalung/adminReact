@@ -2,7 +2,7 @@
 <div>
 <CCard class="mb-4">
           <CCardHeader class="bg-white">Users List</CCardHeader>
-          <CCardBody>
+          <CCardBody class="user-table">
             <router-link  :to="{name:'Create Users'}">
               <CButton class="me-2" color="primary">
               <CIcon class="text-white" name="cil-plus"/> Add User
@@ -13,7 +13,7 @@
               <CIcon class="text-white" name="cil-plus"/> Import User
               </CButton>
             </router-link>
-              <CTable align="middle" class="mt-3 mb-0 mt-2 border border-1" hover responsive>
+              <CTable align="middle" class="border border-top-0" hover responsive>
               <CTableHead color="light">
                 <CTableRow>
                   <CTableHeaderCell class="text-center">
@@ -175,3 +175,39 @@ export default {
   }
 }
 </script>
+
+<style>
+.user-table .table-responsive {
+  display: block;
+  max-height: 500px;
+  overflow: auto;
+  margin-top: 1rem!important;
+}
+.user-table th {
+  background-color: white;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+}
+.user-table th::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 1px;
+  width: 100%;
+  border-bottom: 1px solid #dee2e6!important;
+}
+.user-table th::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 1px;
+  width: 100%;
+  border-bottom: 2px solid currentColor;
+}
+.user-table tbody {
+  border-top: none !important;
+}
+</style>

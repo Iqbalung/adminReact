@@ -56,7 +56,7 @@
         </CDropdownMenu>
       </CDropdown> -->
     </CCardHeader>
-    <CCardBody class="p-0">
+    <CCardBody class="p-0 incident-table">
       <CTable responsive>
         <CTableHead>
           <CTableRow>
@@ -287,4 +287,27 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+.incident-table .table-responsive {
+  display: block;
+  max-height: 500px;
+  overflow: auto;
+}
+.incident-table th {
+  background-color: white;
+  position: sticky;
+  top: 0;
+}
+.incident-table th::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 1px;
+  width: 100%;
+  border-bottom: 2px solid currentColor;
+}
+.incident-table tbody {
+  border-top: none !important;
+}
+</style>
