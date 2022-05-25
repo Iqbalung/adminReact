@@ -130,6 +130,9 @@ export default {
     onMounted(()=> {
       // get data
       axios.get(`${process.env.VUE_APP_URL_API}/users`,{
+        params: {
+          organization_id: window.localStorage.getItem('organization_id')
+        },
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }

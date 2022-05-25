@@ -718,6 +718,7 @@ export default {
         'taskData.bank_type': bankType,
         $skip: skip,
         '$sort[createdAt]':-1,
+        'organization_id': window.localStorage.getItem('organization_id'),
         'taskAssigne': searchTitle
       }
 
@@ -737,6 +738,7 @@ export default {
         'taskData.bank_type': bankType,
         $skip: skip,
         '$sort[createdAt]':-1,
+        'organization_id': window.localStorage.getItem('organization_id'),
         taskAssigne: taskAssigne
       }
 
