@@ -83,7 +83,8 @@ export default {
       role:'worker',
       mistake:'',
       banks: [],
-      ip: []
+      ip: [],
+      organization_id: window.localStorage.getItem('organization_id')
     });
     const bankOptions = ref([]);
     const ipOptions = ref([])
@@ -96,7 +97,10 @@ export default {
     }
 
     function store() {
-      axios.post(`${process.env.VUE_APP_URL_API}/users`, {...user, plainPassword: user.password},{
+      axios.post(`${process.env.VUE_APP_URL_API}/users`, {
+        ...user,
+        plainPassword: user.password
+      },{
          headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }

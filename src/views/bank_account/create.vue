@@ -41,6 +41,7 @@ export default {
     let bank = reactive({
       username: '',
       password:'',
+      organization_id: window.localStorage.getItem('organization_id')
     });
     const validation = ref([]);
     let valid = ref([]);

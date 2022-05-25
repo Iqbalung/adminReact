@@ -73,7 +73,10 @@
                                 const imports = []
 
                                 for (const bank of worksheetJson) {
-                                    imports.push(axios.post(`${process.env.VUE_APP_URL_API}/bank`, bank, {
+                                    imports.push(axios.post(`${process.env.VUE_APP_URL_API}/bank`, {
+                                        organization_id: window.localStorage.getItem('organization_id'),
+                                        ...bank
+                                    }, {
                                         headers: {
                                             Authorization: window.localStorage.getItem('accessToken')
                                         }

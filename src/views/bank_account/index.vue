@@ -56,7 +56,7 @@
                   </CTableDataCell>
                 </CTableRow>
                 <CTableRow v-show="banks.length == 0">
-                  <CTableDataCell colspan="2">No records found</CTableDataCell>
+                  <CTableDataCell colspan="3" class="text-center">No records found</CTableDataCell>
                 </CTableRow>
               </CTableBody>
             </CTable>
@@ -106,6 +106,9 @@ export default {
 
     async function loadBank() {
       axios.get(`${process.env.VUE_APP_URL_API}/bank`,{
+        params: {
+          organization_id: window.localStorage.getItem('organization_id')
+        },
         headers: {
           Authorization:window.localStorage.getItem('accessToken')
         }
