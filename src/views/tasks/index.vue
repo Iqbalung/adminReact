@@ -1,7 +1,7 @@
 <template>
   <div>
 
-    <CCard class="mb-4">
+    <CCard class="mb-3">
       <CCardBody>
         <CInputGroup class="mb-2">
           <Datepicker v-model="dateFilter" range :enableTimePicker="false" class="date-filter"></Datepicker>
@@ -44,25 +44,25 @@
           <CButton size="sm" color="secondary" class="me-1" @click="showClearAssign(clearAssign, [...checkedItems])" :disabled="checkedItems.size < 1">Unassign</CButton>
           <CButton size="sm" color="danger" class="me-1" @click="showProcessRejectBatch(processRejectBatch, [...checkedItems])" :disabled="checkedItems.size < 1">Process Reject</CButton>
           <CButton size="sm" color="warning" @click="showRequestRejectBatch(requestRejectBatch, [...checkedItems])" :disabled="checkedItems.size < 1">Request Reject</CButton>
-          <CButton size="sm" color="primary" @click="exportTasks(exportTasksFeedback)" class="ms-1">Export Tasks</CButton>
+          <CButton size="sm" color="info" @click="exportTasks(exportTasksFeedback)" class="ms-1">Export Tasks</CButton>
         </div>
       </CCardHeader>
       <CCardBody class="p-0 task-table">
         <CTable responsive>
           <CTableHead>
             <CTableRow>
-              <CTableHeaderCell v-if="role === 'admin'">
+              <CTableHeaderCell class="nowrap" v-if="role === 'admin'">
                   <input type="checkbox" @change="e => shiftAll(e.target.checked)" v-model="shift" :disabled="checkStatusFilterActive('done')" />
               </CTableHeaderCell>
-              <CTableHeaderCell>Created</CTableHeaderCell>
-              <CTableHeaderCell v-show="role=='admin' && checkStatusFilterActive('reject')">Updated At</CTableHeaderCell>
-              <CTableHeaderCell v-show="role=='admin'">Assigned</CTableHeaderCell>
-              <CTableHeaderCell>Account Number</CTableHeaderCell>
-              <CTableHeaderCell>Name</CTableHeaderCell>
-              <CTableHeaderCell>Amount</CTableHeaderCell>
-              <CTableHeaderCell>UserId</CTableHeaderCell>
-              <CTableHeaderCell>Status</CTableHeaderCell>
-              <CTableHeaderCell>Action</CTableHeaderCell>
+              <CTableHeaderCell class="nowrap">Created</CTableHeaderCell>
+              <CTableHeaderCell class="nowrap" v-show="role=='admin' && checkStatusFilterActive('reject')">Updated At</CTableHeaderCell>
+              <CTableHeaderCell class="nowrap" v-show="role=='admin'">Assigned</CTableHeaderCell>
+              <CTableHeaderCell class="nowrap">Account Number</CTableHeaderCell>
+              <CTableHeaderCell class="nowrap">Name</CTableHeaderCell>
+              <CTableHeaderCell class="nowrap">Amount</CTableHeaderCell>
+              <CTableHeaderCell class="nowrap">UserId</CTableHeaderCell>
+              <CTableHeaderCell class="nowrap">Status</CTableHeaderCell>
+              <CTableHeaderCell class="nowrap">Action</CTableHeaderCell>
             </CTableRow>
           </CTableHead>
           <CTableBody v-if="isLoading">
@@ -89,12 +89,12 @@
                   <input type="checkbox" disabled/>
                   </div>
               </CTableDataCell>
-              <CTableDataCell>{{ formatDate(item.createdAt) }}</CTableDataCell>
+              <CTableDataCell class="nowrap">{{ formatDate(item.createdAt) }}</CTableDataCell>
               <CTableDataCell v-show="role=='admin' && checkStatusFilterActive('reject')">
                 {{ item.updatedAt ? item.updatedAt : '-' }}</CTableDataCell>
               <CTableDataCell v-show="role=='admin'">{{ item.taskAssigne }}</CTableDataCell>
-              <CTableDataCell>
-                  <div class="overflow-auto">{{ item.taskData.account_number }}
+              <CTableDataCell class="nowrap">
+                  <div class="d-flex flex-nowrap nowrap">{{ item.taskData.account_number }}
                   <CTooltip content="Copy Account Number" placement="right" v-if="!item.isCopied?.accountNumber">
                       <template #toggler="{ on }">
 
@@ -106,7 +106,7 @@
                   </div>
               </CTableDataCell>
               <CTableDataCell>
-                  <div class="overflow-auto">{{ item.taskData.anRekening }}
+                  <div class="d-flex flex-nowrap nowrap">{{ item.taskData.anRekening }}
                   <CTooltip content="Copy Account Name" placement="right" v-if="!item.isCopied?.anRekening">
                       <template #toggler="{ on }">
 
@@ -118,7 +118,7 @@
                   </div>
               </CTableDataCell>
               <CTableDataCell>
-                  <div class="overflow-auto">
+                  <div class="d-flex flex-nowrap nowrap">
                   {{ rupiah(item.taskData.amount) }}
                   <CTooltip content="Copy Account Amount!" placement="right" v-if="!item.isCopied?.amount">
                       <template #toggler="{ on }">
@@ -130,7 +130,7 @@
                   </div>
               </CTableDataCell>
               <CTableDataCell>
-                  <div class="overflow-auto">
+                  <div class="d-flex flex-nowrap nowrap">
                   {{ item.taskData.userId.substring(0, item.taskData.userId.indexOf('\n')) }}
                   <CTooltip content="Copy Account User ID!" placement="right" v-if="!item.isCopied?.userId">
                       <template #toggler="{ on }">

@@ -68,16 +68,16 @@
                 :disabled="filterListActive.value === 'done'"
               />
             </CTableHeaderCell> -->
-            <CTableHeaderCell scope="col">No</CTableHeaderCell>
-            <CTableHeaderCell scope="col" v-show="role == 'admin'">Created</CTableHeaderCell>
-            <!-- <CTableHeaderCell scope="col" v-show="role == 'admin'"
+            <CTableHeaderCell class="nowrap" scope="col">No</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col" v-show="role == 'admin'">Created</CTableHeaderCell>
+            <!-- <CTableHeaderCell class="nowrap" scope="col" v-show="role == 'admin'"
               >Assigned</CTableHeaderCell
             > -->
-            <CTableHeaderCell scope="col">RefNumber</CTableHeaderCell>
-            <CTableHeaderCell scope="col" v-show="role == 'admin'">Date Crawl</CTableHeaderCell>
-            <CTableHeaderCell scope="col">From</CTableHeaderCell>
-            <CTableHeaderCell scope="col" v-show="role == 'admin'">To</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Status</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col">RefNumber</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col" v-show="role == 'admin'">Date Crawl</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col">From</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col" v-show="role == 'admin'">To</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col">Status</CTableHeaderCell>
             <!-- <CTableHeaderCell scope="col">Action</CTableHeaderCell> -->
           </CTableRow>
         </CTableHead>
@@ -96,30 +96,24 @@
         </CTableBody>
         <CTableBody v-else>
           <CTableRow v-for="(item, index) in incidents.data" :key="index">
-            <CTableDataCell>
+            <CTableDataCell classs="nowrap">
               {{ index + 1 + (currentPages - 1) * perPage }}
             </CTableDataCell>
-            <CTableDataCell v-show="role == 'admin'">
+            <CTableDataCell classs="nowrap" v-show="role == 'admin'">
               {{ formatDate(item.createdAt) }}
             </CTableDataCell>
-            <CTableDataCell>{{ item.refNumber }}</CTableDataCell>
-            <CTableDataCell v-show="role == 'admin'">
+            <CTableDataCell classs="nowrap">{{ item.refNumber }}</CTableDataCell>
+            <CTableDataCell classs="nowrap" v-show="role == 'admin'">
               {{ formatDate(item.dateCrawl) }}
             </CTableDataCell>
-            <CTableDataCell>
-              <div class="overflow-auto">
-                {{ item.detailData.ib.name }}
-              </div>
+            <CTableDataCell classs="nowrap">
+              {{ item.detailData.ib.name }}
             </CTableDataCell>
-            <CTableDataCell v-show="role == 'admin'">
-              <div class="overflow-auto">
-                {{ item.detailData.account_receiver }}
-              </div>
+            <CTableDataCell classs="nowrap" v-show="role == 'admin'">
+              {{ item.detailData.account_receiver }}
             </CTableDataCell>
-            <CTableDataCell>
-              <div class="overflow-auto">
-                {{ item.status }}
-              </div>
+            <CTableDataCell classs="nowrap">
+              {{ item.status }}
             </CTableDataCell>
             <!-- <CTableDataCell
               ><CButton size="sm" class="text-light" color="warning"
