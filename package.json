@@ -47,6 +47,7 @@
     "vue-3-socket.io": "^1.0.4",
     "vue-clipboard3": "^1.0.1",
     "vue-router": "^4.0.12",
+    "vue-select": "^4.0.0-beta.3",
     "vue-sweetalert2": "^5.0.2",
     "vue3-date-time-picker": "^2.4.3",
     "vuex": "^4.0.2",

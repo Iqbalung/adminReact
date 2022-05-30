@@ -12,6 +12,16 @@
         <div class="mt-3">
           <CForm @submit.prevent="store()">
             <div class="mb-3">
+              <CFormLabel for="code">Item Type</CFormLabel>
+              <CFormSelect
+                :options="[
+                  { label: 'Services', value: 'services' },
+                  { label: 'Products', value: 'products' },
+                ]" v-model="body.item_type" :invalid="validation.item_type">
+              </CFormSelect>
+              <CFormFeedback v-if="validation.item_type" invalid>{{ validation.item_type.message }}</CFormFeedback>
+            </div>
+            <div class="mb-3">
               <CFormLabel for="code">Product Code</CFormLabel>
               <CFormInput type="text" id="code" placeholder="Product Code" v-model="body.product_code" :invalid="validation.product_code" />
               <CFormFeedback v-if="validation.product_code" invalid>{{ validation.product_code.message }}</CFormFeedback>
@@ -72,6 +82,7 @@ export default {
       product_stock: '',
       product_type: '',
       product_supplier: '',
+      item_type: 'services',
     });
     const validation = ref([]);
     const router = routers

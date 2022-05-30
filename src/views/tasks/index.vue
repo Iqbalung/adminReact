@@ -41,13 +41,18 @@
         </span>
         <div v-if="role === 'admin'">
           <CButton size="sm" color="success" class="me-1" @click="openModalAssign(checkedItems)" :disabled="checkedItems.size < 1">Assign Task</CButton>
+          <CButton size="sm" color="success" @click="openModalShare(checkedItems)" :disabled="checkedItems.size < 1" class="me-1">Share Task</CButton>
           <CButton size="sm" color="secondary" class="me-1" @click="showClearAssign(clearAssign, [...checkedItems])" :disabled="checkedItems.size < 1">Unassign</CButton>
           <CButton size="sm" color="danger" class="me-1" @click="showProcessRejectBatch(processRejectBatch, [...checkedItems])" :disabled="checkedItems.size < 1">Process Reject</CButton>
           <CButton size="sm" color="warning" @click="showRequestRejectBatch(requestRejectBatch, [...checkedItems])" :disabled="checkedItems.size < 1">Request Reject</CButton>
           <CButton size="sm" color="info" @click="exportTasks(exportTasksFeedback)" class="ms-1">Export Tasks</CButton>
-          <router-link :to="{ name: 'Create Tasks' }">
-            <CButton size="sm" color="primary" class="ms-1">Create Task</CButton>
-          </router-link>
+          <CDropdown variant="btn-group" class="ms-1">
+            <CDropdownToggle color="info" size="sm">Print</CDropdownToggle>
+            <CDropdownMenu>
+              <CDropdownItem :disabled="checkedItems.size < 1" v-on:click="printSuratJalan(checkedItems)">Print Surat Jalan</CDropdownItem>
+            </CDropdownMenu>
+          </CDropdown>
+          <CButton size="sm" color="primary" @click="openAddTaskModal" class="ms-1">Create Tasks</CButton>
         </div>
       </CCardHeader>
       <CCardBody class="p-0 task-table">
@@ -97,11 +102,11 @@
                 {{ item.updatedAt ? item.updatedAt : '-' }}</CTableDataCell>
               <CTableDataCell v-show="role=='admin'">{{ item.taskAssigne }}</CTableDataCell>
               <CTableDataCell class="nowrap">
-                  <div class="d-flex flex-nowrap nowrap">{{ item.taskData.account_number }}
+                  <div class="d-flex flex-nowrap nowrap">{{ item.taskData?.account_number }}
                   <CTooltip content="Copy Account Number" placement="right" v-if="!item.isCopied?.accountNumber">
                       <template #toggler="{ on }">
 
-                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.account_number, item._id, 'accountNumber')">
+                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData?.account_number, item._id, 'accountNumber')">
                           <CIcon name="cil-copy"/>
                       </CButton>
                       </template>
@@ -109,11 +114,11 @@
                   </div>
               </CTableDataCell>
               <CTableDataCell>
-                  <div class="d-flex flex-nowrap nowrap">{{ item.taskData.anRekening }}
+                  <div class="d-flex flex-nowrap nowrap">{{ item.taskData?.anRekening }}
                   <CTooltip content="Copy Account Name" placement="right" v-if="!item.isCopied?.anRekening">
                       <template #toggler="{ on }">
 
-                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.anRekening, item._id, 'anRekening')">
+                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData?.anRekening, item._id, 'anRekening')">
                           <CIcon name="cil-copy"/>
                       </CButton>
                       </template>
@@ -122,7 +127,7 @@
               </CTableDataCell>
               <CTableDataCell>
                   <div class="d-flex flex-nowrap nowrap">
-                  {{ rupiah(item.taskData.amount) }}
+                  {{ rupiah(item.taskData?.amount ?? 0) }}
                   <CTooltip content="Copy Account Amount!" placement="right" v-if="!item.isCopied?.amount">
                       <template #toggler="{ on }">
                       <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.amount, item._id, 'amount')">
@@ -134,10 +139,10 @@
               </CTableDataCell>
               <CTableDataCell>
                   <div class="d-flex flex-nowrap nowrap">
-                  {{ item.taskData.userId.substring(0, item.taskData.userId.indexOf('\n')) }}
+                  {{ item.taskData?.userId.substring(0, item.taskData?.userId.indexOf('\n')) }}
                   <CTooltip content="Copy Account User ID!" placement="right" v-if="!item.isCopied?.userId">
                       <template #toggler="{ on }">
-                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.userId, item._id, 'userId')">
+                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData?.userId, item._id, 'userId')">
                           <CIcon name="cil-copy"/>
                       </CButton>
                       </template>
@@ -146,7 +151,7 @@
               </CTableDataCell>
               <CTableDataCell :color="checkIsCopied(item.isCopied) ? 'danger' : getCellColor(item.taskStatus)">{{ item.taskStatus }}</CTableDataCell>
               <CTableDataCell>
-                  <CButton size="sm" class="text-primary" variant="ghost" color="light" :disabled="item.taskStatus === 'processed'" @click="processTask(item.taskData.account_number,item.taskData.anRekening,item.taskData.amount,item.taskData.mutation_id,item.taskData.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
+                  <CButton size="sm" class="text-primary" variant="ghost" color="light" :disabled="item.taskStatus === 'processed'" @click="processTask(item.taskData?.account_number,item.taskData?.anRekening,item.taskData?.amount,item.taskData?.mutation_id,item.taskData?.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
                     Detail
                   </CButton>
                   <CButton size="sm" class="text-danger" variant="ghost" color="light" @click="showRequestReject(requestReject, item)" v-if="role !== 'admin' && item.taskStatus !== 'request_reject'">
@@ -172,27 +177,35 @@
       <CModalTitle>Add Task</CModalTitle>
     </CModalHeader>
     <CModalBody>
-      <CForm @submit.prevent="store()">
-            <div class="mb-3">
-              <CFormLabel for="taskTittle">Task Title</CFormLabel>
-              <CFormInput type="text" v-model="tsk.taskTittle" id="taskTittle" placeholder="Task title"/>
-              <!-- <div class="text-danger">Task Title Required</div> -->
-            </div>
-            <div class="mb-3">
-              <CFormLabel for="taskRefNumber">Ref Number</CFormLabel>
-              <CFormInput type="text" v-model="tsk.taskRefNumber" id="taskRefNumber" placeholder="Task Ref Number"/>
-              <!-- <div class="text-danger">Task Ref Number Required</div> -->
-            </div>
-            <div class="mb-3">
-              <CFormLabel for="taskSlaTime">Sla Time</CFormLabel>
-              <CFormInput type="date" id="taskSlaTime" v-model="tsk.taskSlaTime" placeholder="Task Sla Time"/>
-              <!-- <div class="text-danger">Task Sla Time Required</div> -->
-            </div>
-            <div class="mb-3">
-              <CFormLabel for="taskExpiredTime">Expired Time</CFormLabel>
-              <CFormInput type="date" id="taskExpiredTime" v-model="tsk.taskExpiredTime" placeholder="Task Expired Time"/>
-              <!-- <div class="text-danger">Task Expired Time Required</div> -->
-            </div>
+      <CForm @submit.prevent="store(storeTaskFeedback)">
+        <div class="mb-3">
+          <CFormLabel for="title">Task Title</CFormLabel>
+          <CInputGroup>
+            <MultiSelect :options="addTask.customerOptions" placeholder="Task Title" @open="setCustomerOptions" class="multiselect-control" :class="{ 'invalid': addTask.validation.taskTittle }" v-model="addTask.body.taskTittle" searchable />
+            <CButton color="primary" @click="openModalCustomer" type="button">+</CButton>
+          </CInputGroup>
+          <CFormFeedback v-if="addTask.validation.taskTittle" class="d-block" invalid>{{ addTask.validation.taskTittle.message }}</CFormFeedback>
+        </div>
+        <div class="mb-3">
+          <CFormLabel for="ref">Task Ref Number</CFormLabel>
+          <CFormInput type="text" id="ref" placeholder="Task Ref Number" v-model="addTask.body.taskRefNumber" :invalid="addTask.validation.taskRefNumber" />
+          <CFormFeedback v-if="addTask.validation.taskRefNumber" invalid>{{ addTask.validation.taskRefNumber.message }}</CFormFeedback>
+        </div>
+        <div class="mb-3">
+          <CFormLabel for="decsription">Task Description</CFormLabel>
+          <CFormTextarea id="decsription" placeholder="Task Description" v-model="addTask.body.taskDescription" :invalid="addTask.validation.taskDescription" />
+          <CFormFeedback v-if="addTask.validation.taskDescription" invalid>{{ addTask.validation.taskDescription.message }}</CFormFeedback>
+        </div>
+        <div class="mb-3">
+          <CFormLabel for="time">Task Start Time</CFormLabel>
+          <Datepicker v-model="addTask.body.taskStartTime" :enableTimePicker="false" placeholder="Task Start Time" class="datepicker-control" :class="{ 'invalid': addTask.validation.taskStartTime }" />
+          <CFormFeedback v-if="addTask.validation.taskStartTime" class="d-block" invalid>{{ addTask.validation.taskStartTime.message }}</CFormFeedback>
+        </div>
+        <div class="mb-3">
+          <CFormLabel for="time">Task Expired Time</CFormLabel>
+          <Datepicker v-model="addTask.body.taskExpiredTime" :enableTimePicker="false" placeholder="Task Expired Time" class="datepicker-control" :class="{ 'invalid': addTask.validation.taskExpiredTime }" />
+          <CFormFeedback v-if="addTask.validation.taskExpiredTime" class="d-block" invalid>{{ addTask.validation.taskExpiredTime.message }}</CFormFeedback>
+        </div>
             <div class="mb-3">
               <CButton color="primary" class="rounded">Save</CButton>
             </div>
@@ -200,7 +213,39 @@
 
     </CModalBody>
   </CModal>
-    <!-- Toast Confirm -->
+
+    <CModal :visible="modalCustomer" @close="closeModalCustomer">
+      <CModalHeader>
+        <CModalTitle>Add Customer</CModalTitle>
+      </CModalHeader>
+      <CModalBody>
+        <CForm @submit.prevent="saveCustomer">
+          <div class="mb-3">
+            <CFormLabel for="code">Customer Code</CFormLabel>
+            <CFormInput type="text" id="code" placeholder="Customer Code" v-model="customer.body.customer_code" :invalid="customer.validation.customer_code" />
+            <CFormFeedback v-if="customer.validation.customer_code" invalid>{{ customer.validation.customer_code.message }}</CFormFeedback>
+          </div>
+          <div class="mb-3">
+            <CFormLabel for="name">Customer Name</CFormLabel>
+            <CFormInput type="text" id="name" placeholder="Customer Name" v-model="customer.body.customer_name" :invalid="customer.validation.customer_name" />
+            <CFormFeedback v-if="customer.validation.customer_name" invalid>{{ customer.validation.customer_name.message }}</CFormFeedback>
+          </div>
+          <div class="mb-3">
+            <CFormLabel for="phone">Customer Phone</CFormLabel>
+            <CFormInput type="text" id="phone" placeholder="Customer Phone" v-model="customer.body.customer_phone" :invalid="customer.validation.customer_phone" />
+            <CFormFeedback v-if="customer.validation.customer_phone" invalid>{{ customer.validation.customer_phone.message }}</CFormFeedback>
+          </div>
+          <div class="mb-3">
+            <CFormLabel for="address">Customer Address</CFormLabel>
+            <CFormInput type="text" id="address" placeholder="Customer Address" v-model="customer.body.customer_address" :invalid="customer.validation.customer_address" />
+            <CFormFeedback v-if="customer.validation.customer_address" invalid>{{ customer.validation.customer_address.message }}</CFormFeedback>
+          </div>
+          <div class="mb-3">
+            <CButton color="primary" class="rounded">Save</CButton>
+          </div>
+        </CForm>
+      </CModalBody>
+    </CModal>
 
     <!-- Modal Assigment -->
     <CModal :visible="modalAssign" @close="() => { modalAssign = false }">
@@ -229,6 +274,22 @@
       </CModalBody>
     </CModal>
     <!-- Modal Assigment -->
+
+    <!-- Modal Share -->
+    <CModal :visible="modalShare" @close="() => { modalShare = false }">
+      <CModalHeader>
+        <CModalTitle>Share Task</CModalTitle>
+      </CModalHeader>
+      <CModalBody>
+        <CForm @submit.prevent="saveShareTask(saveShareTaskFeedback)">
+          <div class="mb-3">
+            <MultiSelect :options="users" placeholder="Users" v-model="sharedUsers" searchable @open="getUser" mode="tags"></MultiSelect>
+          </div>
+          <CButton color="primary" :disabled="!sharedUsers.length">Share Task</CButton>
+        </CForm>
+      </CModalBody>
+    </CModal>
+    <!-- Modal Share -->
 
     <!-- Modal History -->
   <CModal  :visible="visibleLiveDemo" @close="() => { visibleLiveDemo = false }">
@@ -494,6 +555,18 @@ export default {
         title:'Tasks Exported',
         icon:'success'
       })
+    },
+    storeTaskFeedback() {
+      this.$swal({
+        title:'Tasks Created',
+        icon:'success'
+      })
+    },
+    saveShareTaskFeedback() {
+      this.$swal({
+        title:'Tasks Shared',
+        icon:'success'
+      })
     }
   },
   setup() {
@@ -522,10 +595,14 @@ export default {
 
     const visibleLiveDemo = ref(false)
     const modalAdd = ref(false)
+    const modalCustomer = ref(false)
     const modalAssign = ref(false)
+    const modalShare = ref(false)
     const modalDetail = ref(false)
 
     const modalAssignItems = ref([])
+    const modalShareItems = ref([])
+    const sharedUsers = ref([])
 
     const account_number = ref('')
     const anRekening = ref('')
@@ -541,6 +618,21 @@ export default {
     const taskStatus = ref('')
     const taskCreatedBy = ref('')
     const taskHistory = ref()
+
+    const addTask = reactive({
+      body: {
+        taskTittle: '',
+        taskDescription: '',
+        taskExpiredTime: '',
+        taskStartTime: '',
+        taskRefNumber: '',
+        userVar: '',
+        taskCreatedBy: window.localStorage.getItem('username'),
+        organization_id: window.localStorage.getItem('organization_id')
+      },
+      validation: [],
+      customerOptions: []
+    })
 
     const work = ref('')
 
@@ -578,6 +670,16 @@ export default {
 
     const copied = ref(new Set)
     const isLoading = ref(true)
+
+    const customer = reactive({
+      body: {
+        customer_code: '',
+        customer_name: '',
+        customer_phone: '',
+        customer_address: '',
+      },
+      validation: []
+    })
 
     watch(dateFilter, value => {
       startLoading()
@@ -706,11 +808,11 @@ export default {
 
 
       const param_admin = {
-        ...(from ? { 'createdAt[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00') } : {}),
+        ...(from ? { 'taskStartTime[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00') } : {}),
         ...(to
-          ? { 'createdAt[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59') }
+          ? { 'taskStartTime[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59') }
           : from
-            ? { 'createdAt[$lte]': new Date(from.toISOString().substring(0, 10) + 'T23:59:59') }
+            ? { 'taskStartTime[$lte]': new Date(from.toISOString().substring(0, 10) + 'T23:59:59') }
             : {}),
         // taskStatus: status,
         'taskStatus[$in]': statusFilter.value,
@@ -720,17 +822,17 @@ export default {
         'taskData.amount': amount.replace(/\W/gi, ''),
         'taskData.bank_type': bankType,
         $skip: skip,
-        '$sort[createdAt]':-1,
+        '$sort[taskStartTime]':-1,
         'organization_id': window.localStorage.getItem('organization_id'),
         'taskAssigne': searchTitle
       }
 
       const param_users = {
-        ...(from ? { 'createdAt[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00') } : {}),
+        ...(from ? { 'taskStartTime[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00') } : {}),
         ...(to
-          ? { 'createdAt[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59') }
+          ? { 'taskStartTime[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59') }
           : from
-            ? { 'createdAt[$lte]': new Date(from.toISOString().substring(0, 10) + 'T23:59:59') }
+            ? { 'taskStartTime[$lte]': new Date(from.toISOString().substring(0, 10) + 'T23:59:59') }
             : {}),
         // taskStatus: status,
         'taskStatus[$in]': statusFilter.value,
@@ -740,7 +842,7 @@ export default {
         'taskData.amount': amount.replace(/\W/gi, ''),
         'taskData.bank_type': bankType,
         $skip: skip,
-        '$sort[createdAt]':-1,
+        '$sort[taskStartTime]':-1,
         'organization_id': window.localStorage.getItem('organization_id'),
         taskAssigne: taskAssigne
       }
@@ -764,6 +866,64 @@ export default {
       }).catch((err) =>{
         console.log(err.response);
       });
+    }
+
+    function openAddTaskModal() {
+      addTask.body = {
+        taskTittle: '',
+        taskDescription: '',
+        taskExpiredTime: '',
+        taskStartTime: '',
+        taskRefNumber: '',
+        userVar: '',
+        taskCreatedBy: window.localStorage.getItem('username'),
+        organization_id: window.localStorage.getItem('organization_id')
+      }
+      addTask.validation = []
+      modalAdd.value = true
+    }
+
+    function store(cb) {
+      let userVar = '', taskTittle = ''
+
+      if (addTask.body.taskTittle) {
+        const customer = addTask.customerOptions.find(option => option.value === addTask.body.taskTittle).customer
+
+        taskTittle = customer.customer_name
+
+        userVar = {
+          customer_id: customer._id,
+          customer_code: customer.customer_code,
+          customer_name: customer.customer_name
+        }
+      }
+
+      axios.post(`${process.env.VUE_APP_URL_API}/tasks`, {
+        ...addTask.body,
+        taskTittle,
+        userVar
+      }, {
+         headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then(() => {
+        cb()
+
+        modalAdd.value = false
+      }).catch((err) => {
+        if (err.response.status === 409) {
+          const [key] = Object.keys(err.response.data.errors)
+
+          addTask.validation = {
+            [key]: {
+              message: err.response.data.message
+            }
+          }
+        } else {
+          addTask.validation = err.response.data.errors
+        }
+      })
     }
 
     // Get User
@@ -840,6 +1000,36 @@ export default {
       modalAssign.value = false;
 
       // cb()
+    }
+
+    function saveShareTask(cb){
+      modalShareItems.value.forEach(element =>{
+        axios.get(`${process.env.VUE_APP_URL_API}/tasks/${element}`, {
+          headers: {
+            Authorization:window.localStorage.getItem('accessToken')
+          }
+        }).then((result)=> {
+          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`, {
+            taskSharedTo: sharedUsers.value
+          },{
+            headers: {
+              Authorization:window.localStorage.getItem('accessToken')
+            }
+          }).then(()=> {
+
+          }).catch((err)=>{
+            console.log(err);
+          })
+        }).catch((err)=>{
+          console.log(err);
+        })
+      })
+
+      checkedItems.value.clear();
+      modalShareItems.value = [];
+      modalShare.value = false;
+
+      cb()
     }
 
     function clearAssign(items) {
@@ -1196,6 +1386,58 @@ export default {
 
       modalAssignItems.value = [...items]
     }
+    
+    function openModalShare(items) {
+      modalShare.value = true
+
+      modalShareItems.value = [...items]
+    }
+    
+    function openModalCustomer() {
+      customer.body = {
+        customer_code: '',
+        customer_name: '',
+        customer_phone: '',
+        customer_address: '',
+      }
+      customer.validation = []
+
+      modalCustomer.value = true
+      modalAdd.value = false
+    }
+    
+    function closeModalCustomer() {
+      modalCustomer.value = false
+      modalAdd.value = true
+    }
+
+    function saveCustomer() {
+      axios.post(`${process.env.VUE_APP_URL_API}/customers`, customer.body, {
+         headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+      .then(() => {
+        closeModalCustomer()
+      }).catch((err) => {
+        if (err.response.status === 409) {
+          const [key] = Object.keys(err.response.data.errors)
+
+          customer.validation = {
+            [key]: {
+              message: err.response.data.message
+            }
+          }
+        } else {
+          customer.validation = err.response.data.errors
+        }
+        console.log(customer.validation)
+      })
+    }
+
+    function printSuratJalan(items) {
+      window.open(router.resolve({ name: 'Print Surat Jalan', query: { items: [...items] } }).href, '_blank')
+    }
 
     function formatDate(date, utc = true) {
       const format = 'DD MMM YYYY HH:mm:ss'
@@ -1252,6 +1494,26 @@ export default {
       });
     }
 
+    function setCustomerOptions() {
+      axios.get(`${process.env.VUE_APP_URL_API}/customers`, {
+         headers: {
+          Authorization:window.localStorage.getItem('accessToken')
+        }
+      })
+        .then(res => {
+          addTask.customerOptions = res.data.data.map(customer => {
+            return {
+              label: customer.customer_name,
+              value: customer._id,
+              customer
+            }
+          })
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    }
+
     return {
       dateFilter,
       searchFilter,
@@ -1281,9 +1543,21 @@ export default {
       modalAdd,
       modalAssign,
       modalAssignItems,
+      modalShare,
+      modalShareItems,
       modalDetail,
+      modalCustomer,
+
+      customer,
+
+      sharedUsers,
 
       openModalAssign,
+      openModalShare,
+      openModalCustomer,
+      
+      closeModalCustomer,
+      saveCustomer,
 
       account_number,
       anRekening,
@@ -1323,6 +1597,7 @@ export default {
       changePg,
 
       updateWorker,
+      saveShareTask,
       clearAssign,
       requestReject,
       requestRejectBatch,
@@ -1345,7 +1620,13 @@ export default {
       formatDate,
       formatNumber,
       isLoading,
-      search
+      search,
+
+      openAddTaskModal,
+      addTask,
+      store,
+      setCustomerOptions,
+      printSuratJalan
     }
   }
 }

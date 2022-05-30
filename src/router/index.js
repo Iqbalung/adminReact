@@ -50,6 +50,19 @@ const routes = [
         }
       },
       {
+        path:'/tasks/print_surat_jalan',
+        name:'Print Surat Jalan',
+        component: () => import('@/views/tasks/print_surat_jalan.vue'),
+        beforeEnter:(to,from,next)=> {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name:'Login'
+            })
+          }
+          return next();
+        }
+      },
+      {
         path:'/bank',
         name:'Bank Account',
         component: () => import('@/views/bank_account/index.vue'),
@@ -351,6 +364,34 @@ const routes = [
         path:'/invoice',
         name:'Invoice',
         component: () => import('@/views/invoice/index.vue'),
+        beforeEnter: (to,from,next) => {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name: 'Login'
+            })
+          }
+  
+          return next();
+        }
+      },
+      {
+        path:'/invoice/create',
+        name:'Create Invoice',
+        component: () => import('@/views/invoice/create.vue'),
+        beforeEnter: (to,from,next) => {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name: 'Login'
+            })
+          }
+  
+          return next();
+        }
+      },
+      {
+        path:'/invoice/print/:id',
+        name:'Print Invoice',
+        component: () => import('@/views/invoice/print.vue'),
         beforeEnter: (to,from,next) => {
           if(!window.localStorage.getItem('accessToken')) {
             return next({

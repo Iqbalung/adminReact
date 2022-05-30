@@ -34,6 +34,51 @@
 .fixed-table tbody {
   border-top: none !important;
 }
+.select-control .vs__dropdown-toggle {
+  border: 1px solid #ced4da;
+  padding: 0;
+}
+.select-control .vs__selected-options {
+  padding: .375rem .75rem;
+}
+.select-control .vs__search, .select-control .vs__search:focus, .select-control .vs__selected {
+  padding: 0;
+  margin: 0;
+}
+.select-control .vs__actions {
+  margin: 0;
+  padding: 0;
+  margin-right: .75rem;
+}
 .datepicker-control.invalid input {
   border-color: #dc3545 !important;
+}
+.input-group .multiselect-control {
+  flex: 1 1;
+}
+.multiselect-control.invalid {
+  border-color: #dc3545 !important;
+}
+@media not print {
+  .print-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+    overflow: auto;
+    z-index: 999999;
+  }
+}
+@media print {
+  .hide-print {
+    display: none;
+  }
+}
+.page-break-before {
+  page-break-before: always;
+}
+.page-break-after {
+  page-break-after: always;
 }

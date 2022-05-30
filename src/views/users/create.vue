@@ -31,6 +31,7 @@
               <CFormSelect
                 :options="[
                   { label: 'Worker', value: 'worker' },
+                  { label: 'Assistace Worker', value: 'assistace_worker' },
                   { label: 'Admin', value: 'admin' },
                 ]" v-model="user.role" :invalid="validation.role">
               </CFormSelect>
