@@ -1,0 +1,39 @@
+.nowrap {
+  white-space: nowrap;
+}  
+.fixed-table .table-responsive {
+  display: block;
+  max-height: 500px;
+  overflow: auto;
+  margin-top: 1rem!important;
+}
+.fixed-table th {
+  background-color: white;
+  position: sticky;
+  top: 0;
+  z-index: 9;
+}
+.fixed-table th::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 1px;
+  width: 100%;
+  border-bottom: 1px solid #dee2e6!important;
+}
+.fixed-table th::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 1px;
+  width: 100%;
+  border-bottom: 2px solid currentColor;
+}
+.fixed-table tbody {
+  border-top: none !important;
+}
+.datepicker-control.invalid input {
+  border-color: #dc3545 !important;
+}

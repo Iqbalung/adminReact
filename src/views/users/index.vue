@@ -187,7 +187,7 @@ export default {
   background-color: white;
   position: sticky;
   top: 0;
-  z-index: 9999;
+  z-index: 9;
 }
 .user-table th::before {
   content: '';

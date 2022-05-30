@@ -1,5 +1,5 @@
 <template>
-  <CCard class="mb-4" v-if="role === 'admin'">
+  <CCard class="mb-3" v-if="role === 'admin'">
     <CCardBody>
       <div class="row gx-2">
         <div class="col">
@@ -60,18 +60,18 @@
                 :disabled="filterListActive.value === 'done'"
               />
             </CTableHeaderCell> -->
-            <CTableHeaderCell scope="col">No</CTableHeaderCell>
-            <!-- <CTableHeaderCell scope="col" v-show="role == 'admin'"
+            <CTableHeaderCell class="nowrap" scope="col">No</CTableHeaderCell>
+            <!-- <CTableHeaderCell class="nowrap" scope="col" v-show="role == 'admin'"
               >Assigned</CTableHeaderCell
             > -->
-            <CTableHeaderCell scope="col" v-show="role == 'admin'">Amount</CTableHeaderCell>
-            <CTableHeaderCell scope="col">From</CTableHeaderCell>
-            <CTableHeaderCell scope="col" v-show="role == 'admin'">To</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Trx Type</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Saldo</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Status</CTableHeaderCell>
-            <CTableHeaderCell scope="col">User Id Task</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Updated At</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col" v-show="role == 'admin'">Amount</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col">From</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col" v-show="role == 'admin'">To</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col">Trx Type</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col">Saldo</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col">Status</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col">User Id Task</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col">Updated At</CTableHeaderCell>
             <!-- <CTableHeaderCell scope="col">Action</CTableHeaderCell> -->
           </CTableRow>
         </CTableHead>

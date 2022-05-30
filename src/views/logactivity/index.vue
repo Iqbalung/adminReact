@@ -33,10 +33,10 @@
       <CTable responsive>
         <CTableHead>
           <CTableRow>
-            <CTableHeaderCell scope="col">No</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Date</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Process Name</CTableHeaderCell>
-            <CTableHeaderCell scope="col">Message</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col">No</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col">Date</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col">Process Name</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col">Message</CTableHeaderCell>
           </CTableRow>
         </CTableHead>
         <CTableBody v-if="isLoading">
@@ -58,17 +58,17 @@
               {{ index + 1 + (currentPages - 1) * perPage }}
             </CTableDataCell>
             <CTableDataCell>
-              <div class="overflow-auto">
+              <div class="nowrap">
                 {{ formatDate(item.date, false) }}
               </div>
             </CTableDataCell>
             <CTableDataCell>
-              <div class="overflow-auto">
+              <div class="nowrap">
                 {{ item.process_name ? item.process_name : '-' }}
               </div>
             </CTableDataCell>
             <CTableDataCell>
-              <div class="overflow-auto">
+              <div class="nowrap">
                 {{ item.message }}
               </div>
             </CTableDataCell>
