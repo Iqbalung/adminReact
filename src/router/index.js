@@ -10,106 +10,103 @@ const routes = [
     component: DefaultLayout,
     redirect: '/tasks',
     children: [
-        {
-          path:'/tasks',
-          name:'Tasks',
-          component: () => import('@/views/tasks/index.vue'),
-          beforeEnter:(to,from,next)=> {
-            if(!window.localStorage.getItem('accessToken')) {
-              return next({
-                name:'Login'
-              })
-            }
-          return next();
+      {
+        path:'/tasks',
+        name:'Tasks',
+        component: () => import('@/views/tasks/index.vue'),
+        beforeEnter:(to,from,next)=> {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name:'Login'
+            })
           }
-        },
-        {
-          path:'/worker',
-          name:'Worker',
-          component: () => import('@/views/worker/index.vue'),
-          beforeEnter:(to,from,next)=> {
-            if(!window.localStorage.getItem('accessToken')) {
-              return next({
-                name:'Login'
-              })
-            }
-          return next();
+        return next();
+        }
+      },
+      {
+        path:'/worker',
+        name:'Worker',
+        component: () => import('@/views/worker/index.vue'),
+        beforeEnter:(to,from,next)=> {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name:'Login'
+            })
           }
-        },
-        {
-          path:'/bank',
-          name:'Bank Account',
-          component: () => import('@/views/bank_account/index.vue'),
-          beforeEnter:(to,from,next)=> {
-            if(!window.localStorage.getItem('accessToken')) {
-              return next({
-                name:'Login'
-              })
-            }
-            // if(window.localStorage.getItem('role')== 'worker')
-            // {
-            //   return next({
-            //     name:'Profile'
-            //   })
-            // }
-          return next();
+        return next();
+        }
+      },
+      {
+        path:'/bank',
+        name:'Bank Account',
+        component: () => import('@/views/bank_account/index.vue'),
+        beforeEnter:(to,from,next)=> {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name:'Login'
+            })
           }
-        },
-        {
-          path:'/bank/create',
-          name:'Create Bank',
-          component: () => import('@/views/bank_account/create.vue')
-          ,
-          beforeEnter:(to,from,next)=> {
-            if(!window.localStorage.getItem('accessToken')) {
-              return next({
-                name:'Login'
-              })
-            }
-          return next();
+          // if(window.localStorage.getItem('role')== 'worker')
+          // {
+          //   return next({
+          //     name:'Profile'
+          //   })
+          // }
+        return next();
+        }
+      },
+      {
+        path:'/bank/create',
+        name:'Create Bank',
+        component: () => import('@/views/bank_account/create.vue'),
+        beforeEnter:(to,from,next)=> {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name:'Login'
+            })
           }
-        },
-        {
-          path:'/bank/import',
-          name:'Import Excel',
-          component: () => import('@/views/bank_account/import.vue')
-          ,
-          beforeEnter:(to,from,next)=> {
-            if(!window.localStorage.getItem('accessToken')) {
-              return next({
-                name:'Login'
-              })
-            }
-          return next();
+        return next();
+        }
+      },
+      {
+        path:'/bank/import',
+        name:'Import Excel',
+        component: () => import('@/views/bank_account/import.vue'),
+        beforeEnter:(to,from,next)=> {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name:'Login'
+            })
           }
-        },
-        {
-          path:'/bank/update/:id',
-          name:'Update Bank',
-          component: () => import('@/views/bank_account/update.vue')
-          ,
-          beforeEnter:(to,from,next)=> {
-            if(!window.localStorage.getItem('accessToken')) {
-              return next({
-                name:'Login'
-              })
-            }
-          return next();
+        return next();
+        }
+      },
+      {
+        path:'/bank/update/:id',
+        name:'Update Bank',
+        component: () => import('@/views/bank_account/update.vue'),
+        beforeEnter:(to,from,next)=> {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name:'Login'
+            })
           }
-        },
-        {
-          path:'/profile',
-          name:'Profile',
-          component:()=>import('@/views/worker/profile.vue'),
-          beforeEnter:(to,from,next)=> {
-            if(!window.localStorage.getItem('accessToken')) {
-              return next({
-                name:'Login'
-              })
-            }
-          return next();
+        return next();
+        }
+      },
+      {
+        path:'/profile',
+        name:'Profile',
+        component:()=>import('@/views/worker/profile.vue'),
+        beforeEnter:(to,from,next)=> {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name:'Login'
+            })
           }
-        },
+        return next();
+        }
+      },
       {
         path:'/users',
         name:'Users',
@@ -132,8 +129,7 @@ const routes = [
       {
         path:'/users/create',
         name:'Create Users',
-        component: () => import('@/views/users/create.vue')
-        ,
+        component: () => import('@/views/users/create.vue'),
         beforeEnter:(to,from,next)=> {
           if(!window.localStorage.getItem('accessToken')) {
             return next({
@@ -146,8 +142,7 @@ const routes = [
       {
         path:'/users/import',
         name:'Import Users',
-        component: () => import('@/views/users/import.vue')
-        ,
+        component: () => import('@/views/users/import.vue'),
         beforeEnter:(to,from,next)=> {
           if(!window.localStorage.getItem('accessToken')) {
             return next({
@@ -160,8 +155,7 @@ const routes = [
       {
         path:'/users/update/:id',
         name:'Update Users',
-        component: () => import('@/views/users/update.vue')
-        ,
+        component: () => import('@/views/users/update.vue'),
         beforeEnter:(to,from,next)=> {
           if(!window.localStorage.getItem('accessToken')) {
             return next({
@@ -227,6 +221,19 @@ const routes = [
         path: '/agwlbca',
         name: 'Agwlbca',
         component: () => import('@/views/webcontrol/agwlbca.vue'),
+        beforeEnter: (to, from, next) => {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name: 'Login',
+            })
+          }
+          return next()
+        },
+      },
+      {
+        path: '/monitoring',
+        name: 'Monitoring',
+        component: () => import('@/views/monitoring/index.vue'),
         beforeEnter: (to, from, next) => {
           if(!window.localStorage.getItem('accessToken')) {
             return next({
