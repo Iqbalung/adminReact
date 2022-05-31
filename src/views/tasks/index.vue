@@ -45,6 +45,9 @@
           <CButton size="sm" color="danger" class="me-1" @click="showProcessRejectBatch(processRejectBatch, [...checkedItems])" :disabled="checkedItems.size < 1">Process Reject</CButton>
           <CButton size="sm" color="warning" @click="showRequestRejectBatch(requestRejectBatch, [...checkedItems])" :disabled="checkedItems.size < 1">Request Reject</CButton>
           <CButton size="sm" color="info" @click="exportTasks(exportTasksFeedback)" class="ms-1">Export Tasks</CButton>
+          <router-link :to="{ name: 'Create Tasks' }">
+            <CButton size="sm" color="primary" class="ms-1">Create Task</CButton>
+          </router-link>
         </div>
       </CCardHeader>
       <CCardBody class="p-0 task-table">
