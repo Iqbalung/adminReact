@@ -63,6 +63,12 @@ export default [
     icon: 'cil-settings',
   },
   {
+    component: 'CNavItem',
+    name: 'Monitoring',
+    to: '/monitoring',
+    icon: 'cil-monitor',
+  },
+  {
     component: 'CNavGroup',
     name: 'Web control',
     to: '',
