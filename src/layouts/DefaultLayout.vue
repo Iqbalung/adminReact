@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="hide-print">
     <AppSidebar />
     <div class="wrapper d-flex flex-column min-vh-100 bg-light">
       <AppHeader />

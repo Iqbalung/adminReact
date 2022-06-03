@@ -46,6 +46,24 @@ export default [
   },
   {
     component: 'CNavItem',
+    name: 'Customers',
+    to: '/customers',
+    icon: 'cil-address-book',
+  },
+  {
+    component: 'CNavItem',
+    name: 'Items',
+    to: '/items',
+    icon: 'cil-basket',
+  },
+  {
+    component: 'CNavItem',
+    name: 'Invoice',
+    to: '/invoice',
+    icon: 'cil-cash',
+  },
+  {
+    component: 'CNavItem',
     name: 'Incidents',
     to: '/incidents',
     icon: 'cil-bell',

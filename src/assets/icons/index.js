@@ -33,6 +33,7 @@ import {
   cilBasket,
   cilBell,
   cilCalculator,
+  cilCash,
   cilCalendar,
   cilCloudDownload,
   cilChartPie,
@@ -66,6 +67,7 @@ import {
   cilNotes,
   cilOptions,
   cilPencil,
+  cilPrint,
   cilPeople,
   cilPuzzle,
   cilSettings,
@@ -94,7 +96,8 @@ import {
   cilCopy,
   cilLibrary,
   cilCreditCard,
-  cilThumbDown
+  cilThumbDown,
+  cilAddressBook
 } from '@coreui/icons'
 
 export const iconsSet = Object.assign(
@@ -107,6 +110,7 @@ export const iconsSet = Object.assign(
     cilBasket,
     cilBell,
     cilCalculator,
+    cilCash,
     cilCalendar,
     cilCloudDownload,
     cilChartPie,
@@ -140,6 +144,7 @@ export const iconsSet = Object.assign(
     cilNotes,
     cilOptions,
     cilPencil,
+    cilPrint,
     cilPeople,
     cilPuzzle,
     cilSettings,
@@ -168,8 +173,8 @@ export const iconsSet = Object.assign(
     cilCopy,
     cilLibrary,
     cilCreditCard,
-    cilThumbDown
-
+    cilThumbDown,
+    cilAddressBook
   },
   {
     cifUs,
