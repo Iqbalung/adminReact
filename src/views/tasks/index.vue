@@ -113,18 +113,7 @@
                   </CTooltip>
                   </div>
               </CTableDataCell>
-              <CTableDataCell>
-                  <div class="d-flex flex-nowrap nowrap">{{ item.taskData?.anRekening }}
-                  <CTooltip content="Copy Account Name" placement="right" v-if="!item.isCopied?.anRekening">
-                      <template #toggler="{ on }">
-
-                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData?.anRekening, item._id, 'anRekening')">
-                          <CIcon name="cil-copy"/>
-                      </CButton>
-                      </template>
-                  </CTooltip>
-                  </div>
-              </CTableDataCell>
+               <CTableDataCell v-show="role=='admin'">{{ item.taskTittle }}</CTableDataCell>
               <CTableDataCell>
                   <div class="d-flex flex-nowrap nowrap">
                   {{ rupiah(item.taskData?.amount ?? 0) }}
