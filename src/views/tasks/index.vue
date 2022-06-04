@@ -100,7 +100,7 @@
               <CTableDataCell class="nowrap">{{ formatDate(item.createdAt) }}</CTableDataCell>
               <CTableDataCell v-show="role=='admin' && checkStatusFilterActive('reject')">
                 {{ item.updatedAt ? item.updatedAt : '-' }}</CTableDataCell>
-              <CTableDataCell v-show="role=='admin'">{{ item.taskAssigne }}</CTableDataCell>
+              <CTableDataCell v-show="role=='admin'">{{ item.taskSharedTo }}</CTableDataCell>
               <CTableDataCell class="nowrap">
                   <div class="d-flex flex-nowrap nowrap">{{ item.taskData?.account_number }}
                   <CTooltip content="Copy Account Number" placement="right" v-if="!item.isCopied?.accountNumber">
@@ -627,6 +627,7 @@ export default {
         taskStartTime: '',
         taskRefNumber: '',
         userVar: '',
+        taskStatus: 'unprocess',
         taskCreatedBy: window.localStorage.getItem('username'),
         organization_id: window.localStorage.getItem('organization_id')
       },
