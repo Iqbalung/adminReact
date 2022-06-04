@@ -8,8 +8,8 @@
               <img :src="organization.logoUrl" width="100">
               <div class="ms-4">
                 <h3 class="fw-bold mb-0">{{ organization.organization_specialist }}</h3>
-                <span class="me-1">Tpl. {{ organization.organization_phone }}</span>
-                <span>Rek {{ organization.organization_account }}</span>
+                <span class="me-1">{{ organization.organization_phone }}</span>
+                <span>{{ organization.organization_account }}</span>
               </div>
             </div>
           </CCol>
