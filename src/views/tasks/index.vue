@@ -101,18 +101,7 @@
               <CTableDataCell v-show="role=='admin' && checkStatusFilterActive('reject')">
                 {{ item.updatedAt ? item.updatedAt : '-' }}</CTableDataCell>
               <CTableDataCell v-show="role=='admin'">{{ item.taskSharedTo }}</CTableDataCell>
-              <CTableDataCell class="nowrap">
-                  <div class="d-flex flex-nowrap nowrap">{{ item.taskData?.account_number }}
-                  <CTooltip content="Copy Account Number" placement="right" v-if="!item.isCopied?.accountNumber">
-                      <template #toggler="{ on }">
-
-                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData?.account_number, item._id, 'accountNumber')">
-                          <CIcon name="cil-copy"/>
-                      </CButton>
-                      </template>
-                  </CTooltip>
-                  </div>
-              </CTableDataCell>
+               <CTableDataCell v-show="role=='admin'">{{ item.userVar.customer_code }}</CTableDataCell>
                <CTableDataCell v-show="role=='admin'">{{ item.taskTittle }}</CTableDataCell>
               <CTableDataCell>
                   <div class="d-flex flex-nowrap nowrap">
