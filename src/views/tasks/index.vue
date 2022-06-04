@@ -69,7 +69,7 @@
               <CTableHeaderCell class="nowrap">Name</CTableHeaderCell>
               <CTableHeaderCell class="nowrap">Amount</CTableHeaderCell>
               <CTableHeaderCell class="nowrap">UserId</CTableHeaderCell>
-              <CTableHeaderCell class="nowrap">Status</CTableHeaderCell>
+              <CTableHeaderCell class="nowrap">Description</CTableHeaderCell>
               <CTableHeaderCell class="nowrap">Action</CTableHeaderCell>
             </CTableRow>
           </CTableHead>
@@ -127,7 +127,7 @@
                   </CTooltip>
                   </div>
               </CTableDataCell>
-              <CTableDataCell :color="checkIsCopied(item.isCopied) ? 'danger' : getCellColor(item.taskStatus)">{{ item.taskStatus }}</CTableDataCell>
+              <CTableDataCell v-show="role=='admin'">{{ item.taskDescription }}</CTableDataCell>
               <CTableDataCell>
                   <CButton size="sm" class="text-primary" variant="ghost" color="light" :disabled="item.taskStatus === 'processed'" @click="processTask(item.taskData?.account_number,item.taskData?.anRekening,item.taskData?.amount,item.taskData?.mutation_id,item.taskData?.bank_type,item._id,item.taskAssigne,item.taskTittle,item.taskRefNumber,item.taskExpiredTime,item.taskCreatedBy,item.taskStatus,item.taskHistory)">
                     Detail
