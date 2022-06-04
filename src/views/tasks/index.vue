@@ -865,9 +865,9 @@ export default {
     function store(cb) {
       let userVar = '', taskTittle = ''
 
-      if (addTask.body.taskTittle) {
+      if (addTask.body.taskTittl) {
         const customer = addTask.customerOptions.find(option => option.value === addTask.body.taskTittle).customer
-
+        taskDescription = addTask.taskDescription;
         taskTittle = customer.customer_name
 
         userVar = {
