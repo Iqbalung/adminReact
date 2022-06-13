@@ -311,7 +311,6 @@ export default {
       const params = {
         '$sort[_id]': -1,
         $skip: skip,
-        organization_id: window.localStorage.getItem('organization_id'),
         account_receiver: searchTitle,
         ...(dateFilter.value ? { 'date_crawl[$gte]': new Date(dateFilter.value[0].toISOString().substring(0, 10) + 'T00:00:00') } : {}),
         ...(dateFilter.value ? { 'date_crawl[$lte]': new Date(dateFilter.value[1].toISOString().substring(0, 10) + 'T23:59:59') } : {}),
