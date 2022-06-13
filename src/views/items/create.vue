@@ -56,9 +56,14 @@
               <CFormInput type="text" id="supplier" placeholder="Product Supplier" v-model="body.product_supplier" :invalid="validation.product_supplier" />
               <CFormFeedback v-if="validation.product_supplier" invalid>{{ validation.product_supplier.message }}</CFormFeedback>
             </div>
+            <div class="mb-3" v-for="(items, index) in custom_field" :key="index">
+              <CFormLabel for="supplier"> {{ items.label }}</CFormLabel>
+              <CFormInput :id="items.key" :key="items.key" v-model="body.custom_field[items.key]" type="text"  :name="items.key" />
+            </div>
             <div class="mb-3">
               <CButton color="primary" class="rounded">Save</CButton>
             </div>
+
           </CForm>
         </div>
       </CCardBody>
@@ -73,6 +78,11 @@ import routers from '../../router'
 
 export default {
   name: 'Create Item',
+  data() {
+    return {
+      custom_field: JSON.parse(window.localStorage.getItem('organization')).custom_field.items
+    }
+  },
   setup() {
     const body = reactive({
       product_code: '',
@@ -83,6 +93,7 @@ export default {
       product_type: '',
       product_supplier: '',
       item_type: 'services',
+      custom_field : {}
     });
     const validation = ref([]);
     const router = routers

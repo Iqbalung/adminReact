@@ -122,10 +122,19 @@ export default {
                 window.localStorage.setItem('accessToken', response.data.accessToken);
                 window.localStorage.setItem('username', response.data.user.username);
                 window.localStorage.setItem('role', response.data.user.role);
-                
+                axios.get(`${process.env.VUE_APP_URL_API}/organization/`+response.data.user.organization_id,{
+                  headers: {
+                    Authorization:window.localStorage.getItem('accessToken')
+                  },
+                }).then((result) => {
+                  console.log("why",result)
+                  window.localStorage.setItem('organization', JSON.stringify(result.data));
+                }).catch((err) =>{
+                  console.log(err);
+                });
                 router.push({ path: '/tasks' })
               }).catch(err => {
-                console.log(err.response)
+                console.log(err)
               })
             } else {
               this.validation = { message: 'Ip Not Allowed' }

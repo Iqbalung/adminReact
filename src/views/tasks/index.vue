@@ -21,11 +21,7 @@
         <form @submit.prevent="search">
           <CCollapse :visible="collapseFilter" :class="{ 'mt-2': collapseFilter }">
             <CInputGroup>
-              <CFormInput type="text" id="search" v-model="userIdFilter" placeholder="User ID" />
-              <CFormInput type="text" id="search" v-model="bankTypeFilter" placeholder="Bank" />
-              <CFormInput type="text" id="search" :value="amountFilter" v-on:input="amountFilter = formatNumber($event.target.value)" placeholder="Nominal" />
-              <CFormInput type="text" id="search" v-model="accountNameFilter" placeholder="Name Account" />
-              <CFormInput type="text" id="search" v-model="accountNumberFilter" placeholder="Account Bank" />
+              <CFormInput type="text" id="search" v-model="refNumberFilter" placeholder="refNumber" />
             </CInputGroup>
             <CButton color="primary" class="mt-2">Search</CButton>
           </CCollapse>
@@ -62,13 +58,14 @@
               <CTableHeaderCell class="nowrap" v-if="role === 'admin'">
                   <input type="checkbox" @change="e => shiftAll(e.target.checked)" v-model="shift" :disabled="checkStatusFilterActive('done')" />
               </CTableHeaderCell>
-              <CTableHeaderCell class="nowrap">Created</CTableHeaderCell>
+              <CTableHeaderCell class="nowrap">Start Date</CTableHeaderCell>
               <CTableHeaderCell class="nowrap" v-show="role=='admin' && checkStatusFilterActive('reject')">Updated At</CTableHeaderCell>
               <CTableHeaderCell class="nowrap" v-show="role=='admin'">Assigned</CTableHeaderCell>
               <CTableHeaderCell class="nowrap">Account Number</CTableHeaderCell>
               <CTableHeaderCell class="nowrap">Name</CTableHeaderCell>
+              <CTableHeaderCell class="nowrap">RefNumber</CTableHeaderCell>
               <CTableHeaderCell class="nowrap">Amount</CTableHeaderCell>
-              <CTableHeaderCell class="nowrap">UserId</CTableHeaderCell>
+             
               <CTableHeaderCell class="nowrap">Description</CTableHeaderCell>
               <CTableHeaderCell class="nowrap">Action</CTableHeaderCell>
             </CTableRow>
@@ -97,30 +94,19 @@
                   <input type="checkbox" disabled/>
                   </div>
               </CTableDataCell>
-              <CTableDataCell class="nowrap">{{ formatDate(item.createdAt) }}</CTableDataCell>
+              <CTableDataCell class="nowrap">{{ formatDate(item.taskStartTime) }}</CTableDataCell>
               <CTableDataCell v-show="role=='admin' && checkStatusFilterActive('reject')">
                 {{ item.updatedAt ? item.updatedAt : '-' }}</CTableDataCell>
               <CTableDataCell v-show="role=='admin'">{{ item.taskSharedTo }}</CTableDataCell>
                <CTableDataCell v-show="role=='admin'">{{ item.userVar.customer_code }}</CTableDataCell>
                <CTableDataCell v-show="role=='admin'">{{ item.taskTittle }}</CTableDataCell>
+               <CTableDataCell v-show="role=='admin'">{{ item.taskRefNumber }}</CTableDataCell>
               <CTableDataCell>
                   <div class="d-flex flex-nowrap nowrap">
                   {{ rupiah(item.taskData?.amount ?? 0) }}
                   <CTooltip content="Copy Account Amount!" placement="right" v-if="!item.isCopied?.amount">
                       <template #toggler="{ on }">
                       <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData.amount, item._id, 'amount')">
-                          <CIcon name="cil-copy"/>
-                      </CButton>
-                      </template>
-                  </CTooltip>
-                  </div>
-              </CTableDataCell>
-              <CTableDataCell>
-                  <div class="d-flex flex-nowrap nowrap">
-                  {{ item.taskData?.userId.substring(0, item.taskData?.userId.indexOf('\n')) }}
-                  <CTooltip content="Copy Account User ID!" placement="right" v-if="!item.isCopied?.userId">
-                      <template #toggler="{ on }">
-                      <CButton size="sm" class="rounded d-inline-block p-0" v-on="on" color="secondary" variant="ghost" @click="copy(item.taskData?.userId, item._id, 'userId')">
                           <CIcon name="cil-copy"/>
                       </CButton>
                       </template>
@@ -305,7 +291,7 @@
     <CModalBody>
     <div class="d-flex justify-content-between">
       <div class="">
-        <p class="mb-0 fw-bold">Task Title :</p>
+        <p class="mb-0 fw-bold">Task Tittle :</p>
         <p>{{ taskTittle }}</p>
         <p class="mb-0 fw-bold">Task Assigne :</p>
         <p>{{ taskAssigne }}</p>
@@ -553,7 +539,7 @@ export default {
 
     const dateFilter = ref();
     const searchFilter = ref('');
-    const userIdFilter = ref('');
+    const refNumberFilter = ref('');
     const accountNameFilter = ref('');
     const accountNumberFilter = ref('');
     const amountFilter = ref('');
@@ -662,37 +648,37 @@ export default {
 
     watch(dateFilter, value => {
       startLoading()
-      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, value ? value[0] : '', value ? value[1] : '')
+      loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, value ? value[0] : '', value ? value[1] : '')
     })
 
     watch(searchFilter, value => {
       startLoading()
-      loadTask(filterListActive.value.value, value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+      loadTask(filterListActive.value.value, value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     })
 
-    // watch(userIdFilter, value => {
+    // watch(refNumberFilter, value => {
     //   loadTask(filterListActive.value.value, searchFilter.value, value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     // })
 
     // watch(accountNumberFilter, value => {
-    //   loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+    //   loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     // })
 
     // watch(accountNameFilter, value => {
-    //   loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+    //   loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     // })
 
     // watch(amountFilter, value => {      
-    //   loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+    //   loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     // })
 
     // watch(bankTypeFilter, value => {
-    //   loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+    //   loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     // })
 
     const handleSocketCreated = message => {
       if (message.hasOwnProperty('taskTittle')) {
-        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+        loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
 
         if (message.taskAssigne == window.localStorage.getItem('username')) {
           if(message.taskStatus=='done'){
@@ -706,13 +692,13 @@ export default {
 
     const handleSocketUpdated = message => {
       if (message.hasOwnProperty('taskTittle')) {
-        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '')
+        loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '')
       }
     }
 
     const handleSocketPatched = message => {
       if (message.hasOwnProperty('taskTittle')) {
-        loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+        loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
       }
 
       if (message.taskAssigne == window.localStorage.getItem('username')) {
@@ -758,7 +744,7 @@ export default {
       // });
 
       // get data
-      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+      loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
       // get worker
 
       getUser()
@@ -777,25 +763,24 @@ export default {
     function search() {
       startLoading()
 
-      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
+      loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '');
     }
 
-    function loadTask(taskStatus, searchTitle, userId, accountNumber, accountName, amount, bankType, pages, from, to) {
+    function loadTask(taskStatus, searchTitle, refNumber, accountNumber, accountName, amount, bankType, pages, from, to) {
       // let status = (taskStatus != '') ? taskStatus : 'unprocess';
       const taskAssigne =`${window.localStorage.getItem('username')}`;
       const skip = (pages > 1) ? (pages-1) * 100 : 0;
 
+      from = momentTz(from).tz('Asia/Jakarta')
+      to = momentTz(to).tz('Asia/Jakarta')
 
       const param_admin = {
-        ...(from ? { 'taskStartTime[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00') } : {}),
-        ...(to
-          ? { 'taskStartTime[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59') }
-          : from
-            ? { 'taskStartTime[$lte]': new Date(from.toISOString().substring(0, 10) + 'T23:59:59') }
-            : {}),
-        // taskStatus: status,
+        
+        'taskStartTime[$gte]':from.toISOString().substring(0, 10) + 'T00:00:00.000Z',
+        'taskStartTime[$lte]': to.toISOString().substring(0, 10) + 'T23:59:59.000Z',
+        
         'taskStatus[$in]': statusFilter.value,
-        userId: userId,
+        'taskRefNumber': refNumber,
         'taskData.account_number': accountNumber,
         'taskData.anRekening': accountName,
         'taskData.amount': amount.replace(/\W/gi, ''),
@@ -806,27 +791,10 @@ export default {
         'taskAssigne': searchTitle
       }
 
-      const param_users = {
-        ...(from ? { 'taskStartTime[$gte]': new Date(from.toISOString().substring(0, 10) + 'T00:00:00') } : {}),
-        ...(to
-          ? { 'taskStartTime[$lte]': new Date(to.toISOString().substring(0, 10) + 'T23:59:59') }
-          : from
-            ? { 'taskStartTime[$lte]': new Date(from.toISOString().substring(0, 10) + 'T23:59:59') }
-            : {}),
-        // taskStatus: status,
-        'taskStatus[$in]': statusFilter.value,
-        userId: userId,
-        'taskData.account_number': accountNumber,
-        'taskData.anRekening': accountName,
-        'taskData.amount': amount.replace(/\W/gi, ''),
-        'taskData.bank_type': bankType,
-        $skip: skip,
-        '$sort[taskStartTime]':-1,
-        'organization_id': window.localStorage.getItem('organization_id'),
-        taskAssigne: taskAssigne
-      }
+      
 
-      const params = (window.localStorage.getItem('role') === 'admin') ? param_admin : param_users;
+      const params = param_admin;
+      console.log("why",from.toISOString().substring(0, 10) + 'T00:00:00')
 
       axios.get(`${process.env.VUE_APP_URL_API}/tasks`,{
         headers: {
@@ -862,20 +830,39 @@ export default {
       modalAdd.value = true
     }
 
+    function makeid(length) {
+        var result           = '';
+        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+          result += characters.charAt(Math.floor(Math.random() * 
+    charactersLength));
+      }
+      return result;
+    }
+
     function store(cb) {
       let userVar = '', taskTittle = ''
-
-      if (addTask.body.taskTittl) {
+      addTask.body.taskStatus = 'unprocess'
+      if (addTask.body.taskTittle) {
+        console.log("why",addTask.body)
         const customer = addTask.customerOptions.find(option => option.value === addTask.body.taskTittle).customer
-        taskDescription = addTask.taskDescription;
         taskTittle = customer.customer_name
-
+        
         userVar = {
           customer_id: customer._id,
           customer_code: customer.customer_code,
           customer_name: customer.customer_name
         }
       }
+
+      if(!addTask.body.taskRefNumber){
+        addTask.body.taskRefNumber = makeid(5)
+      }
+
+
+      addTask.body.taskStartTime =  momentTz(addTask.body.taskStartTime).add(7, 'hours');
+      console.log("why",addTask.body)
 
       axios.post(`${process.env.VUE_APP_URL_API}/tasks`, {
         ...addTask.body,
@@ -963,7 +950,7 @@ export default {
               Authorization:window.localStorage.getItem('accessToken')
             }
           }).then(()=> {
-            // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+            // loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
           }).catch((err)=>{
             console.log(err);
           })
@@ -988,17 +975,23 @@ export default {
             Authorization:window.localStorage.getItem('accessToken')
           }
         }).then((result)=> {
-          axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`, {
-            taskSharedTo: sharedUsers.value
-          },{
-            headers: {
-              Authorization:window.localStorage.getItem('accessToken')
-            }
-          }).then(()=> {
-
-          }).catch((err)=>{
-            console.log(err);
-          })
+          console.log("why2",result.data)
+          if(result.data.taskStatus!='unprocess'){
+           
+          }else{
+            axios.patch(`${process.env.VUE_APP_URL_API}/tasks/${element}`, {
+              taskSharedTo: sharedUsers.value,
+              taskStatus:'assigned'
+            },{
+              headers: {
+                Authorization:window.localStorage.getItem('accessToken')
+              }
+            }).then(()=> {
+  
+            }).catch((err)=>{
+              console.log(err);
+            })
+          }
         }).catch((err)=>{
           console.log(err);
         })
@@ -1030,7 +1023,7 @@ export default {
               Authorization:window.localStorage.getItem('accessToken')
             }
           }).then(()=> {
-            // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+            // loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
           }).catch((err)=>{
             console.log(err);
           })
@@ -1057,7 +1050,7 @@ export default {
           Authorization:window.localStorage.getItem('accessToken')
         }
       }).then(()=> {
-        // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+        // loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
       }).catch((err)=>{
         console.log(err);
       })
@@ -1086,7 +1079,7 @@ export default {
               Authorization:window.localStorage.getItem('accessToken')
             }
           }).then(()=> {
-            // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+            // loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
           }).catch((err)=>{
             console.log(err);
           })
@@ -1120,7 +1113,7 @@ export default {
               Authorization:window.localStorage.getItem('accessToken')
             }
           }).then(()=> {
-            // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+            // loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
           }).catch((err)=>{
             console.log(err);
           })
@@ -1169,7 +1162,7 @@ export default {
           }
         })
         .then(()=> {
-          // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+          // loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
         }).catch((err)=>{
           console.log(err);
         })
@@ -1218,12 +1211,12 @@ export default {
     }
 
     function changePg() {
-      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '')
+      loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '')
     }
 
     function pickDate() {
       startLoading()
-      loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '')
+      loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '')
     }
 
     function playSound(){
@@ -1248,7 +1241,7 @@ export default {
       statusFilter.value = statusFilterOptions.value.filter(option => option.checked).map(option => option.value)
 
       startLoading()
-      loadTask(value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '')
+      loadTask(value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, 1, dateFilter.value ? dateFilter.value[0] : '', dateFilter.value ? dateFilter.value[1] : '')
     }
 
     function getCellColor(status) {
@@ -1284,7 +1277,7 @@ export default {
             }
           })
 
-          // loadTask(filterListActive.value.value, searchFilter.value, userIdFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
+          // loadTask(filterListActive.value.value, searchFilter.value, refNumberFilter.value, accountNumberFilter.value, accountNameFilter.value, amountFilter.value, bankTypeFilter.value, currentPages.value ,dateFilter.value ? dateFilter.value[0] : '' ,dateFilter.value ? dateFilter.value[1] : '');
         } catch (err) {
           console.log(err)
         }
@@ -1496,7 +1489,7 @@ export default {
     return {
       dateFilter,
       searchFilter,
-      userIdFilter,
+      refNumberFilter,
       accountNumberFilter,
       accountNameFilter,
       amountFilter,

@@ -35,6 +35,19 @@
               <CCol :xs="8">
                 {{ task.taskTittle }}
               </CCol>
+              
+            </CRow>
+            <CRow :xs="{ gutterX: 0 }">
+              <CCol :xs="3">
+                <b>Deskripsi Pengerjaan</b>
+              </CCol>
+              <CCol :xs="1">
+                :
+              </CCol>
+              <CCol :xs="8">
+                {{ task.taskDescription }}
+              </CCol>
+              
             </CRow>
             <CRow :xs="{ gutterX: 0 }">
               <CCol :xs="3">

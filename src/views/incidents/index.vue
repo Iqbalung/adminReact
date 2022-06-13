@@ -129,7 +129,7 @@
                 :disabled="item.taskStatus === 'processed'"
                 @click="
                   processTask(
-                    item.taskData.account_number,
+                    item.taskData.customer_name,
                     item.taskData.anRekening,
                     item.taskData.amount,
                     item.taskData.mutation_id,

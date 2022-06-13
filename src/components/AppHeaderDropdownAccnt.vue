@@ -49,11 +49,11 @@ export default {
     const taskCount = ref(0)
 
     onMounted(()=> {
-      socket.on('tasks created', (message) => {
+      /* socket.on('tasks created', (message) => {
         getTaskCount()
       })
 
-      getTaskCount()
+      getTaskCount() */
     })
 
     function getTaskCount() {

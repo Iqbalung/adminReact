@@ -42,6 +42,12 @@
             <CFormInput placeholder="Invoice Number" v-model="body.invoice_number" :invalid="!!validation.invoice_number" />
             <CFormFeedback v-if="validation.invoice_number" invalid>{{ validation.invoice_number.message }}</CFormFeedback>
           </div>
+           <div>
+             <br>
+            <CFormLabel for="code">Payment Type</CFormLabel>
+            <MultiSelect :options="options" placeholder="Payment Type" v-model="body.payment_type" searchable object class="multiselect-control" :class="{ 'invalid': validation.invoice_bill_to }" />
+           
+          </div>
         </CCardBody>
       </CCard>
     </CCol>
@@ -114,6 +120,12 @@ export default {
     MultiSelect,
     VSelect
   },
+  data () {
+    return {
+      value: '',
+      options: ['cash', 'piutang']
+    }
+  },
   setup() {
     const body = reactive({
       invoice_bill_from: '',
@@ -121,6 +133,7 @@ export default {
       invoice_date: '',
       invoice_number: '',
       invoice_total: 0,
+      payment_type: '', 
       invoice_items: [
         {
           item_name: '',
@@ -137,6 +150,7 @@ export default {
     const customerOptions = ref([])
     const itemOptions = ref([])
     const taskOptions = ref([])
+    let paymentOptions = []
 
     const selectedTask = ref()
 
@@ -157,6 +171,20 @@ export default {
         .catch(err => {
           console.log(err)
         })
+
+        console.log("why",customerOptions)
+    }
+
+    const setPaymentOptions = () => {
+      return {
+        value: [
+          { name: 'Vue.js', language: 'JavaScript' },
+          { name: 'Rails', language: 'Ruby' },
+          { name: 'Sinatra', language: 'Ruby' },
+          { name: 'Laravel', language: 'PHP', $isDisabled: true },
+          { name: 'Phoenix', language: 'Elixir' }
+        ]
+      }
     }
 
     const setItemOptions = () => {
@@ -222,6 +250,7 @@ export default {
         }
         body.invoice_date = task.taskStartTime
         body.invoice_number = task.taskRefNumber
+        body.taskId = task._id
       }
     }
 
@@ -266,6 +295,8 @@ export default {
         invoice_bill_to = customerOptions.value.find(option => option.value === body.invoice_bill_to.value).label
       }
 
+      body.payment_type = body.payment_type.value
+
       axios.post(`${process.env.VUE_APP_URL_API}/invoice`, {
         ...body,
         invoice_bill_to,
@@ -281,11 +312,10 @@ export default {
         }
       })
       .then(() => {
-        router.push({
-          name: 'Invoice'
-        })
+
+        
       }).catch((err) => {
-        if (err.response.status === 409) {
+        if (err.response.status === 409 || err.response.status === 400) {
           const [key] = Object.keys(err.response.data.errors)
 
           validation.value = {
@@ -293,6 +323,8 @@ export default {
               message: err.response.data.message
             }
           }
+
+         
         } else {
           validation.value = err.response.data.errors
         }
@@ -310,6 +342,7 @@ export default {
       setCustomerOptions()
       setItemOptions()
       setTaskOptions()
+      setPaymentOptions()
     })
 
     return {
@@ -323,6 +356,7 @@ export default {
       selectedTask,
       addItem,
       saveInvoice,
+      paymentOptions
     }
   }
 }

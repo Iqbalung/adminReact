@@ -1,13 +1,12 @@
 <template>
   <div>
     <CCard class="mb-4">
-      <CCardHeader class="bg-white d-flex align-items-center justify-content-between">
-        Invoice
-        <div>
-          <CFormInput type="text" placeholder="Search" v-model="query.search" />
-        </div>
-      </CCardHeader>
+     
       <CCardBody class="fixed-table">
+        <CInputGroup class="mb-2">
+          <Datepicker v-model="dateFilter" range :enableTimePicker="false" class="date-filter"></Datepicker>
+          <CFormInput type="text" placeholder="Search" v-model="query.search" />
+        </CInputGroup>
         <router-link :to="{ name: 'Create Invoice' }">
           <CButton class="me-2" color="primary">
             <CIcon class="text-white" name="cil-plus"/> Add Invoice
@@ -35,8 +34,9 @@
           </CTableBody>
           <CTableBody v-else>
             <CTableRow v-for="(item,index) in invoices.data" :key="index">
+              
               <CTableDataCell class="text-center nowrap">
-                <div>{{ formatDate(item.invoice_date) }}</div>
+                <div>- {{ formatDate(item.invoice_date) }}</div>
               </CTableDataCell>
               <CTableDataCell class="text-center nowrap">
                 <div>{{ item.invoice_number }}</div>
@@ -50,6 +50,9 @@
                   </a>
                   <CButton size="sm" color="danger" class="rounded" @click="deleteAlert(destroy, item._id,index)">
                     <CIcon class="text-white" name="cil-trash"/>
+                  </CButton>
+                  <CButton size="sm" style="margin-left:5px;" color="warning" class="rounded" @click="paymentAlert(destroy, item._id,index)">
+                    <CIcon class="text-white" name="cil-check"/>
                   </CButton>
                 </div>
               </CTableDataCell>
@@ -90,15 +93,50 @@ export default {
         }
       })
     },
+
+    paymentAlert(cb, id, index) {
+      this.$swal({
+        title: 'Are You Sure ?',
+        icon: 'info',
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText: 'Yes, Sure',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if(result.isConfirmed) {
+          cb(id, index)
+
+          this.$swal('Saved','','success');
+        }
+      })
+    },
   },
+  
   setup() {
     const invoices = ref([]);
-    const query = reactive({
-      search: ''
+    const dateFilter = ref([]);
+    let query = reactive({
+      search: '',
+      invoice_date: '',
+      /* invoice_date[$gte]:invoice_date[0].toISOString().substring(0, 10) + 'T00:00:00.000Z',
+      invoice_date[$lte]: invoice_date[1].toISOString().substring(0, 10) + 'T23:59:59.000Z', */
     })
     const isLoading = ref(true)
 
+    
     function loadInvoice() {
+
+
+     
+      console.log(dateFilter.value[0]);
+      if(dateFilter.value[0]){
+
+        query = {
+          search : query.search,
+          'invoice_date[$gte]' : dateFilter.value[0].toISOString().substring(0, 10) + 'T00:00:00.000Z',
+          'invoice_date[$lte]' : dateFilter.value[1].toISOString().substring(0, 10) + 'T23:59:00.000Z'
+        }
+      }
       axios.get(`${process.env.VUE_APP_URL_API}/invoice`, {
         params: query,
         headers: {
@@ -113,6 +151,7 @@ export default {
         console.log(err.response);
       });
     }
+    
 
     function destroy(id, index) {
       axios.delete(`${process.env.VUE_APP_URL_API}/customers/${id}`,{
@@ -146,16 +185,27 @@ export default {
       loadInvoice()
     })
 
+    watch(dateFilter, value => {
+      startLoading()
+      loadInvoice()
+    })
+
     onMounted(() => {
       loadInvoice()
+      const startDate = new Date(new Date().setDate(new Date().getDate() - 1));
+      const endDate = new Date();
+
+       dateFilter.value = [startDate, endDate];
     });
 
     return {
+      dateFilter,
       invoices,
       query,
       destroy,
       isLoading,
       formatDate,
+      loadInvoice
     }
   }
 }

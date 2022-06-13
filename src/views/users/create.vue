@@ -57,6 +57,10 @@
                 :invalid="validation.password" />
               <CFormFeedback v-if="validation.password" invalid>{{ validation.password.message }}</CFormFeedback>
             </div>
+            <div class="mb-3" v-for="(items, index) in custom_field" :key="index">
+              <CFormLabel for="supplier"> {{ items.label }}</CFormLabel>
+              <CFormInput :id="items.key" :key="items.key" v-model="user.custom_field[items.key]" type="text"  :name="items.key" />
+            </div>
             <div class="mb-3">
               <CButton color="primary" class="rounded">Save</CButton>
             </div>
@@ -74,6 +78,11 @@ import routers from '../../router'
 export default {
   name: 'Create User',
   components: { MultiSelect },
+  data() {
+    return {
+      custom_field: JSON.parse(window.localStorage.getItem('organization')).custom_field.users
+    }
+  },
   setup() {
     // data binding
     const user = reactive({
@@ -85,6 +94,7 @@ export default {
       mistake:'',
       banks: [],
       ip: [],
+      custom_field : {},
       organization_id: window.localStorage.getItem('organization_id')
     });
     const bankOptions = ref([]);
