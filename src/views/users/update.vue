@@ -31,6 +31,10 @@
               <MultiSelect :options="ipOptions"  mode="tags" placeholder="IP Address" createOption tagPlaceholder="Press enter to create a tag" searchable @option="addIp" v-model="user.ip" :invalid="validation.ip" />
               <CFormFeedback v-if="validation.ip" invalid>{{ validation.ip.message }}</CFormFeedback>
             </div>
+            <div class="mb-3" v-for="(items, index) in custom_field" :key="index">
+              <CFormLabel for="supplier"> {{ items.label }}</CFormLabel>
+              <CFormInput :id="items.key" :key="items.key" v-model="user.custom_field[items.key]" type="text"  :name="items.key" />
+            </div>
 
             <div class="mb-3">
               <CButton color="primary" class="rounded">Save</CButton>
@@ -50,6 +54,11 @@ import MultiSelect from '@vueform/multiselect'
 export default {
   name: 'Update User',
   components: { MultiSelect },
+   data() {
+    return {
+      custom_field: JSON.parse(window.localStorage.getItem('organization')).custom_field.users
+    }
+  },
   setup() {
     // data binding
     let user = reactive({
@@ -57,7 +66,8 @@ export default {
       username:'',
       name:'',
       role:'worker',
-      ip: []
+      ip: [],
+      custom_field : {}
     });
     const validation = ref([]);
     const router = routers;
@@ -81,6 +91,9 @@ export default {
         user.name = result.data.name;
         ipOptions.value = result.data.ip ?? [];
         user.ip = result.data.ip
+        if(result.data.hasOwnProperty('custom_field')){
+          user.custom_field = result.data.custom_field;
+        }
       }).catch((err)=>{
         console.log(err.response.data)
       })

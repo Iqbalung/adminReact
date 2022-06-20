@@ -17,7 +17,7 @@
                 :options="[
                   { label: 'Services', value: 'services' },
                   { label: 'Products', value: 'products' },
-                ]" v-model="body.item_type" :invalid="validation.item_type">
+                ]" id="type" v-model="body.product_type" :invalid="validation.product_type">
               </CFormSelect>
               <CFormFeedback v-if="validation.item_type" invalid>{{ validation.item_type.message }}</CFormFeedback>
             </div>
@@ -45,11 +45,6 @@
               <CFormLabel for="stock">Product Stock</CFormLabel>
               <CFormInput type="number" id="stock" placeholder="Product Stock" v-model="body.product_stock" :invalid="validation.product_stock" />
               <CFormFeedback v-if="validation.product_stock" invalid>{{ validation.product_stock.message }}</CFormFeedback>
-            </div>
-            <div class="mb-3">
-              <CFormLabel for="type">Product Type</CFormLabel>
-              <CFormInput type="text" id="type" placeholder="Product Type" v-model="body.product_type" :invalid="validation.product_type" />
-              <CFormFeedback v-if="validation.product_type" invalid>{{ validation.product_type.message }}</CFormFeedback>
             </div>
             <div class="mb-3">
               <CFormLabel for="supplier">Product Supplier</CFormLabel>

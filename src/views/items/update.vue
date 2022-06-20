@@ -46,6 +46,10 @@
               <CFormInput type="text" id="supplier" placeholder="Product Supplier" v-model="body.product_supplier" :invalid="validation.product_supplier" />
               <CFormFeedback v-if="validation.product_supplier" invalid>{{ validation.product_supplier.message }}</CFormFeedback>
             </div>
+            <div class="mb-3" v-for="(items, index) in custom_field" :key="index">
+              <CFormLabel for="supplier"> {{ items.label }}</CFormLabel>
+              <CFormInput :id="items.key" :key="items.key" v-model="body.custom_field[items.key]" type="text"  :name="items.key" />
+            </div>
             <div class="mb-3">
               <CButton color="primary" class="rounded">Save</CButton>
             </div>
@@ -64,6 +68,11 @@ import axios from 'axios'
 
 export default {
   name: 'Update Item',
+  data() {
+    return {
+      custom_field: JSON.parse(window.localStorage.getItem('organization')).custom_field.items
+    }
+  },
   setup() {
     let body = reactive({
       product_code: '',
@@ -73,6 +82,7 @@ export default {
       product_stock: '',
       product_type: '',
       product_supplier: '',
+      custom_field : {}
     });
     const validation = ref([]);
     const router = routers;
@@ -91,6 +101,8 @@ export default {
         body.product_stock = result.data.product_stock;
         body.product_type = result.data.product_type;
         body.product_supplier = result.data.product_supplier;
+        body.product_supplier = result.data.product_supplier;
+        body.custom_field = result.data.custom_field;
       }).catch((err) => {
         console.log(err.response.data)
       })

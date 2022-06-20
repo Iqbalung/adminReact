@@ -17,12 +17,12 @@ export default [
     type: 'external-link',
     icon: 'cil-speedometer',
   },
-  {
+  /* {
     component: 'CNavItem',
     name: 'Bank',
     to: '/bank',
     icon: 'cil-credit-card',
-  },
+  }, */
   // {
   //     component: 'CNavTitle',
   //     name: 'Tasks',
@@ -64,6 +64,12 @@ export default [
   },
   {
     component: 'CNavItem',
+    name: 'Report',
+    to: '/report',
+    icon: 'cil-cash',
+  },
+  /* {
+    component: 'CNavItem',
     name: 'Incidents',
     to: '/incidents',
     icon: 'cil-bell',
@@ -103,7 +109,7 @@ export default [
         to: '/agwlbca',
       },
     ],
-  },
+  }, */
   // {
   //   component: 'CNavTitle',
   //   name: 'Theme',
