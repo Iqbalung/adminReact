@@ -429,6 +429,45 @@ const routes = [
         },
       },
       {
+        path: '/cairan',
+        name: 'Cairan',
+        component: () => import('@/views/report/cairan.vue'),
+        beforeEnter: (to, from, next) => {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name: 'Login',
+            })
+          }
+          return next()
+        },
+      },
+      {
+        path: '/slip',
+        name: 'Slip',
+        component: () => import('@/views/report/slip.vue'),
+        beforeEnter: (to, from, next) => {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name: 'Login',
+            })
+          }
+          return next()
+        },
+      },
+      {
+        path: '/config-cairan',
+        name: 'Slip',
+        component: () => import('@/views/cairans/index.vue'),
+        beforeEnter: (to, from, next) => {
+          if(!window.localStorage.getItem('accessToken')) {
+            return next({
+              name: 'Login',
+            })
+          }
+          return next()
+        },
+      },
+      {
         path: '/log',
         name: 'Log Activity',
         component: () => import('@/views/logactivity/index.vue'),

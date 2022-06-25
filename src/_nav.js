@@ -63,10 +63,32 @@ export default [
     icon: 'cil-cash',
   },
   {
-    component: 'CNavItem',
+    component: 'CNavGroup',
     name: 'Report',
-    to: '/report',
-    icon: 'cil-cash',
+    to: '',
+    icon: 'cil-puzzle',
+    items: [
+      {
+        component: 'CNavItem',
+        name: 'Gaji',
+        to: '/report',
+      },
+      {
+        component: 'CNavItem',
+        name: 'Cairan',
+        to: '/cairan',
+      },
+      {
+        component: 'CNavItem',
+        name: 'Config Cairan',
+        to: '/config-cairan',
+      },
+      {
+        component: 'CNavItem',
+        name: 'Slip',
+        to: '/slip',
+      },
+    ],
   },
   /* {
     component: 'CNavItem',

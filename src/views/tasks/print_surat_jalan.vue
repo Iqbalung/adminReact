@@ -7,8 +7,8 @@
             <div class="d-flex align-items-center">
               <img :src="organization.logoUrl" width="100">
               <div class="ms-4">
-                <h3 class="fw-bold mb-0">{{ organization.organization_specialist }}</h3>
-                <span class="me-1">{{ organization.organization_phone }}</span>
+                <h3 class="fw-bold mb-0">Global Teknik {{ organization.organization_specialist }}</h3>
+                <span class="me-1">{{ organization.organization_phone }} | WA : +62 811-2704-455 , +62 812-2711-531 <br> </span>
                 <span>{{ organization.organization_account }}</span>
               </div>
             </div>
@@ -65,15 +65,15 @@
             <CTable class="mb-4" bordered>
               <CTableHead>
                 <CTableRow>
-                  <CTableHeaderCell>No Unit</CTableHeaderCell>
-                  <CTableHeaderCell>Merk/Type</CTableHeaderCell>
-                  <CTableHeaderCell>Model</CTableHeaderCell>
+                  <CTableHeaderCell style="width:20px;">No</CTableHeaderCell>
+                  <CTableHeaderCell style="width:190px;">Merk/Type/Model</CTableHeaderCell>
                   <CTableHeaderCell>Keterangan</CTableHeaderCell>
+                  <CTableHeaderCell>Nominal</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                <CTableRow v-for="key in 20" :key="key">
-                  <CTableDataCell class="p-3"></CTableDataCell>
+                <CTableRow v-for="key in 18" :key="key">
+                  <CTableDataCell class="p-1"></CTableDataCell>
                   <CTableDataCell class="p-3"></CTableDataCell>
                   <CTableDataCell class="p-3"></CTableDataCell>
                   <CTableDataCell class="p-3"></CTableDataCell>

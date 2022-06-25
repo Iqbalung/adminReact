@@ -1335,6 +1335,15 @@ export default {
     }
 
     function exportTasks(cb) {
+      console.log("test",tasks.value.data);
+      for (var key in tasks.value.data) {
+          delete tasks.value.data[key]['taskExpiredTime'];
+          delete tasks.value.data[key]['taskTimeProcess'];
+          delete tasks.value.data[key]['taskHistory'];
+          delete tasks.value.data[key]['organization_id'];
+          delete tasks.value.data[key]['__v'];
+          // ...
+      }
       const worksheet = XLSX.utils.json_to_sheet(tasks.value.data)
       const workbook = XLSX.utils.book_new()
 

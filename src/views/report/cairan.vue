@@ -58,6 +58,7 @@
               >Assigned</CTableHeaderCell
             > -->
             <CTableHeaderCell class="nowrap" scope="col" v-show="role == 'admin'">Item</CTableHeaderCell>
+            <CTableHeaderCell class="nowrap" scope="col" v-show="role == 'admin'">Worker</CTableHeaderCell>
             <CTableHeaderCell class="nowrap" scope="col"></CTableHeaderCell>
             <CTableHeaderCell class="nowrap" scope="col" v-show="role == 'admin'">Qty</CTableHeaderCell>
             <CTableHeaderCell class="nowrap" scope="col">Upah</CTableHeaderCell>
@@ -93,7 +94,12 @@
             </CTableDataCell>
             <CTableDataCell>
               <div class="nowrap">
-                {{ item.product_code }}
+                {{ item.invoice_number }} - {{ item.item_name }}
+              </div>
+            </CTableDataCell>
+            <CTableDataCell>
+              <div class="nowrap">
+                {{ item.worker }}
               </div>
             </CTableDataCell>
             <CTableDataCell>
@@ -103,15 +109,15 @@
             </CTableDataCell>
             <CTableDataCell v-show="role == 'admin'">
               <div class="nowrap">
-                {{ item.qty_services }}
+                {{ item.item_qty }}
               </div>
             </CTableDataCell>
             <CTableDataCell>
               <div class="nowrap">
                 {{
-                  item.services
+                  item.amount_upah
                     ? 'Rp. ' +
-                      item.services
+                      item.amount_upah
                         .toString()
                         .replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1\.')
                     : 'Rp. -'
@@ -121,9 +127,9 @@
             <CTableDataCell>
               <div class="nowrap">
                 {{
-                  item.amount_services
+                  item.amount_cairan
                     ? 'Rp. ' +
-                      item.amount_services
+                      item.amount_cairan
                         .toString()
                         .replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1\.')
                     : 'Rp. -'
@@ -133,7 +139,7 @@
             
             
             <CTableDataCell>
-              {{ item.jenis }}
+              {{ item.role }}
             </CTableDataCell>
             <!-- <CTableDataCell
               ><CButton size="sm" class="text-light" color="warning"
@@ -226,7 +232,7 @@ import XLSX from 'xlsx'
 import momentTz from 'moment-timezone'
 
 export default {
-  name: 'ReportList',
+  name: 'CairanList',
   components: { MultiSelect },
   methods: {
     exportReportFeedback() {
@@ -299,11 +305,11 @@ export default {
         account_receiver: searchTitle,
         ...(dateFilter.value ? { 'date_crawl[$gte]': new Date(dateFilter.value[0].toISOString().substring(0, 10) + 'T00:00:00') } : {}),
         ...(dateFilter.value ? { 'date_crawl[$lte]': new Date(dateFilter.value[1].toISOString().substring(0, 10) + 'T23:59:59') } : {}),
-        ...(workerFilter.value ? { 'ib.username': workerFilter.value } : {})
+        ...(workerFilter.value ? { 'account_receiver': workerFilter.value } : {})
       }
 
       axios
-        .get(`${process.env.VUE_APP_URL_API_REPORT}/generate-report`, {
+        .get(`${process.env.VUE_APP_URL_API_REPORT}/generate-report-cairan`, {
           headers: {
             Accept: 'application/json',
           },

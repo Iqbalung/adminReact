@@ -162,6 +162,7 @@ export default {
       })
         .then(res => {
           customerOptions.value = res.data.data.map(customer => {
+            
             return {
               label: customer.customer_name,
               value: customer._id,
@@ -312,7 +313,7 @@ export default {
         }
       })
       .then(() => {
-
+        window.location.href = "/invoice#/invoice"
         
       }).catch((err) => {
         if (err.response.status === 409 || err.response.status === 400) {
@@ -341,7 +342,7 @@ export default {
     onMounted(() => {
       setCustomerOptions()
       setItemOptions()
-      setTaskOptions()
+      //setTaskOptions()
       setPaymentOptions()
     })
 

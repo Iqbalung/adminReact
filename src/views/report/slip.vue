@@ -18,14 +18,10 @@
       class="bg-white d-flex align-items-center justify-content-between"
     >
       <span>
-        Data Found
-        <CBadge color="primary">{{
-          report.total ? report.total : 0
-        }}</CBadge>
+       Slip Gaji
       </span>
       <div>
         <CButton size="sm" color="primary" class="me-2" @click="exportReport(exportReportFeedback)">Export Report</CButton>
-        <CButton size="sm" color="success" @click="openRequestRecon">Request Recon</CButton>
       </div>
       <!-- <CDropdown color="light">
         <CDropdownToggle color="dark">{{
@@ -42,162 +38,137 @@
       </CDropdown> -->
     </CCardHeader>
     <CCardBody class="p-0 report-table">
-      <CTable responsive>
-        <CTableHead>
-          <CTableRow>
-            <!-- <CTableHeaderCell scope="col" v-if="role === 'admin'">
-              <input
-                type="checkbox"
-                @change="(e) => shiftAll(e.target.checked)"
-                v-model="shift"
-                :disabled="filterListActive.value === 'done'"
-              />
-            </CTableHeaderCell> -->
-            <CTableHeaderCell class="nowrap" scope="col">No</CTableHeaderCell>
-            <!-- <CTableHeaderCell class="nowrap" scope="col" v-show="role == 'admin'"
-              >Assigned</CTableHeaderCell
-            > -->
-            <CTableHeaderCell class="nowrap" scope="col" v-show="role == 'admin'">Item</CTableHeaderCell>
-            <CTableHeaderCell class="nowrap" scope="col"></CTableHeaderCell>
-            <CTableHeaderCell class="nowrap" scope="col" v-show="role == 'admin'">Qty</CTableHeaderCell>
-            <CTableHeaderCell class="nowrap" scope="col">Upah</CTableHeaderCell>
-            <CTableHeaderCell class="nowrap" scope="col">Saldo</CTableHeaderCell>
-            <CTableHeaderCell class="nowrap" scope="col">Status</CTableHeaderCell>
+      
+        <CCol style="padding:30px;">
+          <div class="mb-2">
+            <h3>Pendapatan</h3>
+            <div class="row gx-2">
+                <div class="col">
+            <div class="mb-6">
+            Gaji 
+            </div>
+                </div>
+                <div class="col">
             
-            <!-- <CTableHeaderCell scope="col">Action</CTableHeaderCell> -->
-          </CTableRow>
-        </CTableHead>
-        <CTableBody v-if="isLoading">
-          <CTableRow>
-            <CTableDataCell
-              align="middle"
-              class="text-center"
-              :colspan="role === 'admin' ? 9 : 7"
-              >
-                <CSpinner
-                  color="primary"
-                />
-            </CTableDataCell>
-          </CTableRow>
-        </CTableBody>
-        <CTableBody v-else>
-          <CTableRow
-            v-for="(item, index) in report.data"
-            :key="index"
-            :color="
-              item.trxType == 'CR' ? 'warning' : !item.status ? 'danger' : ''
-            "
-          >
-            <CTableDataCell>
-              {{ index + 1 + (currentPages - 1) * perPage }}
-            </CTableDataCell>
-            <CTableDataCell>
-              <div class="nowrap">
-                {{ item.product_code }}
-              </div>
-            </CTableDataCell>
-            <CTableDataCell>
-              <div class="overflow-auto">
-                {{ item.amount_services>0 ? "*" : '-' }}
-              </div>
-            </CTableDataCell>
-            <CTableDataCell v-show="role == 'admin'">
-              <div class="nowrap">
-                {{ item.qty_services }}
-              </div>
-            </CTableDataCell>
-            <CTableDataCell>
-              <div class="nowrap">
                 {{
-                  item.services
+                  report.gaji
                     ? 'Rp. ' +
-                      item.services
+                      report.gaji
                         .toString()
                         .replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1\.')
                     : 'Rp. -'
                 }}
-              </div>
-            </CTableDataCell>
-            <CTableDataCell>
-              <div class="nowrap">
+            </div>
+          </div>
+          </div>
+          <div class="mb-2">
+            <div class="row gx-2">
+                <div class="col">
+            <div class="mb-6">
+            Cairan 
+            </div>
+                </div>
+                <div class="col">
+            
                 {{
-                  item.amount_services
+                  report.cairan
                     ? 'Rp. ' +
-                      item.amount_services
+                      report.cairan
                         .toString()
                         .replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1\.')
                     : 'Rp. -'
                 }}
-              </div>
-            </CTableDataCell>
-            
-            
-            <CTableDataCell>
-              {{ item.jenis }}
-            </CTableDataCell>
-            <!-- <CTableDataCell
-              ><CButton size="sm" class="text-light" color="warning"
-                >Action</CButton
-              >
-            </CTableDataCell> -->
-            <!-- <CTableDataCell>
-              <CButton
-                size="sm"
-                class="text-primary"
-                variant="ghost"
-                color="light"
-                :disabled="item.taskStatus === 'processed'"
-                @click="
-                  processTask(
-                    item.taskData.account_number,
-                    item.taskData.anRekening,
-                    item.taskData.amount,
-                    item.taskData.mutation_id,
-                    item.taskData.bank_type,
-                    item._id,
-                    item.taskAssigne,
-                    item.taskTittle,
-                    item.taskRefNumber,
-                    item.taskExpiredTime,
-                    item.taskCreatedBy,
-                    item.taskStatus,
-                    item.taskHistory,
-                  )
-                "
-              >
-                Detail
-              </CButton>
-              <CButton
-                size="sm"
-                class="text-danger"
-                variant="ghost"
-                color="light"
-                @click="showRequestReject(requestReject, item)"
-                v-if="role !== 'admin' && item.status !== 'request_reject'"
-              >
-                Request Reject
-              </CButton>
-            </CTableDataCell> -->
-          </CTableRow>
-          <CTableRow>
-            <CTableDataCell
-              v-show="report.total < 1"
-              class="text-center"
-              :colspan="role === 'admin' ? 9 : 7"
-              >No records found</CTableDataCell
-            >
-          </CTableRow>
-        </CTableBody>
-      </CTable>
+            </div>
+          </div>
+          </div>
+        </CCol>
 
-      <div class="d-flex justify-content-center">
-        <b-pagination
-          v-model="currentPages"
-          :total-rows="report.total"
-          :per-page="perPage"
-          @click="changePg"
-        />
-      </div>
+        <CCol style="padding:30px;">
+          <div class="mb-2">
+            <h3>Potongan</h3>
+            <div class="row gx-2">
+                <div class="col">
+            <div class="mb-6">
+            BPJS 
+            </div>
+                </div>
+                <div class="col">
+            
+                {{
+                  report.bpjs
+                    ? 'Rp. ' +
+                      report.bpjs
+                        .toString()
+                        .replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1\.')
+                    : 'Rp. -'
+                }}
+            </div>
+          </div>
+          </div>
+          <div class="mb-2">
+            <div class="row gx-2">
+                <div class="col">
+            <div class="mb-6">
+            Bon 
+            </div>
+                </div>
+                <div class="col">
+            
+                {{
+                  report.bon
+                    ? 'Rp. ' +
+                      report.bon
+                        .toString()
+                        .replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1\.')
+                    : 'Rp. -'
+                }}
+            </div>
+          </div>
+          </div>
+        </CCol>
+
+        <CCol style="padding:30px;">
+            <div class="mb-2">
+            <h3>Total</h3>
+                <div class="row gx-2">
+                    <div class="col">
+                        <div class="mb-6">
+                        Total Pendapatan (Pendapatan + Potongan) 
+                        </div>
+                    </div>
+                    <div class="col">
+                        {{
+                        report.gaji
+                            ? 'Rp. ' +
+                            (parseInt(report.gaji) + parseInt(report.cairan)) 
+                                .toString()
+                                .replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1\.')
+                            : 'Rp. -'
+                        }}
+                    </div>
+                </div>
+                <div class="row gx-2">
+                    <div class="col">
+                        <div class="mb-6">
+                        Take Home Pay (Pendapatan - Potongan) 
+                        </div>
+                    </div>
+                    <div class="col">
+                        {{
+                        report.gaji
+                            ? 'Rp. ' +
+                            (parseInt(report.gaji) - parseInt(report.cairan)) 
+                                .toString()
+                                .replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1\.')
+                            : 'Rp. -'
+                        }}
+                    </div>
+                </div>
+            </div>
+        </CCol>
+        
+
+     
     </CCardBody>
   </CCard>
 
@@ -226,7 +197,7 @@ import XLSX from 'xlsx'
 import momentTz from 'moment-timezone'
 
 export default {
-  name: 'ReportList',
+  name: 'CairanList',
   components: { MultiSelect },
   methods: {
     exportReportFeedback() {
@@ -299,11 +270,11 @@ export default {
         account_receiver: searchTitle,
         ...(dateFilter.value ? { 'date_crawl[$gte]': new Date(dateFilter.value[0].toISOString().substring(0, 10) + 'T00:00:00') } : {}),
         ...(dateFilter.value ? { 'date_crawl[$lte]': new Date(dateFilter.value[1].toISOString().substring(0, 10) + 'T23:59:59') } : {}),
-        ...(workerFilter.value ? { 'ib.username': workerFilter.value } : {})
+        ...(workerFilter.value ? { 'account_receiver': workerFilter.value } : {})
       }
 
       axios
-        .get(`${process.env.VUE_APP_URL_API_REPORT}/generate-report`, {
+        .get(`${process.env.VUE_APP_URL_API_REPORT}/generate-report-slip`, {
           headers: {
             Accept: 'application/json',
           },
